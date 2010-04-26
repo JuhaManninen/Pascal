@@ -1,13 +1,26 @@
 "ESS-Model is a powerful, reverse engine, UML-tool for 
-Delphi/Kylix and Java-files."
+Delphi/Kylix/Lazarus and Java-files."
 
+Conversion to Lazarus :
+-----------------------
+
+The Lazarus port removes all interfaces and replaces them with abstract base classes and 
+virtual functions and some code to redirect the calls.
+The original interface code was quite clever but it created problems with Lazarus/FPC.
+The program didn't work and became unstable.
+
+The program didn't work even when building with Delphi2009.
+It didn't show any diagram. Something about interfaces has changed since Delphi6.
+
+The initial port for Lazarus draws something but needs lots of work still.
+
+------------------------------------------
 
 
 ESS-Model used to be an commercial product but is now
 released as an Open Source under the GPL.
 
 Note about compiling the source:
-
 
 The source is written in Delphi 6.
 
@@ -32,9 +45,6 @@ links:
 
 
 ARGO_XMI - Define this to use Argo UML compatible xmi-format.
-
-
-
 
 
 
@@ -67,9 +77,6 @@ What's new
   
   + Initial Open Source release.
   
-
-
-
 
 
 ESS-Model
@@ -171,7 +178,6 @@ for instance c:\utils\esmodel.exe.
 
 
 
-
 Diagram indicators for operations and attributes
 ------------------------------------------------
 Italic font = Abstract
@@ -182,7 +188,6 @@ Gray = Function
 Plus-sign = Public
 Minus-sign = Private
 Hash-sign = Protected
-
 
 
 Explorer and Delphi integration
@@ -197,14 +202,9 @@ When the shortcuts are active, ESS-Model will appear
 as 'View as model diagram' in the menues.
 
 
-
-
 Other info can be found at ESS-Model homepage: 
 
 
   http://www.essmodel.com
   http://www.eldean.se/essmodel
   http://www.sourceforge.net/projects/essmodel
-
-
-
