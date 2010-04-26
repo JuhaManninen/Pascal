@@ -1,0 +1,61 @@
+object MainModule: TMainModule
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  OnDestroy = DataModuleDestroy
+  Left = 239
+  Top = 318
+  Height = 540
+  Width = 783
+  object ActionList: TActionList
+    Left = 129
+    Top = 144
+    object CopyDiagramClipboardAction: TAction
+      Caption = 'Copy diagram to clipboard'
+      OnExecute = CopyDiagramClipboardActionExecute
+    end
+    object PrintDiagramAction: TAction
+      Caption = 'Print diagram'
+      Visible = False
+      OnExecute = PrintDiagramActionExecute
+    end
+    object DocGenAction: TAction
+      Caption = 'Generate documentation'
+      OnExecute = DocGenActionExecute
+    end
+    object AboutAction: TAction
+      Caption = 'About...'
+      OnExecute = AboutActionExecute
+    end
+    object ExportXmiAction: TAction
+      Caption = 'Export model to XMI-file'
+      OnExecute = ExportXmiActionExecute
+    end
+    object LayoutDiagramAction: TAction
+      Caption = 'Layout diagram'
+      Hint = 'Layout'
+      OnExecute = LayoutDiagramActionExecute
+    end
+    object FileOpenAction: TAction
+      Caption = 'Open...'
+      Hint = 'Open...'
+      OnExecute = FileOpenActionExecute
+    end
+    object ExitAction: TAction
+      Caption = 'Exit'
+      OnExecute = ExitActionExecute
+    end
+    object SettingsAction: TAction
+      Caption = 'Change settings...'
+      OnExecute = SettingsActionExecute
+    end
+    object UnhideElementsAction: TAction
+      Caption = 'Show hidden diagram elements'
+      OnExecute = UnhideElementsActionExecute
+      OnUpdate = UnhideElementsActionUpdate
+    end
+    object RegisterAction: TAction
+      Caption = 'Register...'
+      OnExecute = RegisterActionExecute
+    end
+  end
+end

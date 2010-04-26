@@ -1,0 +1,1002 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="7"/>
+    <General>
+      <MainUnit Value="0"/>
+      <TargetFileExt Value=""/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <Language Value=""/>
+      <CharSet Value=""/>
+      <StringTable Comments="" CompanyName="" FileDescription="" FileVersion="" InternalName="" LegalCopyright="" LegalTrademarks="" OriginalFilename="" ProductName="" ProductVersion=""/>
+    </VersionInfo>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="91">
+      <Unit0>
+        <Filename Value="essmodel.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="System/uMainForm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="System/uMainModule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="Model/uListeners.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="Integrator/Code/Delphi/uDelphiIntegrator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="Integrator/uIntegrator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="Model/uModel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="CodeProvider/uCodeProvider.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="CodeProvider/uFileProvider.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="Integrator/CodeIO/uCodeParser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="Integrator/CodeIO/uDelphiParser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="Integrator/Code/uCodeIntegrator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="Integrator/View/uViewIntegrator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="Integrator/View/RtfdDiagram/uRtfdComponents.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="Integrator/View/RtfdDiagram/uRtfdDiagram.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="System/uError.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="System/uUseful.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="Model/uModelEntity.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="Integrator/CodeIO/uParseTree.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="System/uConfig.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="Integrator/View/uDiagramFrame.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="Integrator/View/RtfdDiagram/uRtfdDiagramFrame.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="Model/uIterators.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="Integrator/Doc/uDocGen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="Model/uDocumentation.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="Integrator/CodeIO/JavaClass/uJavaClassImport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="Integrator/CodeIO/JavaClass/uJavaClass.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="Components/essConnectPanel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="Integrator/Export/uXmiExport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="Components/essLayout.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="Integrator/Doc/uHtmlDocGen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="Integrator/CodeIO/uJavaParser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="Components/SugiyamaLayout.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="System/uConst.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="System/uAboutForm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="Components/uRegisterExtension.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="System/uSettingsForm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="System/uFeedback.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="Integrator/View/uTreeViewFrame.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="Integrator/View/uTreeViewIntegrator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="System/uZoomFrame.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="System/uOpenFolderForm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="System/umainform.pas"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uMainForm"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="59"/>
+        <CursorPos X="15" Y="99"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="System/umainmodule.pas"/>
+        <ComponentName Value="MainModule"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <UnitName Value="uMainModule"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="152"/>
+        <CursorPos X="15" Y="179"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="Model/ulisteners.pas"/>
+        <UnitName Value="uListeners"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="38"/>
+        <CursorPos X="14" Y="59"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="Integrator/Code/Delphi/udelphiintegrator.pas"/>
+        <UnitName Value="uDelphiIntegrator"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="Integrator/uintegrator.pas"/>
+        <UnitName Value="uIntegrator"/>
+        <EditorIndex Value="11"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="26"/>
+        <CursorPos X="33" Y="49"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="Model/umodel.pas"/>
+        <UnitName Value="uModel"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="288"/>
+        <CursorPos X="50" Y="309"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Bookmarks Count="1">
+          <Item0 X="1" Y="315" ID="1"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="CodeProvider/ucodeprovider.pas"/>
+        <UnitName Value="uCodeProvider"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="CodeProvider/ufileprovider.pas"/>
+        <UnitName Value="uFileProvider"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="Integrator/CodeIO/ucodeparser.pas"/>
+        <UnitName Value="uCodeParser"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="22"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="Integrator/CodeIO/udelphiparser.pas"/>
+        <UnitName Value="uDelphiParser"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="39"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="Integrator/Code/ucodeintegrator.pas"/>
+        <UnitName Value="uCodeIntegrator"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="14"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="14"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="Integrator/View/uviewintegrator.pas"/>
+        <UnitName Value="uViewIntegrator"/>
+        <EditorIndex Value="10"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="15"/>
+        <CursorPos X="21" Y="20"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
+        <UnitName Value="uRtfdComponents"/>
+        <EditorIndex Value="7"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="619"/>
+        <CursorPos X="25" Y="637"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfddiagram.pas"/>
+        <UnitName Value="uRtfdDiagram"/>
+        <EditorIndex Value="6"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="486"/>
+        <CursorPos X="1" Y="507"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="15"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="System/uerror.pas"/>
+        <UnitName Value="uError"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="System/uuseful.pas"/>
+        <UnitName Value="uUseful"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="Model/umodelentity.pas"/>
+        <UnitName Value="uModelEntity"/>
+        <EditorIndex Value="5"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="244"/>
+        <CursorPos X="22" Y="267"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Bookmarks Count="1">
+          <Item0 X="1" Y="254" ID="2"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="Integrator/CodeIO/uparsetree.pas"/>
+        <UnitName Value="uParseTree"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="169"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="System/uconfig.pas"/>
+        <UnitName Value="uConfig"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="46" Y="58"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="Integrator/View/udiagramframe.pas"/>
+        <ComponentName Value="DiagramFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="uDiagramFrame"/>
+        <EditorIndex Value="9"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="98"/>
+        <CursorPos X="18" Y="115"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfddiagramframe.pas"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="uRtfdDiagramFrame"/>
+        <EditorIndex Value="13"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="28"/>
+        <CursorPos X="15" Y="69"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="Model/uiterators.pas"/>
+        <UnitName Value="uIterators"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="49"/>
+        <CursorPos X="58" Y="69"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="13"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="Integrator/Doc/udocgen.pas"/>
+        <UnitName Value="uDocGen"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="59"/>
+        <CursorPos X="26" Y="100"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="13"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="Model/udocumentation.pas"/>
+        <UnitName Value="uDocumentation"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="29"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="Integrator/CodeIO/JavaClass/ujavaclassimport.pas"/>
+        <UnitName Value="uJavaClassImport"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="106"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="Integrator/CodeIO/JavaClass/ujavaclass.pas"/>
+        <UnitName Value="uJavaClass"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="219"/>
+        <CursorPos X="5" Y="236"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <UnitName Value="essConnectPanel"/>
+        <EditorIndex Value="14"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="655"/>
+        <CursorPos X="77" Y="676"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="Integrator/Export/uxmiexport.pas"/>
+        <UnitName Value="uXmiExport"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="442"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="Components/esslayout.pas"/>
+        <UnitName Value="essLayout"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="Integrator/Doc/uhtmldocgen.pas"/>
+        <UnitName Value="uHtmlDocGen"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="Integrator/CodeIO/ujavaparser.pas"/>
+        <UnitName Value="uJavaParser"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="Components/sugiyamalayout.pas"/>
+        <UnitName Value="SugiyamaLayout"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="211"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="System/uconst.pas"/>
+        <UnitName Value="uConst"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="8"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="System/uaboutform.pas"/>
+        <ComponentName Value="AboutForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uAboutForm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="Components/uregisterextension.pas"/>
+        <UnitName Value="uRegisterExtension"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="System/usettingsform.pas"/>
+        <ComponentName Value="SettingsForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uSettingsForm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="System/ufeedback.pas"/>
+        <UnitName Value="uFeedback"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="Integrator/View/utreeviewframe.pas"/>
+        <ComponentName Value="TreeViewFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="uTreeViewFrame"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="Integrator/View/utreeviewintegrator.pas"/>
+        <UnitName Value="uTreeViewIntegrator"/>
+        <EditorIndex Value="12"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="30"/>
+        <CursorPos X="38" Y="35"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="17"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="System/uzoomframe.pas"/>
+        <ComponentName Value="ZoomFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="uZoomFrame"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="System/uopenfolderform.pas"/>
+        <ComponentName Value="OpenFolderForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uOpenFolderForm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="../../fpc_svn/rtl/objpas/classes/classesh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1761"/>
+        <CursorPos X="13" Y="1801"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="../../fpc_svn/rtl/objpas/sysutils/intfh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="10" Y="37"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="../../lazarus_gitsvn/trunk/lcl/lmessages.pp"/>
+        <UnitName Value="LMessages"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="30"/>
+        <CursorPos X="3" Y="50"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="Integrator/Export/uXmiExportArgoUML.pas"/>
+        <UnitName Value="uXmiExportArgoUML"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="476"/>
+        <CursorPos X="26" Y="521"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="13"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="Interfaces.txt"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="123"/>
+        <CursorPos X="7" Y="124"/>
+        <SyntaxHighlighter Value="None"/>
+        <UsageCount Value="13"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="../../lazarus_gitsvn/trunk/lcl/controls.pp"/>
+        <UnitName Value="Controls"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1971"/>
+        <CursorPos X="3" Y="1992"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="../../lazarus_gitsvn/trunk/lcl/include/graphiccontrol.inc"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="7"/>
+        <CursorPos X="1" Y="45"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="../../lazarus_gitsvn/trunk/lcl/include/control.inc"/>
+        <EditorIndex Value="8"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="4366"/>
+        <CursorPos X="28" Y="4387"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit90>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="Integrator/View/utreeviewintegrator.pas"/>
+        <Caret Line="55" Column="1" TopLine="34"/>
+      </Position1>
+      <Position2>
+        <Filename Value="Integrator/View/utreeviewintegrator.pas"/>
+        <Caret Line="35" Column="38" TopLine="30"/>
+      </Position2>
+      <Position3>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="330" Column="20" TopLine="309"/>
+      </Position3>
+      <Position4>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="247" Column="29" TopLine="213"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../../lazarus_gitsvn/trunk/lcl/include/graphiccontrol.inc"/>
+        <Caret Line="45" Column="12" TopLine="7"/>
+      </Position5>
+      <Position6>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
+        <Caret Line="640" Column="1" TopLine="619"/>
+      </Position6>
+      <Position7>
+        <Filename Value="../../lazarus_gitsvn/trunk/lcl/include/graphiccontrol.inc"/>
+        <Caret Line="45" Column="1" TopLine="7"/>
+      </Position7>
+      <Position8>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
+        <Caret Line="637" Column="25" TopLine="619"/>
+      </Position8>
+      <Position9>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="46" Column="15" TopLine="25"/>
+      </Position9>
+      <Position10>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="277" Column="13" TopLine="256"/>
+      </Position10>
+      <Position11>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="283" Column="24" TopLine="256"/>
+      </Position11>
+      <Position12>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="315" Column="15" TopLine="294"/>
+      </Position12>
+      <Position13>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position13>
+      <Position14>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="46" Column="15" TopLine="25"/>
+      </Position14>
+      <Position15>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="277" Column="18" TopLine="256"/>
+      </Position15>
+      <Position16>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="283" Column="24" TopLine="256"/>
+      </Position16>
+      <Position17>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="315" Column="29" TopLine="294"/>
+      </Position17>
+      <Position18>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="317" Column="22" TopLine="294"/>
+      </Position18>
+      <Position19>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="392" Column="16" TopLine="371"/>
+      </Position19>
+      <Position20>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="393" Column="15" TopLine="371"/>
+      </Position20>
+      <Position21>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="244" Column="28" TopLine="247"/>
+      </Position21>
+      <Position22>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position22>
+      <Position23>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="54" Column="18" TopLine="33"/>
+      </Position23>
+      <Position24>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="135" Column="18" TopLine="114"/>
+      </Position24>
+      <Position25>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="142" Column="24" TopLine="114"/>
+      </Position25>
+      <Position26>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="162" Column="16" TopLine="141"/>
+      </Position26>
+      <Position27>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="163" Column="15" TopLine="141"/>
+      </Position27>
+      <Position28>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="168" Column="13" TopLine="141"/>
+      </Position28>
+      <Position29>
+        <Filename Value="Model/umodelentity.pas"/>
+        <Caret Line="252" Column="29" TopLine="231"/>
+      </Position29>
+      <Position30>
+        <Filename Value="System/umainmodule.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
+      </Position30>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="8"/>
+    <SearchPaths>
+      <IncludeFiles Value="Components/;CodeProvider/;Integrator/;Integrator/Code/;Integrator/Code/Delphi/;Integrator/CodeIO/;Integrator/CodeIO/JavaClass/;Integrator/Doc/;Integrator/Export/;Integrator/View/;Integrator/View/RtfdDiagram/;Model/;System/"/>
+      <Libraries Value="Components/"/>
+      <OtherUnitFiles Value="Components/;CodeProvider/;Integrator/;Integrator/Code/;Integrator/Code/Delphi/;Integrator/CodeIO/;Integrator/CodeIO/JavaClass/;Integrator/Doc/;Integrator/Export/;Integrator/View/;Integrator/View/RtfdDiagram/;Model/;System/"/>
+      <ObjectPath Value="Components/"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <UseAnsiStrings Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
+    <Other>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <BreakPoints Count="3">
+      <Item1>
+        <Source Value="Model/umodelentity.pas"/>
+        <Line Value="280"/>
+      </Item1>
+      <Item2>
+        <Source Value="Model/umodel.pas"/>
+        <Line Value="363"/>
+      </Item2>
+      <Item3>
+        <Source Value="System/umainmodule.pas"/>
+        <Line Value="205"/>
+      </Item3>
+    </BreakPoints>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

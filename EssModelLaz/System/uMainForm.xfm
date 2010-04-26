@@ -1,0 +1,91 @@
+object MainForm: TMainForm
+  Left = 350
+  Top = 434
+  Width = 839
+  Height = 540
+  VertScrollBar.Range = 16
+  Caption = 'x'
+  Color = clButton
+  Font.Color = clText
+  Font.Height = 11
+  Font.Name = 'MS Sans Serif'
+  Font.Pitch = fpVariable
+  Font.Style = []
+  Menu = MainMenu1
+  ParentFont = False
+  Position = poScreenCenter
+  ShowHint = True
+  OnActivate = FormActivate
+  OnClose = FormClose
+  PixelsPerInch = 96
+  TextHeight = 13
+  TextWidth = 5
+  object StatusPanel: TPanel
+    Left = 0
+    Top = 501
+    Width = 839
+    Height = 16
+    Align = alBottom
+    Alignment = taLeftJustify
+    BevelOuter = bvLowered
+    TabOrder = 0
+  end
+  object MainMenu1: TMainMenu
+    Left = 46
+    Top = 55
+    object File1: TMenuItem
+      Caption = 'File'
+      object Open1: TMenuItem
+        Action = MainModule.FileOpenAction
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object Printdiagram1: TMenuItem
+        Action = MainModule.PrintDiagramAction
+      end
+      object Generatedocumentation1: TMenuItem
+        Action = MainModule.DocGenAction
+      end
+      object ExportXmiAction1: TMenuItem
+        Action = MainModule.ExportXmiAction
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object Changesettings1: TMenuItem
+        Action = MainModule.SettingsAction
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object Exit1: TMenuItem
+        Action = MainModule.ExitAction
+      end
+    end
+    object Diagram1: TMenuItem
+      Caption = 'Diagram'
+      object Copydiagramtoclipboard1: TMenuItem
+        Action = MainModule.CopyDiagramClipboardAction
+      end
+      object Layoutdiagram1: TMenuItem
+        Action = MainModule.LayoutDiagramAction
+      end
+      object Unhidediagramelements1: TMenuItem
+        Action = MainModule.UnhideElementsAction
+      end
+    end
+    object Help: TMenuItem
+      Caption = 'Help'
+      object Register1: TMenuItem
+        Action = MainModule.RegisterAction
+      end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object About1: TMenuItem
+        Action = MainModule.AboutAction
+      end
+    end
+  end
+end

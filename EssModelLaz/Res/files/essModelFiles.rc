@@ -1,0 +1,4 @@
+p_overview_xsl_file RCDATA "p_overview.xsl"
+p_detail_xsl_file   RCDATA "p_detail.xsl"
+css_file            RCDATA "styles.css"
+
