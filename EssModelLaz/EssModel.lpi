@@ -31,7 +31,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="91">
+    <Units Count="93">
       <Unit0>
         <Filename Value="essmodel.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -304,11 +304,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <UnitName Value="uMainModule"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="152"/>
-        <CursorPos X="15" Y="179"/>
+        <TopLine Value="167"/>
+        <CursorPos X="40" Y="196"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="17"/>
         <Loaded Value="True"/>
@@ -317,7 +316,7 @@
       <Unit44>
         <Filename Value="Model/ulisteners.pas"/>
         <UnitName Value="uListeners"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
         <TopLine Value="38"/>
         <CursorPos X="14" Y="59"/>
@@ -339,19 +338,17 @@
       <Unit46>
         <Filename Value="Integrator/uintegrator.pas"/>
         <UnitName Value="uIntegrator"/>
-        <EditorIndex Value="11"/>
         <WindowIndex Value="0"/>
         <TopLine Value="26"/>
         <CursorPos X="33" Y="49"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="17"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit46>
       <Unit47>
         <Filename Value="Model/umodel.pas"/>
         <UnitName Value="uModel"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
         <TopLine Value="288"/>
         <CursorPos X="50" Y="309"/>
@@ -416,22 +413,21 @@
       <Unit53>
         <Filename Value="Integrator/View/uviewintegrator.pas"/>
         <UnitName Value="uViewIntegrator"/>
-        <EditorIndex Value="10"/>
         <WindowIndex Value="0"/>
         <TopLine Value="15"/>
         <CursorPos X="21" Y="20"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="17"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit53>
       <Unit54>
         <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
         <UnitName Value="uRtfdComponents"/>
-        <EditorIndex Value="7"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="619"/>
-        <CursorPos X="25" Y="637"/>
+        <TopLine Value="298"/>
+        <CursorPos X="1" Y="310"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="17"/>
         <Loaded Value="True"/>
@@ -440,13 +436,11 @@
       <Unit55>
         <Filename Value="Integrator/View/RtfdDiagram/urtfddiagram.pas"/>
         <UnitName Value="uRtfdDiagram"/>
-        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
         <TopLine Value="486"/>
         <CursorPos X="1" Y="507"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="15"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit55>
       <Unit56>
@@ -472,7 +466,6 @@
       <Unit58>
         <Filename Value="Model/umodelentity.pas"/>
         <UnitName Value="uModelEntity"/>
-        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
         <TopLine Value="244"/>
         <CursorPos X="22" Y="267"/>
@@ -481,7 +474,6 @@
         <Bookmarks Count="1">
           <Item0 X="1" Y="254" ID="2"/>
         </Bookmarks>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit58>
       <Unit59>
@@ -510,13 +502,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <UnitName Value="uDiagramFrame"/>
-        <EditorIndex Value="9"/>
         <WindowIndex Value="0"/>
         <TopLine Value="98"/>
         <CursorPos X="18" Y="115"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="17"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit61>
       <Unit62>
@@ -524,13 +514,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
         <UnitName Value="uRtfdDiagramFrame"/>
-        <EditorIndex Value="13"/>
         <WindowIndex Value="0"/>
         <TopLine Value="28"/>
         <CursorPos X="15" Y="69"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="17"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit62>
       <Unit63>
@@ -586,10 +574,10 @@
       <Unit68>
         <Filename Value="Components/essconnectpanel.pas"/>
         <UnitName Value="essConnectPanel"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="655"/>
-        <CursorPos X="77" Y="676"/>
+        <TopLine Value="712"/>
+        <CursorPos X="1" Y="730"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="17"/>
         <Loaded Value="True"/>
@@ -717,13 +705,11 @@
       <Unit80>
         <Filename Value="Integrator/View/utreeviewintegrator.pas"/>
         <UnitName Value="uTreeViewIntegrator"/>
-        <EditorIndex Value="12"/>
         <WindowIndex Value="0"/>
         <TopLine Value="30"/>
         <CursorPos X="38" Y="35"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="17"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit80>
       <Unit81>
@@ -811,148 +797,152 @@
       </Unit88>
       <Unit89>
         <Filename Value="../../lazarus_gitsvn/trunk/lcl/include/graphiccontrol.inc"/>
-        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
         <TopLine Value="7"/>
         <CursorPos X="1" Y="45"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="11"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit89>
       <Unit90>
         <Filename Value="../../lazarus_gitsvn/trunk/lcl/include/control.inc"/>
-        <EditorIndex Value="8"/>
         <WindowIndex Value="0"/>
         <TopLine Value="4366"/>
         <CursorPos X="28" Y="4387"/>
         <SyntaxHighlighter Value="FreePascal"/>
         <UsageCount Value="11"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Text"/>
       </Unit90>
+      <Unit91>
+        <Filename Value="../../LazConvertTests_fresh/EssModel_22/Integrator/View/RtfdDiagram/uRtfdComponents.pas"/>
+        <UnitName Value="uRtfdComponents"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="275"/>
+        <CursorPos X="1" Y="301"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="../../LazConvertTests_fresh/EssModel_22/Components/essConnectPanel.pas"/>
+        <UnitName Value="essConnectPanel"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="121"/>
+        <CursorPos X="1" Y="43"/>
+        <SyntaxHighlighter Value="FreePascal"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Text"/>
+      </Unit92>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="27" HistoryIndex="26">
       <Position1>
-        <Filename Value="Integrator/View/utreeviewintegrator.pas"/>
-        <Caret Line="55" Column="1" TopLine="34"/>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="330" Column="20" TopLine="309"/>
       </Position1>
       <Position2>
-        <Filename Value="Integrator/View/utreeviewintegrator.pas"/>
-        <Caret Line="35" Column="38" TopLine="30"/>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="247" Column="29" TopLine="213"/>
       </Position2>
       <Position3>
         <Filename Value="Model/umodel.pas"/>
-        <Caret Line="330" Column="20" TopLine="309"/>
+        <Caret Line="46" Column="15" TopLine="25"/>
       </Position3>
       <Position4>
         <Filename Value="Model/umodel.pas"/>
-        <Caret Line="247" Column="29" TopLine="213"/>
+        <Caret Line="277" Column="13" TopLine="256"/>
       </Position4>
       <Position5>
-        <Filename Value="../../lazarus_gitsvn/trunk/lcl/include/graphiccontrol.inc"/>
-        <Caret Line="45" Column="12" TopLine="7"/>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="283" Column="24" TopLine="256"/>
       </Position5>
       <Position6>
-        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
-        <Caret Line="640" Column="1" TopLine="619"/>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="315" Column="15" TopLine="294"/>
       </Position6>
       <Position7>
-        <Filename Value="../../lazarus_gitsvn/trunk/lcl/include/graphiccontrol.inc"/>
-        <Caret Line="45" Column="1" TopLine="7"/>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position7>
       <Position8>
-        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
-        <Caret Line="637" Column="25" TopLine="619"/>
+        <Filename Value="Model/umodel.pas"/>
+        <Caret Line="46" Column="15" TopLine="25"/>
       </Position8>
       <Position9>
         <Filename Value="Model/umodel.pas"/>
-        <Caret Line="46" Column="15" TopLine="25"/>
+        <Caret Line="277" Column="18" TopLine="256"/>
       </Position9>
       <Position10>
         <Filename Value="Model/umodel.pas"/>
-        <Caret Line="277" Column="13" TopLine="256"/>
+        <Caret Line="283" Column="24" TopLine="256"/>
       </Position10>
       <Position11>
         <Filename Value="Model/umodel.pas"/>
-        <Caret Line="283" Column="24" TopLine="256"/>
+        <Caret Line="315" Column="29" TopLine="294"/>
       </Position11>
       <Position12>
         <Filename Value="Model/umodel.pas"/>
-        <Caret Line="315" Column="15" TopLine="294"/>
+        <Caret Line="317" Column="22" TopLine="294"/>
       </Position12>
       <Position13>
         <Filename Value="Model/umodel.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
+        <Caret Line="392" Column="16" TopLine="371"/>
       </Position13>
       <Position14>
         <Filename Value="Model/umodel.pas"/>
-        <Caret Line="46" Column="15" TopLine="25"/>
+        <Caret Line="393" Column="15" TopLine="371"/>
       </Position14>
       <Position15>
-        <Filename Value="Model/umodel.pas"/>
-        <Caret Line="277" Column="18" TopLine="256"/>
-      </Position15>
-      <Position16>
-        <Filename Value="Model/umodel.pas"/>
-        <Caret Line="283" Column="24" TopLine="256"/>
-      </Position16>
-      <Position17>
-        <Filename Value="Model/umodel.pas"/>
-        <Caret Line="315" Column="29" TopLine="294"/>
-      </Position17>
-      <Position18>
-        <Filename Value="Model/umodel.pas"/>
-        <Caret Line="317" Column="22" TopLine="294"/>
-      </Position18>
-      <Position19>
-        <Filename Value="Model/umodel.pas"/>
-        <Caret Line="392" Column="16" TopLine="371"/>
-      </Position19>
-      <Position20>
-        <Filename Value="Model/umodel.pas"/>
-        <Caret Line="393" Column="15" TopLine="371"/>
-      </Position20>
-      <Position21>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="244" Column="28" TopLine="247"/>
-      </Position21>
-      <Position22>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
-      </Position22>
-      <Position23>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="54" Column="18" TopLine="33"/>
-      </Position23>
-      <Position24>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="135" Column="18" TopLine="114"/>
-      </Position24>
-      <Position25>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="142" Column="24" TopLine="114"/>
-      </Position25>
-      <Position26>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="162" Column="16" TopLine="141"/>
-      </Position26>
-      <Position27>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="163" Column="15" TopLine="141"/>
-      </Position27>
-      <Position28>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="168" Column="13" TopLine="141"/>
-      </Position28>
-      <Position29>
-        <Filename Value="Model/umodelentity.pas"/>
-        <Caret Line="252" Column="29" TopLine="231"/>
-      </Position29>
-      <Position30>
         <Filename Value="System/umainmodule.pas"/>
         <Caret Line="1" Column="1" TopLine="1"/>
-      </Position30>
+      </Position15>
+      <Position16>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <Caret Line="676" Column="77" TopLine="655"/>
+      </Position16>
+      <Position17>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <Caret Line="726" Column="9" TopLine="712"/>
+      </Position17>
+      <Position18>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
+        <Caret Line="637" Column="25" TopLine="619"/>
+      </Position18>
+      <Position19>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
+        <Caret Line="312" Column="18" TopLine="298"/>
+      </Position19>
+      <Position20>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <Caret Line="43" Column="1" TopLine="361"/>
+      </Position20>
+      <Position21>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
+        <Caret Line="318" Column="5" TopLine="298"/>
+      </Position21>
+      <Position22>
+        <Filename Value="Integrator/View/RtfdDiagram/urtfdcomponents.pas"/>
+        <Caret Line="307" Column="3" TopLine="298"/>
+      </Position22>
+      <Position23>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <Caret Line="211" Column="3" TopLine="190"/>
+      </Position23>
+      <Position24>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <Caret Line="355" Column="12" TopLine="317"/>
+      </Position24>
+      <Position25>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <Caret Line="370" Column="15" TopLine="332"/>
+      </Position25>
+      <Position26>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <Caret Line="421" Column="27" TopLine="383"/>
+      </Position26>
+      <Position27>
+        <Filename Value="Components/essconnectpanel.pas"/>
+        <Caret Line="370" Column="5" TopLine="373"/>
+      </Position27>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

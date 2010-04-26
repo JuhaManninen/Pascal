@@ -722,15 +722,10 @@ begin
       end;
     end else if Assigned(found) then
     begin
-      if found is TForm then begin
-        if Assigned((found as TForm).OnMouseMove) then
-        begin
-          p2 := found.ScreenToClient(pt);
-          (found as TForm).OnMouseMove(found,Shift,p2.x,p2.y);
-        end;
-      end
-      else begin
-        found := nil;  // For debug.
+      if Assigned(TCrackControl(found).OnMouseMove) then
+      begin
+        p2 := found.ScreenToClient(pt);
+        TCrackControl(found).OnMouseMove(found,Shift,p2.x,p2.y);
       end;
     end;
   end;

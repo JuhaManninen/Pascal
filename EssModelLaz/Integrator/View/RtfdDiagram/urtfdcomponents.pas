@@ -307,23 +307,12 @@ type
   TCrackControl = class(TControl);
 
 procedure TRtfdBox.Notification(AComponent: TComponent; Operation: Classes.TOperation);
-var
-  s: string;
-  co: TControl;
 begin
   inherited;
   //Owner=Self must be tested because notifications are being sent for all components
   //in the form. TRtfdLabels are created with Owner=box.
-  if (Operation = opInsert) and (Acomponent.Owner = Self) then begin
-    if Acomponent is TForm then
-      (AComponent as TForm).OnMouseDown := OnChildMouseDown
-    else
-      if Acomponent is TControl then
-      begin
-        co:=Acomponent as TControl;
-        s:=co.ClassName;
-      end;
-  end;
+  if (Operation = opInsert) and (Acomponent.Owner = Self) and (Acomponent is TControl) then
+    TCrackControl(AComponent).OnMouseDown := OnChildMouseDown;
 end;
 
 procedure TRtfdBox.OnChildMouseDown(Sender: TObject; Button: TMouseButton;
