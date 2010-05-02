@@ -35,8 +35,8 @@ type
     procedure TraverseModel; virtual;
     procedure WriteOverview; virtual;
     procedure WritePackageDetail(P : TUnitPackage); virtual;
-    procedure WriteClassDetail(C : TClass); virtual;
-    procedure WriteInterfaceDetail(I: TInterface); virtual;
+    procedure WriteClassDetail(C : TMdlClass); virtual;
+    procedure WriteInterfaceDetail(I: TMdlInterface); virtual;
     procedure DocStart; virtual; abstract;
     procedure DocFinished; virtual; abstract;
     procedure SelectDestPath;
@@ -56,8 +56,7 @@ uses uIterators,
   uHtmlDocGen,
   uUseful,
   SysUtils,
-  Forms,
-  uConst;
+  Forms;
 
 { TDocGen }
 
@@ -121,13 +120,13 @@ begin
     P := Packages.Next as TUnitPackage;
     WritePackageDetail(P);
     //Class details
-    Mi := TModelIterator.Create(P.GetClassifiers,TClass,Low(TVisibility),ioAlpha);
+    Mi := TModelIterator.Create(P.GetClassifiers, TMdlClass, Low(TVisibility), ioAlpha);
     while Mi.HasNext do
-      WriteClassDetail(Mi.Next as TClass);
+      WriteClassDetail(Mi.Next as TMdlClass);
     //Interface details
-    Mi := TModelIterator.Create(P.GetClassifiers,TInterface,Low(TVisibility),ioAlpha);
+    Mi := TModelIterator.Create(P.GetClassifiers,TMdlInterface,Low(TVisibility),ioAlpha);
     while Mi.HasNext do
-      WriteInterfaceDetail(Mi.Next as TInterface);
+      WriteInterfaceDetail(Mi.Next as TMdlInterface);
     Pro.Tick;
   end;
 end;
@@ -140,12 +139,12 @@ begin
   Result := THtmlDocGen.Create(Om);
 end;
 
-procedure TDocGen.WriteClassDetail(C: TClass);
+procedure TDocGen.WriteClassDetail(C: TMdlClass);
 begin
 
 end;
 
-procedure TDocGen.WriteInterfaceDetail(I: TInterface);
+procedure TDocGen.WriteInterfaceDetail(I: TMdlInterface);
 begin
 
 end;

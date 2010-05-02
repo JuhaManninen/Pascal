@@ -26,13 +26,35 @@ unit uDiagramFrame;
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ActnList, Menus, uViewIntegrator, StdCtrls, ExtCtrls, uListeners, uModelEntity,
-  uModel, Buttons;
+  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls,
+  Forms, Dialogs, Buttons, ActnList, Menus, StdCtrls, ExtCtrls,
+  uViewIntegrator, uModelEntity, uModel;
 
 const
   WM_ChangePackage = WM_USER + 1;
 type
+
+  // Modified Panel for TRtfdBox.
+
+  TDiagramFrame = class;
+
+  { TDiagramFrameDispatcher }
+
+  { TDiagramFrameListener }
+
+  TDiagramFrameListener = class(TListenerBase)
+  private
+    FFrameOwner: TDiagramFrame;
+  protected
+  public
+    constructor Create(AFrameOwner: TDiagramFrame);
+    //Model listener
+    procedure BeforeChange(Sender: TModelEntity); override;
+    procedure AfterChange(Sender: TModelEntity); override;
+  end;
+
+  { TDiagramFrame }
+
   TDiagramFrame = class(TFrame) // IBeforeObjectModelListener,IAfterObjectModelListener
     ActionList: TActionList;
     OpenSelectedPackageAction: TAction;
@@ -53,6 +75,7 @@ type
     procedure HideDiagramElementActionExecute(Sender: TObject);
     procedure ConnectionsComboChange(Sender: TObject);
   private
+    FListener: TDiagramFrameListener;
     Bypass : boolean;
 //    procedure IBeforeObjectModelListener.Change = ModelBeforeChange;
 //    procedure IAfterObjectModelListener.Change = ModelAfterChange;
@@ -63,9 +86,6 @@ type
     constructor Create(AOwner: TComponent; Model : TObjectModel); reintroduce;
     destructor Destroy; override;
     procedure OnUpdateToolbar(Sender : TObject);
-    //Model listener
-    procedure BeforeChange(Sender: TModelEntity);
-    procedure AfterChange(Sender: TModelEntity);
   public
     Diagram : TDiagramIntegrator;
     Model : TObjectModel;
@@ -92,7 +112,7 @@ diagramframe
 
 implementation
 
-uses uError, uMainModule;
+uses uError;
 
 {$IFNDEF FPC}
   {$R *.dfm}
@@ -110,15 +130,39 @@ type
   end;
 
 
+{ TDiagramFrameListener }
+
+constructor TDiagramFrameListener.Create(AFrameOwner: TDiagramFrame);
+begin
+  FFrameOwner := AFrameOwner;;
+end;
+
+procedure TDiagramFrameListener.BeforeChange(Sender: TModelEntity);
+begin
+  //Someone have to do a reset to currententity, so it's done here.
+  uViewIntegrator.SetCurrentEntity(nil);
+end;
+
+procedure TDiagramFrameListener.AfterChange(Sender: TModelEntity);
+var
+  HasModel : boolean;
+begin
+  HasModel := FFrameOwner.Model.ModelRoot.GetAllUnitPackages.Count > 0;
+  FFrameOwner.VisibilityCombo.Enabled := HasModel;
+  FFrameOwner.ConnectionsCombo.Enabled := HasModel;
+end;
+
+
 { TDiagramFrame }
 
 constructor TDiagramFrame.Create(AOwner: TComponent; Model : TObjectModel);
 begin
   inherited Create(AOwner);
   Self.Model := Model;
-  Model.AddListener(Self); // IAfterObjectModelListener(
+  FListener := TDiagramFrameListener.Create(Self);
+  Model.AddListener(FListener); // IAfterObjectModelListener(
   VisibilityCombo.ItemIndex := 0;
-  //Hindra att caption från FileOpenAction syns på knapp, vi vill bara ha glyfen
+  // Hindra att caption från FileOpenAction syns på knapp, vi vill bara ha glyfen
   OpenButton.Caption:='';
   LayoutButton.Caption:='';
   ScrollBox := TScrollBoxWithNotify.Create(Self);
@@ -129,7 +173,8 @@ end;
 destructor TDiagramFrame.Destroy;
 begin
   if Assigned(Model) and not Application.Terminated then
-    Model.RemoveListener(Self); // IAfterObjectModelListener(
+    Model.RemoveListener(FListener); // IAfterObjectModelListener(
+  FListener.Free;
   inherited;
 end;
 
@@ -166,19 +211,19 @@ begin
   end;
 end;
 
-procedure TDiagramFrame.BeforeChange(Sender: TModelEntity);
-begin
-  //Someone have to do a reset to currententity, so it's done here.
-  uViewIntegrator.SetCurrentEntity(nil);
-end;
-
-procedure TDiagramFrame.AfterChange(Sender: TModelEntity);
+procedure TDiagramFrame.ConnectionsComboChange(Sender: TObject);
 var
-  HasModel : boolean;
+  P : TAbstractPackage;
 begin
-  HasModel := Model.ModelRoot.GetAllUnitPackages.Count > 0;
-  VisibilityCombo.Enabled := HasModel;
-  ConnectionsCombo.Enabled := HasModel;
+  if not Bypass then
+  begin
+    Diagram.ShowAssoc := ConnectionsCombo.ItemIndex=0;
+    //We have to do a full refresh with store/fetch, this is only done at setpackage
+    P := Diagram.Package;
+    Diagram.Package := nil;
+    Diagram.Package := P;
+    Diagram.InitFromModel;
+  end;
 end;
 
 procedure TDiagramFrame.HideDiagramElementActionExecute(Sender: TObject);
@@ -211,21 +256,6 @@ begin
   inherited;
   if (Message.ScrollBar = 0) and (VertScrollBar.Visible) and Assigned(OnResize) then
     OnResize(nil);
-end;
-
-procedure TDiagramFrame.ConnectionsComboChange(Sender: TObject);
-var
-  P : TAbstractPackage;
-begin
-  if not Bypass then
-  begin
-    Diagram.ShowAssoc := ConnectionsCombo.ItemIndex=0;
-    //We have to do a full refresh with store/fetch, this is only done at setpackage
-    P := Diagram.Package;
-    Diagram.Package := nil;
-    Diagram.Package := P;
-    Diagram.InitFromModel;
-  end;
 end;
 
 

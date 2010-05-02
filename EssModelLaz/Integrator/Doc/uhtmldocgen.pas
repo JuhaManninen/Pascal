@@ -30,7 +30,7 @@ uses
 {$IFNDEF FPC}
   Windows, ComObj,
 {$ELSE}
-  LCLIntf, LCLType, LMessages,
+  LCLIntf, LCLType,
 {$ENDIF}
 Forms, SysUtils, Graphics, Classes, Dialogs,
 uDocGen, uModel, uModelEntity, uXmiExport;
@@ -53,7 +53,7 @@ type
 
 implementation
 
-uses uConfig, uIterators, uViewIntegrator;
+uses uConfig, uViewIntegrator;
 
 
 {$IFDEF Win32}

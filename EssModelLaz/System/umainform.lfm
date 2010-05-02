@@ -1,10 +1,10 @@
 object MainForm: TMainForm
-  Left = 306
+  Left = 362
   Height = 526
   Top = 122
   Width = 648
   Caption = 'x'
-  ClientHeight = 505
+  ClientHeight = 526
   ClientWidth = 648
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
@@ -12,22 +12,23 @@ object MainForm: TMainForm
   OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   Position = poScreenCenter
   ShowHint = True
   LCLVersion = '0.9.29'
   object Panel1: TPanel
     Left = 0
-    Height = 477
+    Height = 498
     Top = 28
     Width = 648
     Align = alClient
     Caption = 'Panel1'
-    ClientHeight = 477
+    ClientHeight = 498
     ClientWidth = 648
     TabOrder = 0
     object Splitter1: TSplitter
       Left = 201
-      Height = 455
+      Height = 476
       Top = 1
       Width = 8
       Beveled = True
@@ -35,7 +36,7 @@ object MainForm: TMainForm
     object StatusPanel: TPanel
       Left = 1
       Height = 20
-      Top = 456
+      Top = 477
       Width = 646
       Align = alBottom
       Alignment = taLeftJustify
@@ -47,7 +48,7 @@ object MainForm: TMainForm
     end
     object DiagramPanel: TPanel
       Left = 209
-      Height = 455
+      Height = 476
       Top = 1
       Width = 438
       Align = alClient
@@ -56,12 +57,12 @@ object MainForm: TMainForm
     end
     object LeftPanel: TPanel
       Left = 1
-      Height = 455
+      Height = 476
       Top = 1
       Width = 200
       Align = alLeft
       BevelOuter = bvNone
-      ClientHeight = 455
+      ClientHeight = 476
       ClientWidth = 200
       TabOrder = 2
       object Splitter2: TSplitter
@@ -85,7 +86,7 @@ object MainForm: TMainForm
       end
       object TreePanel: TPanel
         Left = 0
-        Height = 326
+        Height = 347
         Top = 129
         Width = 200
         Align = alClient
@@ -108,9 +109,10 @@ object MainForm: TMainForm
     object OpenButton: TSpeedButton
       Left = 1
       Height = 22
+      Hint = 'Open...'
       Top = 3
       Width = 71
-      Action = MainModule.FileOpenAction
+      Caption = 'Open...'
       Color = clBtnFace
       Flat = True
       Glyph.Data = {
@@ -143,6 +145,7 @@ object MainForm: TMainForm
         D3D6CED3D600
       }
       NumGlyphs = 0
+      OnClick = FileOpenActionExecute
     end
   end
   object MainMenu1: TMainMenu
@@ -151,10 +154,12 @@ object MainForm: TMainForm
     object File1: TMenuItem
       Caption = 'File'
       object Open1: TMenuItem
-        Action = MainModule.FileOpenAction
+        Action = FileOpenAction
+        OnClick = FileOpenActionExecute
       end
       object OpenFolderAction1: TMenuItem
-        Action = MainModule.OpenFolderAction
+        Action = OpenFolderAction
+        OnClick = OpenFolderActionExecute
       end
       object ReopenMenuItem: TMenuItem
         Caption = '&Reopen'
@@ -163,50 +168,131 @@ object MainForm: TMainForm
         Caption = '-'
       end
       object Printdiagram1: TMenuItem
-        Action = MainModule.PrintDiagramAction
+        Action = PrintDiagramAction
       end
       object Generatedocumentation1: TMenuItem
-        Action = MainModule.DocGenAction
+        Action = DocGenAction
+        OnClick = DocGenActionExecute
       end
       object Previewdocumentation1: TMenuItem
-        Action = MainModule.DocGenPreviewAction
+        Action = DocGenPreviewAction
+        OnClick = DocGenPreviewActionExecute
       end
       object ExportXmiAction1: TMenuItem
-        Action = MainModule.ExportXmiAction
+        Action = ExportXmiAction
+        OnClick = ExportXmiActionExecute
       end
       object N3: TMenuItem
         Caption = '-'
       end
       object Changesettings1: TMenuItem
-        Action = MainModule.SettingsAction
+        Action = SettingsAction
+        OnClick = SettingsActionExecute
       end
       object N2: TMenuItem
         Caption = '-'
       end
       object Exit1: TMenuItem
-        Action = MainModule.ExitAction
+        Action = ExitAction
+        OnClick = ExitActionExecute
       end
     end
     object Diagram1: TMenuItem
       Caption = 'Diagram'
       object Copydiagramtoclipboard1: TMenuItem
-        Action = MainModule.CopyDiagramClipboardAction
+        Action = CopyDiagramClipboardAction
+        OnClick = CopyDiagramClipboardActionExecute
       end
       object Layoutdiagram1: TMenuItem
-        Action = MainModule.LayoutDiagramAction
+        Action = LayoutDiagramAction
+        OnClick = LayoutDiagramActionExecute
       end
       object Unhidediagramelements1: TMenuItem
-        Action = MainModule.UnhideElementsAction
+        Action = UnhideElementsAction
+        OnClick = UnhideElementsActionExecute
       end
       object Saveaspicture1: TMenuItem
-        Action = MainModule.SaveDiagramAction
+        Action = SaveDiagramAction
+        OnClick = SaveDiagramActionExecute
       end
     end
     object Help: TMenuItem
       Caption = 'Help'
       object About1: TMenuItem
-        Action = MainModule.AboutAction
+        Action = AboutAction
+        OnClick = AboutActionExecute
       end
     end
+  end
+  object ActionList: TActionList
+    left = 136
+    top = 56
+    object CopyDiagramClipboardAction: TAction
+      Caption = 'Copy diagram to clipboard'
+      Enabled = False
+      OnExecute = CopyDiagramClipboardActionExecute
+      ShortCut = 16451
+    end
+    object PrintDiagramAction: TAction
+      Caption = 'Print diagram'
+      Visible = False
+    end
+    object DocGenAction: TAction
+      Caption = 'Generate documentation'
+      Enabled = False
+      OnExecute = DocGenActionExecute
+    end
+    object AboutAction: TAction
+      Caption = 'About...'
+      OnExecute = AboutActionExecute
+    end
+    object ExportXmiAction: TAction
+      Caption = 'Export model to XMI-file'
+      Enabled = False
+      OnExecute = ExportXmiActionExecute
+    end
+    object LayoutDiagramAction: TAction
+      Caption = 'Layout diagram'
+      Enabled = False
+      Hint = 'Layout'
+      OnExecute = LayoutDiagramActionExecute
+    end
+    object FileOpenAction: TAction
+      Caption = 'Open...'
+      Hint = 'Open...'
+      OnExecute = FileOpenActionExecute
+    end
+    object ExitAction: TAction
+      Caption = 'Exit'
+      OnExecute = ExitActionExecute
+    end
+    object SettingsAction: TAction
+      Caption = 'Change settings...'
+      OnExecute = SettingsActionExecute
+    end
+    object UnhideElementsAction: TAction
+      Caption = 'Show hidden diagram elements'
+      OnExecute = UnhideElementsActionExecute
+    end
+    object SaveDiagramAction: TAction
+      Caption = 'Save as picture...'
+      Enabled = False
+      OnExecute = SaveDiagramActionExecute
+    end
+    object DocGenPreviewAction: TAction
+      Caption = 'Preview documentation'
+      Enabled = False
+      OnExecute = DocGenPreviewActionExecute
+    end
+    object OpenFolderAction: TAction
+      Caption = 'Open folder...'
+      OnExecute = OpenFolderActionExecute
+    end
+  end
+  object CloseTimer: TTimer
+    Enabled = False
+    Interval = 200
+    left = 48
+    top = 128
   end
 end

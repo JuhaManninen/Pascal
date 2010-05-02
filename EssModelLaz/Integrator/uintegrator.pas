@@ -25,13 +25,13 @@ unit uIntegrator;
 
 interface
 
-uses uModel, Classes, Contnrs, uCodeProvider;
+uses uModel, Classes, Contnrs, uCodeProvider, uModelEntity;
 
 type
   {
     Baseclass for integrators
   }
-  TIntegrator = class(TComponent)
+  TIntegrator = class(TListenerBase)  // TComponent
   private
     FModel: TObjectModel;
   public
@@ -117,7 +117,7 @@ var
 
 constructor TIntegrator.Create(om: TObjectModel);
 begin
-  inherited Create(nil);
+//  inherited Create(nil);
   FModel := om;
 end;
 
@@ -143,7 +143,7 @@ end;
 
 procedure TImportIntegrator.BuildModelFrom(FileName: string; ResetModel: boolean; Lock : boolean);
 begin
-  CodeProvider.AddSearchPath(ExtractFilePath(FileName));
+//  CodeProvider.AddSearchPath(ExtractFilePath(FileName));
 
   if Lock then
     Model.Lock;
@@ -176,6 +176,7 @@ var
 begin
   Model.Lock;
   try
+    i := FileNames.Count;
     // Add all searchpaths first so the units can find eachother.
     for I := 0 to FileNames.Count-1 do
       CodeProvider.AddSearchPath(ExtractFilePath(FileNames[I]));

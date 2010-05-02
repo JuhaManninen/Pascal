@@ -26,9 +26,9 @@ unit uRtfdDiagramFrame;
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  uDiagramFrame, ActnList, uRtfdDiagram, Menus, StdCtrls, ExtCtrls, uListeners,
-  Buttons;
+  LCLIntf, LCLType, SysUtils, Classes, Graphics,
+  Controls, Forms, Dialogs, ActnList, Menus, ExtCtrls, Buttons,
+  uDiagramFrame, uRtfdDiagram;
 
 type
   TRtfdDiagramFrame = class(TDiagramFrame)

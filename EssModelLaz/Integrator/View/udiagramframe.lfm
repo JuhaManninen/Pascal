@@ -6,7 +6,6 @@ object DiagramFrame: TDiagramFrame
   Align = alClient
   ClientHeight = 280
   ClientWidth = 510
-  LCLVersion = '0.9.29'
   TabOrder = 0
   DesignLeft = 269
   DesignTop = 107
@@ -39,9 +38,10 @@ object DiagramFrame: TDiagramFrame
     object OpenButton: TSpeedButton
       Left = 1
       Height = 22
+      Hint = 'Open...'
       Top = 3
       Width = 23
-      Action = MainModule.FileOpenAction
+      Caption = 'Open...'
       Color = clBtnFace
       Flat = True
       Glyph.Data = {
@@ -78,10 +78,12 @@ object DiagramFrame: TDiagramFrame
     object LayoutButton: TSpeedButton
       Left = 32
       Height = 22
+      Hint = 'Layout'
       Top = 3
       Width = 23
-      Action = MainModule.LayoutDiagramAction
+      Caption = 'Layout diagram'
       Color = clBtnFace
+      Enabled = False
       Flat = True
       Glyph.Data = {
         06030000424D06030000000000003600000028000000100000000F0000000100

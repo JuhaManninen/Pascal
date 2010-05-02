@@ -77,7 +77,7 @@ type
 
 implementation
 
-uses SysUtils, uConst;
+uses SysUtils;
 
 { TCodeProvider }
 
@@ -133,4 +133,4 @@ begin
   end;
 end;
 
-end.
+end.

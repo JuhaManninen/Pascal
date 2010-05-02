@@ -32,7 +32,7 @@ unit uModelEntity;
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Sysutils, Classes, contnrs,
+  LCLIntf, LCLType, Sysutils, Classes, contnrs,
   uDocumentation;
 
 type
@@ -41,35 +41,14 @@ type
 
   TVisibility = (viPrivate, viProtected, viPublic, viPublished);
 
-  { TModelEntity }
+  TModelEntity = class;
 
-  TModelEntity = class(TObject)
+  { TListenerBase }
+
+  TListenerBase = class(TObject)
   private
-    function GetRoot: TModelEntity;
   protected
-    FName: string;
-    FOwner: TModelEntity;
-    FDocumentation : TDocumentation;
-    FVisibility: TVisibility;
-    FListeners: TList; // TInterfaceList;
-//    FListenerTypes: TListenerTypes;
-    FLocked: boolean;
-    procedure SetName(const Value: string); virtual;
-    function GetFullName: string;
-//    class function GetBeforeListener: TGUID; virtual;
-//    class function GetAfterListener: TGUID; virtual;
-    procedure SetVisibility(const Value: TVisibility);
-    function GetLocked: boolean;
-    procedure Fire(Method: TListenerMethodType; Info: TModelEntity = nil); virtual;
-    {IUnknown, behövs för att kunna vara lyssnare}
-{    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
-    function _AddRef: Integer; stdcall;
-    function _Release: Integer; stdcall;  }
   public
-    constructor Create(Owner: TModelEntity); virtual;
-    destructor Destroy; override;
-    procedure AddListener(NewListener: TObject);
-    procedure RemoveListener(Listener: TObject);
     // Dispatch functions, earlier interfaces took care of them.
     procedure BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity); virtual;
     procedure BeforeRemove(Sender: TModelEntity); virtual;
@@ -79,6 +58,41 @@ type
     procedure AfterRemove(Sender: TModelEntity); virtual;
     procedure AfterChange(Sender: TModelEntity); virtual;
     procedure AfterEntityChange(Sender: TModelEntity); virtual;
+  end;
+
+  // Forward declarations.
+  TModelEntityList = class;
+  TListenerList = class;
+
+  { TModelEntity }
+
+  TModelEntity = class(TListenerBase)
+  private
+    function GetRoot: TModelEntity;
+  protected
+    FName: string;
+    FOwner: TModelEntity;
+    FDocumentation : TDocumentation;
+    FVisibility: TVisibility;
+    FListeners: TListenerList; // TInterfaceList;
+//    FListenerTypes: TListenerTypes;
+    FLocked: boolean;
+    procedure SetName(const Value: string); virtual;
+    function GetFullName: string;
+//    class function GetBeforeListener: TGUID; virtual;
+//    class function GetAfterListener: TGUID; virtual;
+    procedure SetVisibility(const Value: TVisibility);
+    function GetLocked: boolean;
+    procedure Fire(Method: TListenerMethodType; Info: TModelEntity = nil); //virtual;
+    {IUnknown, behövs för att kunna vara lyssnare}
+{    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;  }
+  public
+    constructor Create(Owner: TModelEntity); virtual;
+    destructor Destroy; override;
+    procedure AddListener(NewListener: TListenerBase);
+    procedure RemoveListener(Listener: TListenerBase);
   public
     property Name: string read FName write SetName;
     property FullName: string read GetFullName;
@@ -107,6 +121,26 @@ type
     function Accept(M : TModelEntity) : boolean; virtual; abstract;
   end;
 
+  { TModelEntityList }
+
+  TModelEntityList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TModelEntity;
+    procedure SetItems(AIndex: integer; const AValue: TModelEntity);
+  public
+    property Items[AIndex: integer]: TModelEntity read GetItems write SetItems; default;
+  end;
+
+  { TListenerList }
+
+  TListenerList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TListenerBase;
+    procedure SetItems(AIndex: integer; const AValue: TListenerBase);
+  public
+    property Items[AIndex: integer]: TListenerBase read GetItems write SetItems; default;
+  end;
+
   //Basinterface for iterators
 //  I*ModelIterator = interface(IUnknown)
 //    ['{42329900-029F-46AE-96ED-6D4ABBEAFD4F}']
@@ -124,7 +158,48 @@ type
 
 implementation
 
-uses uListeners;
+{ TListenerBase }
+
+procedure TListenerBase.BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity);
+begin
+  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+end;
+
+procedure TListenerBase.BeforeRemove(Sender: TModelEntity);
+begin
+  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+end;
+
+procedure TListenerBase.BeforeChange(Sender: TModelEntity);
+begin
+  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+end;
+
+procedure TListenerBase.BeforeEntityChange(Sender: TModelEntity);
+begin
+  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+end;
+
+procedure TListenerBase.AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity);
+begin
+  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+end;
+
+procedure TListenerBase.AfterRemove(Sender: TModelEntity);
+begin
+  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+end;
+
+procedure TListenerBase.AfterChange(Sender: TModelEntity);
+begin
+  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+end;
+
+procedure TListenerBase.AfterEntityChange(Sender: TModelEntity);
+begin
+  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+end;
+
 
 { TModelEntity }
 
@@ -132,7 +207,7 @@ constructor TModelEntity.Create(Owner: TModelEntity);
 begin
   inherited Create;
   Self.Owner := Owner;
-  FListeners := TList.Create;
+  FListeners := TListenerList.Create(False);
   FDocumentation := TDocumentation.Create;
 end;
 
@@ -157,60 +232,17 @@ begin
   Result := FLocked or (Assigned(Owner) and Owner.Locked);
 end;
 
-procedure TModelEntity.AddListener(NewListener: TObject);
+procedure TModelEntity.AddListener(NewListener: TListenerBase);
 begin
   if FListeners.IndexOf(NewListener) = -1 then
     FListeners.Add(NewListener);
 end;
 
-procedure TModelEntity.RemoveListener(Listener: TObject);
+procedure TModelEntity.RemoveListener(Listener: TListenerBase);
 begin
   FListeners.Remove(Listener);
 end;
 
-
-//
-procedure TModelEntity.BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity);
-begin
-  ;
-end;
-
-procedure TModelEntity.BeforeRemove(Sender: TModelEntity);
-begin
-  ;
-end;
-
-procedure TModelEntity.BeforeChange(Sender: TModelEntity);
-begin
-  ;
-end;
-
-procedure TModelEntity.BeforeEntityChange(Sender: TModelEntity);
-begin
-  ;
-end;
-
-procedure TModelEntity.AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity);
-begin
-  ;
-end;
-
-procedure TModelEntity.AfterRemove(Sender: TModelEntity);
-begin
-  ;
-end;
-
-procedure TModelEntity.AfterChange(Sender: TModelEntity);
-begin
-  ;
-end;
-
-procedure TModelEntity.AfterEntityChange(Sender: TModelEntity);
-begin
-  ;
-end;
-
-//
 procedure TModelEntity.SetName(const Value: string);
 var
   OldName: string;
@@ -218,7 +250,7 @@ begin
   OldName := FName;
   FName := Value;
   try
-    Fire(mtBeforeEntityChange)
+    Fire(mtBeforeEntityChange);
   except
     FName := OldName;
     raise;
@@ -233,7 +265,7 @@ begin
   Old := Value;
   FVisibility := Value;
   try
-    Fire(mtBeforeEntityChange)
+    Fire(mtBeforeEntityChange);
   except
     FVisibility := Old;
     raise;
@@ -244,41 +276,33 @@ end;
 procedure TModelEntity.Fire(Method: TListenerMethodType; Info: TModelEntity = nil);
 var
   I: integer;
-//  IL: IModelEntityListener;
-  L: TObject;
-  s: String;
+  L: TListenerBase;
 begin
   if not Locked then
     for I := 0 to FListeners.Count - 1 do
     begin
       L := FListeners[I];
-      if L is TModelEntity then begin
-        case Method of
-          mtBeforeAddChild:      // if Supports(L, GetBeforeListener, IL) then
-            (L as TModelEntity).BeforeAddChild(Self, Info);
-          mtBeforeRemove:        // if Supports(L, GetBeforeListener, IL) then
-            (L as TModelEntity).BeforeRemove(Self);
-          mtBeforeChange:        // if Supports(L, GetBeforeListener, IL) then
-            (L as TModelEntity).BeforeChange(Self);
-          mtBeforeEntityChange:  // if Supports(L, GetBeforeListener, IL) then
-            (L as TModelEntity).BeforeEntityChange(Self);
-          mtAfterAddChild:       // if Supports(L, GetAfterListener, IL) then
-            (L as TModelEntity).AfterAddChild(Self, Info);
-          mtAfterRemove:         // if Supports(L, GetAfterListener, IL) then
-            (L as TModelEntity).AfterRemove(Self);
-          mtAfterChange:         // if Supports(L, GetAfterListener, IL) then
-            (L as TModelEntity).AfterChange(Self);
-          mtAfterEntityChange:   // if Supports(L, GetAfterListener, IL) then
-            (L as TModelEntity).AfterEntityChange(Self);
-        else
-          raise Exception.Create(ClassName + ' Eventmethod not recognized.');
-        end {case};
-      end
-      else begin //if L is TControl then
-        s:=L.ClassName;
-        raise Exception.Create(
-                  Format('TObjectModel.Fire should support type "%s".', [s]));
-      end;
+      Assert(L is TListenerBase, 'TModelEntity.Fire: Listener is not TListenerBase.');
+      case Method of
+        mtBeforeAddChild:      // if Supports(L, GetBeforeListener, IL) then
+          L.BeforeAddChild(Self, Info);
+        mtBeforeRemove:        // if Supports(L, GetBeforeListener, IL) then
+          L.BeforeRemove(Self);
+        mtBeforeChange:        // if Supports(L, GetBeforeListener, IL) then
+          L.BeforeChange(Self);
+        mtBeforeEntityChange:  // if Supports(L, GetBeforeListener, IL) then
+          L.BeforeEntityChange(Self);
+        mtAfterAddChild:       // if Supports(L, GetAfterListener, IL) then
+          L.AfterAddChild(Self, Info);
+        mtAfterRemove:         // if Supports(L, GetAfterListener, IL) then
+          L.AfterRemove(Self);
+        mtAfterChange:         // if Supports(L, GetAfterListener, IL) then
+          L.AfterChange(Self);
+        mtAfterEntityChange:   // if Supports(L, GetAfterListener, IL) then
+          L.AfterEntityChange(Self);
+      else
+        raise Exception.Create(ClassName + ' Eventmethod not recognized.');
+      end; {case};
     end;
 end;
 
@@ -316,4 +340,30 @@ begin
     Result := Result.Owner;
 end;
 
-end.
+{ TModelEntityList }
+
+function TModelEntityList.GetItems(AIndex: integer): TModelEntity;
+begin
+  Result := (inherited Items[AIndex]) as TModelEntity;
+end;
+
+procedure TModelEntityList.SetItems(AIndex: integer; const AValue: TModelEntity);
+begin
+  Items[AIndex] := AValue;
+end;
+
+{ TListenerList }
+
+function TListenerList.GetItems(AIndex: integer): TListenerBase;
+begin
+  Result := (inherited Items[AIndex]) as TListenerBase;
+end;
+
+procedure TListenerList.SetItems(AIndex: integer; const AValue: TListenerBase);
+begin
+  Items[AIndex] := AValue;
+end;
+
+
+end.
+

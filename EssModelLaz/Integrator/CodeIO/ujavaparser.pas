@@ -25,7 +25,7 @@ unit uJavaParser;
 
 interface
 
-uses Classes, uCodeParser, uParseTree, uModel, uModelEntity, uIntegrator, uCodeProvider;
+uses Classes, uCodeParser, uModel, uModelEntity, uIntegrator;
 
 type
   TJavaImporter = class(TImportIntegrator)
@@ -63,7 +63,7 @@ type
     procedure ParseClassDeclaration(IsInner : boolean = False; const ParentName : string = '');
     procedure ParseInterfaceDeclaration;
 
-    procedure DoOperation(O: TOperation; const ParentName, TypeName: string);
+    procedure DoOperation(O: TMdlOperation; const ParentName, TypeName: string);
     procedure DoAttribute(A: TAttribute; const TypeName: string);
     function GetTypeName : string;
 
@@ -78,7 +78,7 @@ type
 
 implementation
 
-uses LCLIntf, LCLType, LMessages, Dialogs, SysUtils, uError;
+uses LCLIntf, LCLType, Dialogs, SysUtils, uError;
 
 
 function ExtractPackageName(const CName: string): string;
@@ -510,8 +510,8 @@ MethodOrFieldRest:
     MethodDeclaratorRest
 *)
 var
-  C: TClass;
-  Int: TInterface;
+  C: TMdlClass;
+  Int: TMdlInterface;
   TypeName, Ident: string;
 begin
   GetNextToken;
@@ -521,14 +521,14 @@ begin
 
   if Token = 'extends' then
   begin
-    C.Ancestor := NeedClassifier(GetNextToken, True, TClass) as TClass;
+    C.Ancestor := NeedClassifier(GetNextToken, True, TMdlClass) as TMdlClass;
     GetNextToken;
   end;
 
   if Token = 'implements' then
   begin
     repeat
-      Int := NeedClassifier(GetNextToken, True, TInterface) as TInterface;
+      Int := NeedClassifier(GetNextToken, True, TMdlInterface) as TMdlInterface;
       if Assigned(Int) then
         C.AddImplements(Int);
       GetNextToken;
@@ -638,7 +638,7 @@ VoidInterfaceMethodDeclaratorRest:
 	FormalParameters [throws QualifiedIdentifierList]   ;
 *)
 var
-  Int: TInterface;
+  Int: TMdlInterface;
   TypeName, Ident: string;
 begin
   GetNextToken;
@@ -648,7 +648,7 @@ begin
 
   if Token = 'extends' then
   begin
-    Int.Ancestor := NeedClassifier(GetNextToken, True, TInterface) as TInterface;
+    Int.Ancestor := NeedClassifier(GetNextToken, True, TMdlInterface) as TMdlInterface;
     //**limitation: an java interface can extend several interfaces, but our model only support one ancestor
     GetNextToken;
     while Token=',' do
@@ -792,9 +792,9 @@ begin
     if Force and (not Assigned(Result)) then
     begin
       //Saknas, skapa i unknown (om Force)
-      if (TheClass=nil) or (TheClass=TClass) then
+      if (TheClass=nil) or (TheClass=TMdlClass) then
         Result := FOM.UnknownPackage.AddClass(CName)
-      else if TheClass=TInterface then
+      else if TheClass=TMdlInterface then
         Result := FOM.UnknownPackage.AddInterface(CName)
       else if TheClass=TDataType then
         Result := FOM.UnknownPackage.AddDataType(CName)
@@ -815,8 +815,8 @@ end;
 procedure TJavaParser.SetVisibility(M: TModelEntity);
 begin
   M.Visibility := ModVisibility;
-  if ModAbstract and (M is TOperation) then
-    (M as TOperation).IsAbstract := ModAbstract;
+  if ModAbstract and (M is TMdlOperation) then
+    (M as TMdlOperation).IsAbstract := ModAbstract;
 end;
 
 function TJavaParser.GetChar: char;
@@ -826,7 +826,7 @@ begin
     Inc(FCurrPos);
 end;
 
-procedure TJavaParser.DoOperation(O: TOperation; const ParentName, TypeName: string);
+procedure TJavaParser.DoOperation(O: TMdlOperation; const ParentName, TypeName: string);
 var
   ParType: string;
 begin

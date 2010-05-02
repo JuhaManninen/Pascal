@@ -29,7 +29,7 @@ unit uModel;
 
 interface
 
-uses Contnrs, Classes, SysUtils, uListeners, uModelEntity, uIterators;
+uses Contnrs, Classes, SysUtils, uModelEntity, uIterators;
 
 const
   UNKNOWNPACKAGE_NAME = '<<Unknown>>';
@@ -43,7 +43,7 @@ type
 
   TObjectModel = class
   private
-    FListeners: TList; // TInterfaceList;
+    FListeners: TListenerList; // TInterfaceList;
     FModelRoot: TLogicPackage;
     FUnknownPackage: TUnitPackage;
     FLocked: boolean;
@@ -52,8 +52,8 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Fire(Method: TListenerMethodType; Info: TModelEntity = nil);
-    procedure AddListener(NewListener: TObject);
-    procedure RemoveListener(Listener: TObject);
+    procedure AddListener(NewListener: TListenerBase);
+    procedure RemoveListener(Listener: TListenerBase);
     procedure Clear;
     procedure Lock;
     procedure Unlock;
@@ -62,11 +62,17 @@ type
     property UnknownPackage: TUnitPackage read FUnknownPackage;
   end;
 
+  // Forward declarations.
+//  TFeatureList = class;
+//  TParameterList = class;
+//  TClassifierList = class;
+
+  // Class definition.
   TFeature = class(TModelEntity);
 
   TClassifier = class(TModelEntity)
   private
-    FFeatures: TObjectList;
+    FFeatures: TModelEntityList;
 //    FListenerTypes: TListenerTypes;
     FIsPlaceholder: boolean;
   public
@@ -87,13 +93,13 @@ type
     property TypeClassifier : TClassifier read FTypeClassifier write FTypeClassifier;
   end;
 
-  TOperation = class(TFeature)
+  TMdlOperation = class(TFeature)
   protected
 //    class function GetBeforeListener: TGUID; override;
 //    class function GetAfterListener: TGUID; override;
   private
     FOperationType: TOperationType;
-    FParameters: TObjectList;
+    FParameters: TModelEntityList;
     FIsAbstract: boolean;
     FReturnValue: TClassifier;
     procedure SetOperationType(const Value: TOperationType);
@@ -138,37 +144,32 @@ type
 //    class function GetAfterListener: TGUID; override;
   end;
 
-  TInterface = class(TClassifier)
+  TMdlInterface = class(TClassifier)
   private
-    FAncestor: TInterface;
-    procedure SetAncestor(const Value: TInterface);
+    FAncestor: TMdlInterface;
+    procedure SetAncestor(const Value: TMdlInterface);
   protected
 //    class function GetBeforeListener: TGUID; override;
 //    class function GetAfterListener: TGUID; override;
   public
     constructor Create(Owner: TModelEntity); override;
     destructor Destroy; override;
-    function AddOperation(const NewName: string): TOperation;
+    function AddOperation(const NewName: string): TMdlOperation;
     function AddAttribute(const NewName: string): TAttribute;
     function GetOperations : TBaseModelIterator;
     function GetAttributes : TBaseModelIterator;
-    property Ancestor: TInterface read FAncestor write SetAncestor;
+    property Ancestor: TMdlInterface read FAncestor write SetAncestor;
     function GetImplementingClasses : TBaseModelIterator;
   end;
 
-  TClass = class(TClassifier) // , IBeforeClassListener
+  TMdlClass = class(TClassifier) // , IBeforeClassListener
   protected
 //    class function GetBeforeListener: TGUID; override;
 //    class function GetAfterListener: TGUID; override;
   private
-    FAncestor: TClass;
-    FImplements: TObjectList;
-    procedure SetAncestor(const Value: TClass);
-    //Ancestorlisteners
-    procedure BeforeChange(Sender: TModelEntity);
-    procedure BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity);
-    procedure BeforeRemove(Sender: TModelEntity);
-    procedure BeforeEntityChange(Sender: TModelEntity);
+    FAncestor: TMdlClass;
+    FImplements: TModelEntityList;
+    procedure SetAncestor(const Value: TMdlClass);
 //    procedure IBeforeClassListener.Change = AncestorChange;
 //    procedure IBeforeClassListener.EntityChange = AncestorEntityChange;
 //    procedure IBeforeClassListener.AddChild = AncestorAddChild;
@@ -176,16 +177,21 @@ type
   public
     constructor Create(Owner: TModelEntity); override;
     destructor Destroy; override;
-    function AddOperation(const NewName: string): TOperation;
+    function AddOperation(const NewName: string): TMdlOperation;
     function AddAttribute(const NewName: string): TAttribute;
     function AddProperty(const NewName: string): TProperty;
-    function AddImplements(I: TInterface): TInterface;
-    property Ancestor: TClass read FAncestor write SetAncestor;
+    function AddImplements(I: TMdlInterface): TMdlInterface;
+    property Ancestor: TMdlClass read FAncestor write SetAncestor;
     function GetOperations : TBaseModelIterator;
     function GetAttributes : TBaseModelIterator;
     function GetImplements : TBaseModelIterator;
     function GetDescendants : TBaseModelIterator;
-    function FindOperation(O : TOperation) : TOperation;
+    function FindOperation(O : TMdlOperation) : TMdlOperation;
+    //Ancestorlisteners
+    procedure BeforeChange(Sender: TModelEntity); override;
+    procedure BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity); override;
+    procedure BeforeRemove(Sender: TModelEntity); override;
+    procedure BeforeEntityChange(Sender: TModelEntity); override;
   end;
 
 
@@ -208,13 +214,13 @@ type
 //    class function GetBeforeListener: TGUID; override;
 //    class function GetAfterListener: TGUID; override;
   private
-    FClassifiers: TObjectList;
-    FUnitDependencies: TObjectList;
+    FClassifiers: TModelEntityList;
+    FUnitDependencies: TModelEntityList;
   public
     constructor Create(Owner: TModelEntity); override;
     destructor Destroy; override;
-    function AddClass(const NewName: string): TClass;
-    function AddInterface(const NewName: string): TInterface;
+    function AddClass(const NewName: string): TMdlClass;
+    function AddInterface(const NewName: string): TMdlInterface;
     function AddDatatype(const NewName: string): TDataType;
     function AddUnitDependency(U : TUnitPackage; Visibility : TVisibility): TUnitDependency;
     function FindClassifier(const CName: string; RaiseException: boolean = False; TheClass : TModelEntityClass = nil; CaseSense : boolean = False): TClassifier;
@@ -225,7 +231,7 @@ type
 
   TLogicPackage = class(TAbstractPackage)
   private
-    FPackages: TObjectList;
+    FPackages: TModelEntityList;
   protected
 //    class function GetBeforeListener: TGUID; override;
 //    class function GetAfterListener: TGUID; override;
@@ -240,28 +246,65 @@ type
     function GetAllClassifiers : TBaseModelIterator;
   end;
 
+
+  { TFeatureList }
+{  TFeatureList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TFeature;
+    procedure SetItems(AIndex: integer; const AValue: TFeature);
+  public
+    property Items[AIndex: integer]: TFeature read GetItems write SetItems; default;
+  end; }
+
+  { TAttributeList }
+  TAttributeList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TAttribute;
+    procedure SetItems(AIndex: integer; const AValue: TAttribute);
+  public
+    property Items[AIndex: integer]: TAttribute read GetItems write SetItems; default;
+  end;
+
+  { TParameterList }
+  TParameterList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TParameter;
+    procedure SetItems(AIndex: integer; const AValue: TParameter);
+  public
+    property Items[AIndex: integer]: TParameter read GetItems write SetItems; default;
+  end;
+
+  { TClassifierList }
+{  TClassifierList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TClassifier;
+    procedure SetItems(AIndex: integer; const AValue: TClassifier);
+  public
+    property Items[AIndex: integer]: TClassifier read GetItems write SetItems; default;
+  end; }
+
   function AllClassesPackage : TAbstractPackage;
 
 implementation
 
-uses uError, uViewIntegrator, uRtfdDiagram, uDiagramFrame;
+uses uError, uViewIntegrator;
 
 type
   //Used by Class.GetDescendant
   TClassDescendantFilter = class(TIteratorFilter)
   private
-    Ancestor : TClass;
+    Ancestor : TMdlClass;
   public
-    constructor Create(Ancestor : TClass);
+    constructor Create(Ancestor : TMdlClass);
     function Accept(M : TModelEntity) : boolean; override;
   end;
 
   //Used by Interface.GetImplementingClasses
   TInterfaceImplementsFilter = class(TIteratorFilter)
   private
-    Int : TInterface;
+    Int : TMdlInterface;
   public
-    constructor Create(I : TInterface);
+    constructor Create(I : TMdlInterface);
     function Accept(M : TModelEntity) : boolean; override;
   end;
 
@@ -274,7 +317,7 @@ const
 
 constructor TObjectModel.Create;
 begin
-  FListeners := TList.Create;
+  FListeners := TListenerList.Create(False);
   CreatePackages;
 end;
 
@@ -297,70 +340,28 @@ begin
     CreatePackages;
     UnLock;
   end
-  else
-  begin
+  else begin
     FreeAndNil(FModelRoot);
     CreatePackages;
   end;
 end;
 
-
 procedure TObjectModel.Fire(Method: TListenerMethodType; Info: TModelEntity = nil);
 var
   I: integer;
-  L: TObject;
-  s: string;
+  L: TListenerBase;
 begin
   if not Locked then
     for I := 0 to FListeners.Count - 1 do
     begin
       L := FListeners[I];
-      if L is TModelEntity then begin
-        case Method of
-          //BeforeChange is triggered when the model will be changed from the root-level.
-          mtBeforeChange:
-            (L as TModelEntity).BeforeChange(nil);
-          //AfterChange is triggered when the model has been changed from the root-level.
-          mtAfterChange:
-            (L as TModelEntity).AfterChange(nil);
-        else
-          raise Exception.Create(ClassName + ' Eventmethod not recognized.');
-        end;
-      end
-      else if L is TViewIntegrator then begin
-        case Method of
-          mtBeforeChange:
-            (L as TViewIntegrator).BeforeChange(nil);
-          mtAfterChange:
-            (L as TViewIntegrator).AfterChange(nil);
-        else
-          raise Exception.Create(ClassName + ' Eventmethod not recognized.');
-        end;
-      end
-      else if L is TRtfdDiagram then begin
-        case Method of
-          mtBeforeChange:
-            (L as TRtfdDiagram).BeforeChange(nil);
-          mtAfterChange:
-            (L as TRtfdDiagram).AfterChange(nil);
-        else
-          raise Exception.Create(ClassName + ' Eventmethod not recognized.');
-        end;
-      end
-      else if L is TDiagramFrame then begin
-        case Method of
-          mtBeforeChange:
-            (L as TDiagramFrame).BeforeChange(nil);
-          mtAfterChange:
-            (L as TDiagramFrame).AfterChange(nil);
-        else
-          raise Exception.Create(ClassName + ' Eventmethod not recognized.');
-        end;
-      end
-      else begin //if L is TControl then
-        s:=L.ClassName;
-        raise Exception.Create(
-                  Format('TObjectModel.Fire should support type "%s".', [s]));
+      Assert(L is TListenerBase, 'TObjectModel.Fire: Listener is not TDispatchBase.');
+      case Method of
+        //BeforeChange is triggered when the model will be changed from the root-level.
+        mtBeforeChange: L.BeforeChange(nil);
+        //AfterChange is triggered when the model has been changed from the root-level.
+        mtAfterChange:  L.AfterChange(nil);
+      else raise Exception.Create(ClassName + ' Eventmethod not recognized.');
       end;
     end;
 end;
@@ -387,13 +388,13 @@ begin
   FUnknownPackage := FModelRoot.AddUnit(UNKNOWNPACKAGE_NAME);
 end;
 
-procedure TObjectModel.AddListener(NewListener: TObject);
+procedure TObjectModel.AddListener(NewListener: TListenerBase);
 begin
   if FListeners.IndexOf(NewListener) = -1 then
     FListeners.Add(NewListener);
 end;
 
-procedure TObjectModel.RemoveListener(Listener: TObject);
+procedure TObjectModel.RemoveListener(Listener: TListenerBase);
 begin
   FListeners.Remove(Listener);
 end;
@@ -403,7 +404,7 @@ end;
 constructor TLogicPackage.Create(Owner: TModelEntity);
 begin
   inherited Create(Owner);
-  FPackages := TObjectList.Create(True);
+  FPackages := TModelEntityList.Create(True);
 end;
 
 destructor TLogicPackage.Destroy;
@@ -468,7 +469,10 @@ begin
 end;
 
 function TLogicPackage.GetPackages: TBaseModelIterator;
+var
+  i: LongInt;
 begin
+  i := FPackages.Count;
   Result := TModelIterator.Create(FPackages);
 end;
 
@@ -476,7 +480,7 @@ end;
 //Unknownpackage is excluded.
 function TLogicPackage.GetAllUnitPackages: TBaseModelIterator;
 var
-  List : TObjectList;
+  List : TModelEntityList;
 
   procedure InAddNested(L : TLogicPackage);
   var
@@ -490,12 +494,13 @@ var
       if P is TLogicPackage then
         InAddNested(P as TLogicPackage)
       else //Not logicpackage, must be unitpackage.
-        if (P.Name<>UNKNOWNPACKAGE_NAME) then List.Add( P );
+        if (P.Name<>UNKNOWNPACKAGE_NAME) then
+          List.Add( P );
     end;
   end;
 
 begin
-  List := TObjectList.Create(False);
+  List := TModelEntityList.Create(False);
   try
     InAddNested(Self);
     Result := TModelIterator.Create(List,True);
@@ -508,9 +513,9 @@ end;
 function TLogicPackage.GetAllClassifiers: TBaseModelIterator;
 var
   Pmi,Cmi : TBaseModelIterator;
-  List : TObjectList;
+  List : TModelEntityList;
 begin
-  List := TObjectList.Create(False);
+  List := TModelEntityList.Create(False);
   try
     Pmi := GetAllUnitPackages;
     while Pmi.HasNext do
@@ -530,8 +535,8 @@ end;
 constructor TUnitPackage.Create(Owner: TModelEntity);
 begin
   inherited Create(Owner);
-  FClassifiers := TObjectList.Create(True);
-  FUnitDependencies := TObjectList.Create(True);
+  FClassifiers := TModelEntityList.Create(True);
+  FUnitDependencies := TModelEntityList.Create(True);
 end;
 
 destructor TUnitPackage.Destroy;
@@ -541,11 +546,14 @@ begin
   inherited;
 end;
 
-function TUnitPackage.AddClass(const NewName: string): TClass;
+function TUnitPackage.AddClass(const NewName: string): TMdlClass;
+var
+  i: LongInt;
 begin
-  Result := TClass.Create(Self);
+  Result := TMdlClass.Create(Self);
   Result.FName := NewName;
   FClassifiers.Add(Result);
+  i := FClassifiers.Count;
   try
     Fire(mtBeforeAddChild, Result);
   except
@@ -555,9 +563,9 @@ begin
   Fire(mtAfterAddChild, Result);
 end;
 
-function TUnitPackage.AddInterface(const NewName: string): TInterface;
+function TUnitPackage.AddInterface(const NewName: string): TMdlInterface;
 begin
-  Result := TInterface.Create(Self);
+  Result := TMdlInterface.Create(Self);
   Result.FName := NewName;
   FClassifiers.Add(Result);
   try
@@ -650,7 +658,10 @@ begin
 end;
 
 function TUnitPackage.GetClassifiers: TBaseModelIterator;
+var
+  i: LongInt;
 begin
+  i := FClassifiers.Count;
   Result := TModelIterator.Create( FClassifiers );
 end;
 
@@ -668,15 +679,15 @@ begin
   Result := TModelIterator.Create( FUnitDependencies );
 end;
 
-{ TClass }
+{ TMdlClass }
 
-constructor TClass.Create(Owner: TModelEntity);
+constructor TMdlClass.Create(Owner: TModelEntity);
 begin
   inherited Create(Owner);
-  FImplements := TObjectList.Create(False); //Only reference
+  FImplements := TModelEntityList.Create(False); //Only reference
 end;
 
-destructor TClass.Destroy;
+destructor TMdlClass.Destroy;
 begin
   //Dont touch listeners if the model is locked.
   if not Locked then
@@ -689,7 +700,7 @@ begin
   inherited;
 end;
 
-function TClass.AddAttribute(const NewName: string): TAttribute;
+function TMdlClass.AddAttribute(const NewName: string): TAttribute;
 begin
   Result := TAttribute.Create(Self);
   Result.FName := NewName;
@@ -703,16 +714,16 @@ begin
   Fire(mtAfterAddChild, Result);
 end;
 
-function TClass.AddProperty(const NewName: string): TProperty;
+function TMdlClass.AddProperty(const NewName: string): TProperty;
 begin
   Result := TProperty.Create(Self);
   Result.FName := NewName;
   FFeatures.Add(Result);
 end;
 
-function TClass.AddOperation(const NewName: string): TOperation;
+function TMdlClass.AddOperation(const NewName: string): TMdlOperation;
 begin
-  Result := TOperation.Create(Self);
+  Result := TMdlOperation.Create(Self);
   Result.FName := NewName;
   FFeatures.Add(Result);
   try
@@ -724,17 +735,17 @@ begin
   Fire(mtAfterAddChild, Result);
 end;
 {
-class function TClass.GetAfterListener: TGUID;
+class function TMdlClass.GetAfterListener: TGUID;
 begin
   Result := IAfterClassListener;
 end;
 
-class function TClass.GetBeforeListener: TGUID;
+class function TMdlClass.GetBeforeListener: TGUID;
 begin
   Result := IBeforeClassListener;
 end;
 }
-function TClass.AddImplements(I: TInterface): TInterface;
+function TMdlClass.AddImplements(I: TMdlInterface): TMdlInterface;
 begin
   Result := I;
   FImplements.Add(I);
@@ -747,9 +758,9 @@ begin
   Fire(mtAfterAddChild, Result);
 end;
 
-procedure TClass.SetAncestor(const Value: TClass);
+procedure TMdlClass.SetAncestor(const Value: TMdlClass);
 var
-  Old: TClass;
+  Old: TMdlClass;
 begin
   Assert(Value <> Self, 'Tried to set self to ancestor.');
   if Value <> FAncestor then
@@ -766,47 +777,50 @@ begin
   end;
 end;
 
-procedure TClass.BeforeAddChild(Sender, NewChild: TModelEntity);
+procedure TMdlClass.BeforeAddChild(Sender, NewChild: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s : %s : %s', ['AncestorAddChild', ClassName, FName, Sender.Name]));
+  Assert(Assigned(Sender), 'Sender not assigned in TMdlClass.BeforeAddChild.');
+  ErrorHandler.Trace(Format('AncestorAddChild: %s : %s : %s', [ClassName, FName, Sender.Name]));
 end;
 
-procedure TClass.BeforeChange(Sender: TModelEntity);
+procedure TMdlClass.BeforeChange(Sender: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s : %s : %s', ['AncestorChange', ClassName, FName, Sender.Name]));
+  Assert(Assigned(Sender), 'Sender not assigned in TRtfdDiagram.BeforeChange.');
+  ErrorHandler.Trace(Format('AncestorChange: %s : %s : %s', [ClassName, FName, Sender.Name]));
 end;
 
-procedure TClass.BeforeEntityChange(Sender: TModelEntity);
+procedure TMdlClass.BeforeEntityChange(Sender: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s : %s : %s', ['AncestorEntityChange', ClassName, FName, Sender.Name]));
+  Assert(Assigned(Sender), 'Sender not assigned in TRtfdDiagram.BeforeEntityChange.');
+  ErrorHandler.Trace(Format('AncestorEntityChange: %s : %s : %s', [ClassName, FName, Sender.Name]));
   Fire(mtBeforeEntityChange);
   Fire(mtAfterEntityChange);
 end;
 
-procedure TClass.BeforeRemove(Sender: TModelEntity);
+procedure TMdlClass.BeforeRemove(Sender: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s : %s : %s', ['AncestorRemove', ClassName, FName, Sender.Name]));
+  ErrorHandler.Trace(Format('AncestorRemove: %s : %s : %s', [ClassName, FName, Sender.Name]));
   FAncestor.RemoveListener(Self); // IBeforeClassListener()
   Ancestor := nil;
 end;
 
-function TClass.GetOperations: TBaseModelIterator;
+function TMdlClass.GetOperations: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create( GetFeatures , TOperation);
+  Result := TModelIterator.Create( GetFeatures , TMdlOperation);
 end;
 
-function TClass.GetAttributes: TBaseModelIterator;
+function TMdlClass.GetAttributes: TBaseModelIterator;
 begin
   Result := TModelIterator.Create( GetFeatures , TAttribute);
 end;
 
-function TClass.GetImplements: TBaseModelIterator;
+function TMdlClass.GetImplements: TBaseModelIterator;
 begin
   Result := TModelIterator.Create( FImplements );
 end;
 
 //Returns a list of classes that inherits from this class.
-function TClass.GetDescendants: TBaseModelIterator;
+function TMdlClass.GetDescendants: TBaseModelIterator;
 begin
   Result := TModelIterator.Create(
     (Root as TLogicPackage).GetAllClassifiers,
@@ -818,10 +832,10 @@ end;
   Finds an operation with same name and signature as parameter.
   Used by Delphi-parser to find a modelentity for a method implementation.
 }
-function TClass.FindOperation(O: TOperation): TOperation;
+function TMdlClass.FindOperation(O: TMdlOperation): TMdlOperation;
 var
   Mi,Omi1,Omi2 : TBaseModelIterator;
-  O2 : TOperation;
+  O2 : TMdlOperation;
   label Skip;
 begin
   Assert(O<>nil,ClassName + '.FindOperation invalid parameter');
@@ -829,9 +843,9 @@ begin
   Mi := GetOperations;
   while Mi.HasNext do
   begin
-    O2 := Mi.Next as TOperation;
+    O2 := Mi.Next as TMdlOperation;
     //Compare nr of parameters
-    if O.FParameters.Count<>O2.FParameters.Count then
+    if O.FParameters.Count <> O2.FParameters.Count then
       Continue;
     { TODO -ovk : case sensitive match? java/delphi. only delphi-parser calls this method. }
     //Compare operation name
@@ -863,22 +877,22 @@ begin
   Result := IBeforeParameterListener;
 end;
 }
-{ TOperation }
+{ TMdlOperation }
 
 
-constructor TOperation.Create(Owner: TModelEntity);
+constructor TMdlOperation.Create(Owner: TModelEntity);
 begin
   inherited Create(Owner);
-  FParameters := TObjectList.Create(True);
+  FParameters := TModelEntityList.Create(True);
 end;
 
-destructor TOperation.Destroy;
+destructor TMdlOperation.Destroy;
 begin
   FreeAndNil(FParameters);
   inherited;
 end;
 
-function TOperation.AddParameter(const NewName: string): TParameter;
+function TMdlOperation.AddParameter(const NewName: string): TParameter;
 begin
   Result := TParameter.Create(Self);
   Result.FName := NewName;
@@ -892,17 +906,17 @@ begin
   Fire(mtAfterAddChild, Result);
 end;
 {
-class function TOperation.GetAfterListener: TGUID;
+class function TMdlOperation.GetAfterListener: TGUID;
 begin
   Result := IAfterOperationListener;
 end;
 
-class function TOperation.GetBeforeListener: TGUID;
+class function TMdlOperation.GetBeforeListener: TGUID;
 begin
   Result := IBeforeOperationListener;
 end;
 }
-procedure TOperation.SetOperationType(const Value: TOperationType);
+procedure TMdlOperation.SetOperationType(const Value: TOperationType);
 var
   Old: TOperationType;
 begin
@@ -920,7 +934,7 @@ begin
   end;
 end;
 
-procedure TOperation.SetIsAbstract(const Value: boolean);
+procedure TMdlOperation.SetIsAbstract(const Value: boolean);
 var
   Old: boolean;
 begin
@@ -938,7 +952,7 @@ begin
   end;
 end;
 
-procedure TOperation.SetReturnValue(const Value: TClassifier);
+procedure TMdlOperation.SetReturnValue(const Value: TClassifier);
 var
   Old: TClassifier;
 begin
@@ -956,9 +970,9 @@ begin
   end;
 end;
 
-function TOperation.GetParameters: TBaseModelIterator;
+function TMdlOperation.GetParameters: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create( FParameters );
+  Result := TModelIterator.Create(FParameters);
 end;
 
 { TAttribute }
@@ -1008,7 +1022,7 @@ end;
 constructor TClassifier.Create(Owner: TModelEntity);
 begin
   inherited Create(Owner);
-  FFeatures := TObjectList.Create(True);
+  FFeatures := TModelEntityList.Create(True);
 end;
 
 destructor TClassifier.Destroy;
@@ -1019,24 +1033,24 @@ end;
 
 function TClassifier.GetFeatures: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create( FFeatures );
+  Result := TModelIterator.Create(FFeatures);
 end;
 
-{ TInterface }
+{ TMdlInterface }
 
-constructor TInterface.Create(Owner: TModelEntity);
+constructor TMdlInterface.Create(Owner: TModelEntity);
 begin
   inherited Create(Owner);
 end;
 
-destructor TInterface.Destroy;
+destructor TMdlInterface.Destroy;
 begin
   inherited;
 end;
 
-function TInterface.AddOperation(const NewName: string): TOperation;
+function TMdlInterface.AddOperation(const NewName: string): TMdlOperation;
 begin
-  Result := TOperation.Create(Self);
+  Result := TMdlOperation.Create(Self);
   Result.FName := NewName;
   FFeatures.Add(Result);
   try
@@ -1048,36 +1062,36 @@ begin
   Fire(mtAfterAddChild, Result);
 end;
 {
-class function TInterface.GetAfterListener: TGUID;
+class function TMdlInterface.GetAfterListener: TGUID;
 begin
   Result := IAfterInterfaceListener;
 end;
 
-class function TInterface.GetBeforeListener: TGUID;
+class function TMdlInterface.GetBeforeListener: TGUID;
 begin
   Result := IBeforeInterfaceListener;
 end;
 }
-function TInterface.GetOperations: TBaseModelIterator;
+function TMdlInterface.GetOperations: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create( GetFeatures , TOperation);
+  Result := TModelIterator.Create( GetFeatures , TMdlOperation);
 end;
 
-procedure TInterface.SetAncestor(const Value: TInterface);
+procedure TMdlInterface.SetAncestor(const Value: TMdlInterface);
 begin
   Assert(Value <> Self, 'Tried to set self to ancestor.');
   FAncestor := Value;
 end;
 
 //Returns a list of classes that implements this interface.
-function TInterface.GetImplementingClasses: TBaseModelIterator;
+function TMdlInterface.GetImplementingClasses: TBaseModelIterator;
 begin
   Result := TModelIterator.Create(
     (Root as TLogicPackage).GetAllClassifiers,
     TInterfaceImplementsFilter.Create(Self) );
 end;
 
-function TInterface.AddAttribute(const NewName: string): TAttribute;
+function TMdlInterface.AddAttribute(const NewName: string): TAttribute;
 begin
   Result := TAttribute.Create(Self);
   Result.FName := NewName;
@@ -1091,7 +1105,7 @@ begin
   Fire(mtAfterAddChild, Result);
 end;
 
-function TInterface.GetAttributes : TBaseModelIterator;
+function TMdlInterface.GetAttributes : TBaseModelIterator;
 begin
   Result := TModelIterator.Create( GetFeatures , TAttribute);
 end;
@@ -1126,7 +1140,7 @@ end;
 
 { TClassDescendantFilter }
 
-constructor TClassDescendantFilter.Create(Ancestor: TClass);
+constructor TClassDescendantFilter.Create(Ancestor: TMdlClass);
 begin
   inherited Create;
   Self.Ancestor := Ancestor;
@@ -1135,12 +1149,12 @@ end;
 //Returns true if M inherits from ancestor
 function TClassDescendantFilter.Accept(M: TModelEntity): boolean;
 begin
-  Result := (M is TClass) and ((M as TClass).Ancestor = Ancestor);
+  Result := (M is TMdlClass) and ((M as TMdlClass).Ancestor = Ancestor);
 end;
 
 { TInterfaceImplementsFilter }
 
-constructor TInterfaceImplementsFilter.Create(I: TInterface);
+constructor TInterfaceImplementsFilter.Create(I: TMdlInterface);
 begin
   inherited Create;
   Int := I;
@@ -1148,8 +1162,11 @@ end;
 
 //Returns true if M implements interface Int
 function TInterfaceImplementsFilter.Accept(M: TModelEntity): boolean;
+var
+  MC: TMdlClass;
 begin
-  Result := (M is TClass) and ((M as TClass).FImplements.IndexOf(Int)<>-1);
+  MC := M as TMdlClass;
+  Result := MC.FImplements.IndexOf(Int) <> -1;
 end;
 
 
@@ -1163,5 +1180,51 @@ begin
   Result := _AllClassesPackage;
 end;
 
+{ TAttributeList }
+
+function TAttributeList.GetItems(AIndex: integer): TAttribute;
+begin
+  Result := (inherited Items[AIndex]) as TAttribute;
+end;
+
+procedure TAttributeList.SetItems(AIndex: integer; const AValue: TAttribute);
+begin
+  Items[AIndex] := AValue;
+end;
+
+{ TParameterList }
+
+function TParameterList.GetItems(AIndex: integer): TParameter;
+begin
+  Result := (inherited Items[AIndex]) as TParameter;
+end;
+
+procedure TParameterList.SetItems(AIndex: integer; const AValue: TParameter);
+begin
+  Items[AIndex] := AValue;
+end;
+
+{ TFeatureList
+
+function TFeatureList.GetItems(AIndex: integer): TFeature;
+begin
+  Result := (inherited Items[AIndex]) as TFeature;
+end;
+
+procedure TFeatureList.SetItems(AIndex: integer; const AValue: TFeature);
+begin
+  Items[AIndex] := AValue;
+end;
+
+function TClassifierList.GetItems(AIndex: integer): TClassifier;
+begin
+  Result := (inherited Items[AIndex]) as TClassifier;
+end;
+
+procedure TClassifierList.SetItems(AIndex: integer; const AValue: TClassifier);
+begin
+  Items[AIndex] := AValue;
+end;
+}
 end.
 

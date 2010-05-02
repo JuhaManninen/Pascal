@@ -26,8 +26,8 @@ unit essConnectPanel;
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ExtCtrls,Contnrs;
+  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls,
+  Forms, Dialogs, ExtCtrls, Contnrs, uRtfdComponents;
 
 type
   // Available linestyles
@@ -35,28 +35,23 @@ type
   //Different kinds of arrowheads
   TessConnectionArrowStyle = (asEmptyOpen,asEmptyClosed);
 
-  {
-    Specifies a connection between two managed objects.
-  }
+  { Specifies a connection between two managed objects. }
   TConnection = class
   public
-    FFrom, FTo: TControl;
+    FFrom, FTo: TRtfdBox;
     FConnectStyle: TessConnectionStyle;
     ArrowStyle : TessConnectionArrowStyle;
   end;
 
-
-  {
-    Wrapper around a control managed by essConnectPanel
-  }
+  { Wrapper around a control managed by essConnectPanel }
   TManagedObject = class
   private
     FSelected: Boolean;
     procedure SetSelected(const Value: Boolean);
   private
-    FControl: TControl;
+    FBox: TRtfdBox;
     // Old eventhandlers
-    FOnMouseDown :TMouseEvent;
+//    FOnMouseDown :TMouseEvent;
     FOnMouseMove :TMouseMoveEvent;
     FOnMouseUp :TMouseEvent;
     FOnClick :TNotifyEvent;
@@ -64,6 +59,34 @@ type
     property Selected: Boolean read FSelected write SetSelected;
   public
     destructor Destroy; override;
+    property Box: TRtfdBox read FBox;
+  end;
+
+  { TManagedList }
+  TManagedList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TManagedObject;
+    procedure SetItems(AIndex: integer; const AValue: TManagedObject);
+  public
+    property Items[AIndex: integer]: TManagedObject read GetItems write SetItems; default;
+  end;
+
+  { TConnectionList }
+  TConnectionList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TConnection;
+    procedure SetItems(AIndex: integer; const AValue: TConnection);
+  public
+    property Items[AIndex: integer]: TConnection read GetItems write SetItems; default;
+  end;
+
+  { TControlList }
+  TControlList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TControl;
+    procedure SetItems(AIndex: integer; const AValue: TControl);
+  public
+    property Items[AIndex: integer]: TControl read GetItems write SetItems; default;
   end;
 
   {
@@ -79,12 +102,12 @@ type
     FMemMousePos: TPoint;
     FSelectRect: TRect;
     FBackBitmap: TBitmap;
-    TempHidden : TObjectList;
+    TempHidden : TManagedList;
     procedure SetSelectedOnly(const Value : boolean);
   protected
     { Protected declarations }
-    FManagedObjects: TList;
-    FConnections: TObjectList;
+    FManagedObjects: TManagedList;
+    FConnections: TConnectionList;
 
     procedure CreateParams(var Params: TCreateParams); override;
     procedure Click; override;
@@ -95,7 +118,7 @@ type
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
     procedure WMEraseBkgnd(var Message: TWmEraseBkgnd); message WM_ERASEBKGND;
-    function FindManagedControl( AControl: TControl ): TManagedObject;
+    function FindManagedControl(AControl: TControl): TManagedObject;
     procedure SelectObjectsInRect(SelRect: TRect);
     procedure OnManagedObjectMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure OnManagedObjectMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -111,24 +134,24 @@ type
     destructor Destroy; override;
 
     // Add a control to the managed list
-    function AddManagedObject(AObject: TControl): TControl;
+    function AddManagedObject(ABox: TRtfdBox): TControl;
     // Return the first of the selected controls if any.
-    function GetFirstSelected : TControl;
+    function GetFirstSelected : TRtfdBox;
 
     // Returns a objectlist containing the selected controls.
     // The list should be freed by the caller.
-    function GetSelectedControls : TObjectList;
+    function GetSelectedControls : TControlList;
 
     // Returns a list containing all the managed controls.
     // The list should be freed by the caller.
-    function GetManagedObjects: TList;
+    function GetManagedObjects: TControlList;
 
     // Returns a list with all interobject connections.
     // The list should be freed by the caller.
-    function GetConnections : TList;
+//    function GetConnections : TConnectionList;
 
     // Add a connection from Src to Dst with the supplied style
-    function ConnectObjects(Src, Dst: TControl;
+    function ConnectObjects(Src, Dst: TRtfdBox;
       AStyle:TessConnectionStyle = csNormal;
       Arrow : TessConnectionArrowStyle = asEmptyClosed): Boolean;
 
@@ -149,6 +172,7 @@ type
 
     //Only draw selected
     property SelectedOnly : boolean read FSelectedOnly write SetSelectedOnly;
+    property Connections: TConnectionList read FConnections;
   published
     { Published declarations }
     property Align;
@@ -208,7 +232,7 @@ implementation
 uses Math;
 
 type
-  TCrackControl = class(TControl) end;
+  TCrackControl = class(TControl);
 
 procedure Register;
 begin
@@ -350,24 +374,28 @@ begin
 end;
 
 { TessConnectPanel }
-function TessConnectPanel.AddManagedObject(AObject: TControl): TControl;
+function TessConnectPanel.AddManagedObject(ABox: TRtfdBox): TControl;
 var
-  crkObj : TCrackControl;
+//  crkObj : TCrackControl;
   newObj: TManagedObject;
+  C: TControl;
 begin
   Result := nil;
-  if (AObject.Left + AObject.Width) > Width then Width := Max(Width,AObject.Left + AObject.Width + 50);
-  if (AObject.Top + AObject.Height) > Height then Height := Max(Height,AObject.Top + AObject.Height + 50);
+  C := ABox;
+  if (C.Left + C.Width) > Width then
+    Width := Max(Width,C.Left + C.Width + 50);
+  if (C.Top + C.Height) > Height then
+    Height := Max(Height,C.Top + C.Height + 50);
 
-  AObject.Parent := Self;
-  AObject.Visible := True;
-  if FindManagedControl(AObject) = nil then
+  C.Parent := Self;
+  C.Visible := True;
+  if FindManagedControl(C) = nil then
   begin
     newObj := TManagedObject.Create;
-    newObj.FControl := AObject;
+    newObj.FBox := ABox;
     FManagedObjects.Add(newObj);
 
-    crkObj := TCrackControl(AObject);
+{!!!    crkObj := TCrackControl(C);
     newObj.FOnMouseDown := crkObj.OnMouseDown;
     newObj.FOnMouseMove := crkObj.OnMouseMove;
     newObj.FOnMouseUp := crkObj.OnMouseUp;
@@ -378,8 +406,8 @@ begin
     crkObj.OnMouseMove := OnManagedObjectMouseMove;
     crkObj.OnMouseUp := OnManagedObjectMouseUp;
     crkObj.OnClick := OnManagedObjectClick;
-    crkObj.OnDblClick := OnManagedObjectDblClick;
-    Result := AObject;
+    crkObj.OnDblClick := OnManagedObjectDblClick; }
+//    Result := ABox;
   end;
 end;
 
@@ -389,7 +417,7 @@ var
 begin
   FConnections.Clear;
   for i:=0 to FManagedObjects.Count -1 do
-    TManagedObject(FManagedObjects[i]).Free;
+    FManagedObjects[i].Free;
   FManagedObjects.Clear;
   SetBounds(0,0,0,0);
   FIsModified := False;
@@ -400,7 +428,7 @@ var
   i: Integer;
 begin
   for i:=0 to FManagedObjects.Count -1 do
-    TManagedObject(FManagedObjects[i]).Selected := False;
+    FManagedObjects[i].Selected := False;
 end;
 
 procedure TessConnectPanel.Click;
@@ -418,7 +446,8 @@ begin
       ClearSelection;
     if Assigned(mcont) then
       mcont.Selected := True;
-    if found <> Self then TCrackControl(found).Click;
+//!!!    if found <> Self then
+//!!!      TCrackControl(found).Click;
   end;
 end;
 
@@ -442,13 +471,14 @@ begin
     ReleaseCapture;
 end;
 
-function TessConnectPanel.ConnectObjects(Src, Dst: TControl;
+function TessConnectPanel.ConnectObjects(Src, Dst: TRtfdBox;
   AStyle: TessConnectionStyle; Arrow : TessConnectionArrowStyle): Boolean;
 var
   conn: TConnection;
 begin
-  if (FindManagedControl(Src) <> nil) and (FindManagedControl(Dst) <> nil) and
-    (Src<>Dst) then
+  if (FindManagedControl(Src) <> nil) and
+     (FindManagedControl(Dst) <> nil) and
+     (Src<>Dst) then
   begin
     conn := TConnection.Create;
     conn.FFrom := Src;
@@ -467,10 +497,10 @@ end;
 constructor TessConnectPanel.Create(AOwner: TComponent);
 begin
   inherited;
-  FManagedObjects := TList.Create;
-  FConnections := TObjectList.Create(True);
+  FManagedObjects := TManagedList.Create(false);
+  FConnections := TConnectionList.Create(True);
   Color := clWhite;
-  TempHidden := TObjectList.Create(False);
+  TempHidden := TManagedList.Create(False);
   UseDockManager := True;
 end;
 
@@ -489,7 +519,8 @@ begin
   if Assigned(found) then
   begin
     FindManagedControl(found);
-    if found <> Self then TCrackControl(found).DblClick;
+    if found <> Self then
+      TCrackControl(found).DblClick;
   end;
 end;
 
@@ -503,7 +534,7 @@ begin
   inherited;
 end;
 
-function TessConnectPanel.FindManagedControl( AControl: TControl): TManagedObject;
+function TessConnectPanel.FindManagedControl(AControl: TControl): TManagedObject;
 var
   i: Integer;
   curr: TManagedObject;
@@ -511,54 +542,54 @@ begin
   Result := nil;
   for i:=0 to FManagedObjects.Count -1 do
   begin
-    curr := TManagedObject(FManagedObjects[i]);
-    if curr.FControl = AControl then
+    curr := FManagedObjects[i];
+    if curr.FBox = AControl then
     begin
       Result := curr;
       exit;
     end;
   end;
 end;
-
-function TessConnectPanel.GetConnections: TList;
+{
+function TessConnectPanel.GetConnections: TConnectionList;
 var
   i: Integer;
 begin
-  Result := TList.Create;
+  Result := TConnectionList.Create(False);
   for i := 0 to FConnections.Count-1 do
     Result.Add(FConnections[I]);
 end;
-
-function TessConnectPanel.GetManagedObjects: TList;
+}
+function TessConnectPanel.GetManagedObjects: TControlList;
 var
   i: Integer;
 begin
-  Result := TList.Create;
+  Result := TControlList.Create(False);
   for i := 0 to FManagedObjects.Count-1 do
-    Result.Add(TManagedObject(FManagedObjects[i]).FControl);
+    Result.Add(FManagedObjects[i].FBox);
 end;
 
 
-function TessConnectPanel.GetFirstSelected: TControl;
+function TessConnectPanel.GetFirstSelected: TRtfdBox;
 var
-  Tmp : TObjectList;
+  Tmp : TControlList;
 begin
   Result := nil;
   Tmp := GetSelectedControls;
   if Tmp.Count>0 then
-    Result := Tmp[0] as TControl;
+    Result := Tmp[0] as TRtfdBox;
   Tmp.Free;
 end;
 
 
-function TessConnectPanel.GetSelectedControls: TObjectList;
+function TessConnectPanel.GetSelectedControls: TControlList;
 var
   I : Integer;
 begin
-  Result := TObjectList.Create(False);
+  Result := TControlList.Create(False);
   for I := 0 to FManagedObjects.Count-1 do
-    if TManagedObject(FManagedObjects[I]).FSelected then
-      Result.Add( TManagedObject(FManagedObjects[I]).FControl );
+    if FManagedObjects[I].FSelected then
+      Result.Add(FManagedObjects[I].FBox);
 end;
 
 
@@ -594,13 +625,13 @@ begin
         ClearSelection;
       mcont.Selected := True;
     end;
-    if Assigned(TCrackControl(found).OnMouseDown) then
+{!!!    if Assigned(TCrackControl(found).OnMouseDown) then
     begin
       p2 := found.ScreenToClient(Mouse.CursorPos);
       TCrackControl(found).OnMouseDown(found,Button,Shift,p2.x,p2.y);
-    end;
+    end; }
   end else
-  begin if not Assigned(found) and (Button = mbLeft) then
+  begin if Button = mbLeft then
     FIsRectSelecting := True;
     FSelectRect.TopLeft := FMemMousePos;
     FSelectRect.BottomRight := FMemMousePos;
@@ -618,12 +649,10 @@ var
   pt,pt1: TPoint;
   r: TRect;
   found: TControl;
-  mcont: TManagedObject;
+  CrackFound: TCrackControl;
   p2: TPoint;
   i,dx,dy, mdx, mdy: Integer;
-  curr: TCrackControl;
-//  ff: TForm;
-//  cc: TControl;
+  curr: TControl;
   MovedRect : TRect;
 
   procedure InMakeVisible(C : TRect);
@@ -686,17 +715,16 @@ begin
     end else if (ssLeft in Shift) then
     begin
       //  Move the selected boxes
-      if (Abs(Abs(dx)+Abs(dy)) > 5) or (FIsMoving) then
+      if ((Abs(dx)+Abs(dy)) > 5) or (FIsMoving) then // Abs(
       begin
         FMemMousePos := pt;
         FIsMoving := True;
         MovedRect:=Rect(MaxInt,0,0,0);
         for i:=0 to FManagedObjects.Count -1 do
         begin
-          if TManagedObject(FManagedObjects[i]).Selected then
+          if FManagedObjects[i].Selected then
           begin
-            mcont := TManagedObject(FManagedObjects[i]);
-            curr := TCrackControl(mcont.FControl);
+            curr := FManagedObjects[i].FBox;
             if curr.Left+dx >= 0 then
               curr.Left := curr.Left + dx;
             if curr.Top+dy >= 0 then
@@ -722,11 +750,12 @@ begin
       end;
     end else if Assigned(found) then
     begin
-      if Assigned(TCrackControl(found).OnMouseMove) then
+{!!!      CrackFound := TCrackControl(found);
+      if Assigned(CrackFound.OnMouseMove) then
       begin
         p2 := found.ScreenToClient(pt);
-        TCrackControl(found).OnMouseMove(found,Shift,p2.x,p2.y);
-      end;
+        CrackFound.OnMouseMove(found,Shift,p2.x,p2.y);
+      end; }
     end;
   end;
 end;
@@ -844,7 +873,6 @@ var
   i: Integer;
   conn: TConnection;
 
-
   procedure AdjustColors(Bevel: TPanelBevel);
   begin
     TopColor := clBtnHighlight;
@@ -870,15 +898,15 @@ begin
   if BevelOuter <> bvNone then
   begin
     AdjustColors(BevelOuter);
-//    Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
+//!!!    Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
     Canvas.Frame3D(Rect, BevelWidth, bvLowered);
   end;
-//  Frame3D(Canvas, Rect, Color, Color, BorderWidth);
+//!!!  Frame3D(Canvas, Rect, Color, Color, BorderWidth);
   Canvas.Frame3D(Rect, BorderWidth, bvLowered);
   if BevelInner <> bvNone then
   begin
     AdjustColors(BevelInner);
-//    Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
+//!!!    Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
     Canvas.Frame3D(Rect, BevelWidth, bvLowered); // TopColor, BottomColor,
   end;
 
@@ -894,7 +922,7 @@ begin
 
   for i:=0 to FConnections.Count -1 do
   begin
-    conn := (FConnections[i] as TConnection);
+    conn := FConnections[i];
     if (not Conn.FFrom.Visible) or (not Conn.FTo.Visible) then
       Continue;
     case conn.FConnectStyle of
@@ -915,7 +943,7 @@ begin
         end;
     end;
 
-    CalcShortest(conn.FFrom.BoundsRect,conn.FTo.BoundsRect,p,p1);
+    CalcShortest(conn.FFrom.BoundsRect, conn.FTo.BoundsRect,p,p1);
     if FindManagedControl(conn.FFrom).Selected and (not FSelectedOnly) then
       Canvas.Pen.Color := clGreen
     else
@@ -933,9 +961,9 @@ begin
   //Grab-handles
   if not FSelectedOnly then for i:=0 to FManagedObjects.Count -1 do
   begin
-    if TManagedObject(FManagedObjects[i]).Selected and (TManagedObject(FManagedObjects[i]).FControl.Visible) then
+    if FManagedObjects[i].Selected and (FManagedObjects[i].FBox.Visible) then
     begin
-      Rect := TManagedObject(FManagedObjects[i]).FControl.BoundsRect;
+      Rect := FManagedObjects[i].FBox.BoundsRect;
       MakeRectangle(r2, Rect.Left -HANDLESIZE, Rect.Top -HANDLESIZE, Rect.Left+HANDLESIZE, Rect.Top+HANDLESIZE);
       Canvas.FillRect(r2);
       MakeRectangle(r2, Rect.Right -HANDLESIZE, Rect.Top -HANDLESIZE, Rect.Right+HANDLESIZE, Rect.Top+HANDLESIZE);
@@ -986,10 +1014,10 @@ begin
 
   for i:=0 to FManagedObjects.Count -1 do
   begin
-    r1 := TCrackControl(TManagedObject(FManagedObjects[i]).FControl).BoundsRect;
+    r1 := FManagedObjects[i].FBox.BoundsRect;
     IntersectRect(r2,SelRect,r1);
-    if EqualRect(r1,r2) and TManagedObject(FManagedObjects[i]).FControl.Visible then
-      TManagedObject(FManagedObjects[i]).Selected := True;
+    if EqualRect(r1,r2) and FManagedObjects[i].FBox.Visible then
+      FManagedObjects[i].Selected := True;
   end;
 end;
 
@@ -1046,16 +1074,17 @@ begin
     begin
       TempHidden.Clear;
       for i:=0 to FManagedObjects.Count -1 do
-        if (not TManagedObject(FManagedObjects[i]).Selected) and TManagedObject(FManagedObjects[i]).FControl.Visible then
+        if (not FManagedObjects[i].Selected) and
+            FManagedObjects[i].FBox.Visible then
         begin
-          TManagedObject(FManagedObjects[i]).FControl.Visible := False;
-          TempHidden.Add( FManagedObjects[i] );
+          FManagedObjects[i].FBox.Visible := False;
+          TempHidden.Add(FManagedObjects[i]);
         end;
     end
     else
     begin
       for I := 0 to TempHidden.Count-1 do
-        TManagedObject(TempHidden[I]).FControl.Visible := True;
+        TempHidden[I].FBox.Visible := True;
       TempHidden.Clear;
     end;
 
@@ -1067,16 +1096,55 @@ end;
 
 destructor TManagedObject.Destroy;
 begin
-  if Assigned(FControl) then FreeAndNil(FControl);
+  if Assigned(FBox) then FreeAndNil(FBox);
   inherited;
 end;
 
 procedure TManagedObject.SetSelected(const Value: Boolean);
 begin
-  FControl.Parent.Invalidate;
+  FBox.Parent.Invalidate;
   FSelected := Value;
   if FSelected then
-    FControl.BringToFront;
+    FBox.BringToFront;
 end;
+
+
+{ ManagedList }
+
+function TManagedList.GetItems(AIndex: integer): TManagedObject;
+begin
+  Result := (inherited Items[AIndex]) as TManagedObject;
+end;
+
+procedure TManagedList.SetItems(AIndex: integer; const AValue: TManagedObject);
+begin
+  Items[AIndex] := AValue;
+end;
+
+
+{ TConnectionList }
+
+function TConnectionList.GetItems(AIndex: integer): TConnection;
+begin
+  Result := (inherited Items[AIndex]) as TConnection;
+end;
+
+procedure TConnectionList.SetItems(AIndex: integer; const AValue: TConnection);
+begin
+  Items[AIndex] := AValue;
+end;
+
+{ TControlList }
+
+function TControlList.GetItems(AIndex: integer): TControl;
+begin
+  Result := (inherited Items[AIndex]) as TControl;
+end;
+
+procedure TControlList.SetItems(AIndex: integer; const AValue: TControl);
+begin
+  Items[AIndex] := AValue;
+end;
+
 
 end.

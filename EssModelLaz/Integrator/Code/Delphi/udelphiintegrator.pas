@@ -24,8 +24,7 @@ unit uDelphiIntegrator;
 {$ENDIF}
 
 interface
-uses Classes, uIntegrator, uCodeIntegrator, uModel, uDelphiParser, uCodeProvider,
-  uCodeParser;
+uses Classes, uIntegrator, uDelphiParser;
 
 type
 
@@ -103,4 +102,4 @@ initialization
 
   Integrators.Register(TDelphiImporter);
 
-end.
+end.

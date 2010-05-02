@@ -25,19 +25,16 @@ unit uIterators;
 
 interface
 
-{
-  Iterators and filters for model navigation.
-}
+{ Iterators and filters for model navigation. }
 
-uses Contnrs, Classes, SysUtils, uModelEntity;
-
+uses Classes, SysUtils, uModelEntity;
 
 type
 
   //Baseclass for iterators
   TModelIterator = class(TBaseModelIterator)
   private
-    FItems : TObjectList;
+    FItems : TModelEntityList;
     OwnsItems : boolean;
     NextI : integer;
     FNext : TModelEntity;
@@ -47,14 +44,14 @@ type
   protected
     procedure Advance; virtual;
   public
-    constructor Create(ObList : TObjectList; MakeCopy : boolean = False); overload;
-    constructor Create(List : TBaseModelIterator; Filter : TBaseIteratorFilter; Order : TIteratorOrder = ioNone); overload;
-    constructor Create(List : TBaseModelIterator;
+    constructor Create(ObList: TModelEntityList; MakeCopy: boolean = False); overload;
+    constructor Create(List: TBaseModelIterator; Filter: TBaseIteratorFilter; Order : TIteratorOrder = ioNone); overload;
+    constructor Create(List: TBaseModelIterator;
       OneClass : TModelEntityClass;
       MinVisibility : TVisibility = Low(TVisibility);
       Order : TIteratorOrder = ioNone); overload;
-    constructor Create(List : TBaseModelIterator; Order : TIteratorOrder = ioNone); overload;
-    constructor Create(List : TBaseModelIterator; MinVisibility : TVisibility); overload;
+    constructor Create(List: TBaseModelIterator; Order : TIteratorOrder = ioNone); overload;
+    constructor Create(List: TBaseModelIterator; MinVisibility : TVisibility); overload;
     destructor Destroy; override;
     // TBaseModelIterator
     function HasNext : boolean; override;
@@ -95,7 +92,7 @@ implementation
 
 //Creates iterator as a direct copy of an objectlist.
 //If makecopy=false then reference oblist, else copy all items.
-constructor TModelIterator.Create(ObList: TObjectList; MakeCopy : boolean = False);
+constructor TModelIterator.Create(ObList: TModelEntityList; MakeCopy: boolean = False);
 var
   I : integer;
 begin
@@ -104,7 +101,7 @@ begin
   begin
     //Copy oblist to items
     OwnsItems := True;
-    FItems := TObjectList.Create(False);
+    FItems := TModelEntityList.Create(False);
     for I:=0 to ObList.Count-1 do
       FItems.Add(ObList[I]);
   end
@@ -190,17 +187,20 @@ var
   E : TModelEntity;
 begin
   OwnsItems := True;
-  FItems := TObjectList.Create(False);
+  FItems := TModelEntityList.Create(False);
   if Assigned(Filter) then
+  begin
     while List.HasNext do
     begin
       E := List.Next;
       if Filter.Accept( E ) then
         FItems.Add( E );
-    end
-  else//Not filtered
+    end;
+  end
+  else begin //Not filtered
     while List.HasNext do
       FItems.Add( List.Next );
+  end;
   //Sort
   case Order of
     ioNone : ;
@@ -216,7 +216,7 @@ begin
   FHasNext := NextI < FItems.Count;
   if FHasNext then
   begin
-    FNext := FItems[NextI] as TModelEntity;
+    FNext := FItems[NextI];
     Inc(NextI);
   end;
 end;
@@ -240,9 +240,7 @@ begin
   Advance;
 end;
 
-{
-  Returns nr of elements.
-}
+// Returns nr of elements.
 function TModelIterator.Count: integer;
 begin
   Result := FItems.Count;

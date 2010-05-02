@@ -38,8 +38,6 @@ unit uListeners;
 
 interface
 
-uses uModelEntity;
-
 type
 
   // Original interfaces moved to text file "Interfaces.txt" and the same names

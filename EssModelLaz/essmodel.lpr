@@ -35,7 +35,6 @@ program EssModel;
 uses
   Forms, Interfaces,
   uMainForm in 'System/uMainForm.pas' {MainForm},
-  uMainModule in 'System/uMainModule.pas' {MainModule: TDataModule},
   uListeners in 'Model/uListeners.pas',
   uDelphiIntegrator in 'Integrator/Code/Delphi/uDelphiIntegrator.pas',
   uIntegrator in 'Integrator/uIntegrator.pas',
@@ -77,11 +76,8 @@ uses
   uZoomFrame in 'System/uZoomFrame.pas' {ZoomFrame: TFrame},
   uOpenFolderForm in 'System/uOpenFolderForm.pas' {OpenFolderForm};
 
-{$R *.res}
-
 begin
   Application.Initialize;
-  Application.Title:='ESS Model';
   Application.CreateForm(TMainForm, MainForm);
   Application.Run;
 end.

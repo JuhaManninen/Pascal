@@ -19,6 +19,10 @@
 
 unit uDelphiIntegrator;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 uses Classes, uIntegrator, uCodeIntegrator, uModel, uDelphiParser, uCodeProvider,
   uCodeParser;

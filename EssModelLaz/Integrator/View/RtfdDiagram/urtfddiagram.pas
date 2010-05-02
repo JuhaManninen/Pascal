@@ -24,8 +24,9 @@ unit uRtfdDiagram;
 {$ENDIF}
 
 interface
-uses uViewIntegrator, essConnectPanel, uModelEntity, uModel, Controls, uListeners, Graphics,
-  Classes, Forms, uDiagramFrame, uRtfdComponents, uFeedback, Types;
+uses Controls, Graphics, Classes, Forms, Types,
+  uDiagramFrame, uRtfdComponents, uFeedback, uViewIntegrator, essConnectPanel,
+  uModelEntity, uModel;
 
 
 type
@@ -47,12 +48,6 @@ type
     procedure AddBox(E: TModelEntity);
     function GetBox(const S : string) : TRtfdBox;
     procedure ResolveAssociations;
-    // Listener methods distributing to other listeners:
-    procedure BeforeChange(Sender: TModelEntity); virtual;
-    procedure AfterChange(Sender: TModelEntity); virtual;
-    procedure AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity); virtual;
-    procedure AfterRemove(Sender: TModelEntity); virtual;
-    procedure AfterEntityChange(Sender: TModelEntity); virtual;
     //Model listeners
     procedure ModelBeforeChange(Sender: TModelEntity);
     procedure ModelAfterChange(Sender: TModelEntity);
@@ -92,11 +87,17 @@ type
     procedure UnHideAllElements; override;
     function GetSelectedRect : TRect; override;
     procedure ScreenCenterEntity(E : TModelEntity); override;
+    // Listener methods distributing to other listeners:
+    procedure BeforeChange(Sender: TModelEntity); override;
+    procedure AfterChange(Sender: TModelEntity); override;
+    procedure AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity); override;
+    procedure AfterRemove(Sender: TModelEntity); override;
+    procedure AfterEntityChange(Sender: TModelEntity); override;
   end;
 
 implementation
 
-uses uRtfdDiagramFrame, Math, LCLIntf, LCLType, LMessages, uError, SysUtils,
+uses uRtfdDiagramFrame, Math, LCLIntf, LCLType, uError, SysUtils,
   uIterators, IniFiles, Dialogs, essLayout, uConfig, contnrs, ExtCtrls, uIntegrator;
 
 
@@ -222,7 +223,7 @@ begin
   Panel.IsModified := False;
 
   DoOnUpdateToolbar;
-  DoOnUpdateZoom;
+//  DoOnUpdateZoom;
   Panel.Show;
   Panel.SetFocus;
   FHasChanged := False;
@@ -264,7 +265,7 @@ end;
 
 procedure TRtfdDiagram.ModelBeforeChange(Sender: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s', ['ModelBeforeChange', ClassName]));
+  ErrorHandler.Trace(Format('ModelBeforeChange: %s', [ClassName]));
   Package := nil;
   IsAllClasses := False;
   ClearDiagram;
@@ -273,7 +274,7 @@ end;
 
 procedure TRtfdDiagram.ModelAfterChange(Sender: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s', ['ModelAfterChange', ClassName]));
+  ErrorHandler.Trace(Format('ModelAfterChange: %s', [ClassName]));
   InitFromModel;
 end;
 
@@ -315,8 +316,8 @@ end;
 procedure TRtfdDiagram.AddBox(E: TModelEntity);
 var
   Mi : TBaseModelIterator;
-  Int : TInterface;
-  C : TClass;
+  Int : TMdlInterface;
+  C : TMdlClass;
   A : TAttribute;
 
   function InCreateBox(E: TModelEntity; BoxT: TRtfdBoxClass): TRtfdBox;
@@ -328,7 +329,7 @@ var
 begin
   if E is TUnitPackage then
     Panel.AddManagedObject( InCreateBox(E,TRtfdUnitPackage) )
-  else if E is TClass then
+  else if E is TMdlClass then
   //Class
   begin
     //Insert related boxes from other packages
@@ -337,7 +338,7 @@ begin
     begin
       //Ancestor that is in another package and that is not already inserted
       //is added to the diagram.
-      C := (E as TClass);
+      C := (E as TMdlClass);
       if Assigned(C.Ancestor) and
         (C.Ancestor.Owner<>E.Owner) and
         ( GetBox(C.Ancestor.FullName)=nil ) then
@@ -347,7 +348,7 @@ begin
       Mi := C.GetImplements;
       while Mi.HasNext do
       begin
-        Int := Mi.Next as TInterface;
+        Int := Mi.Next as TMdlInterface;
         if (Int.Owner<>E.Owner) and
           ( GetBox( Int.FullName )=nil ) then
           Panel.AddManagedObject( InCreateBox(Int,TRtfdInterface) );
@@ -363,9 +364,9 @@ begin
             (A.TypeClassifier<>C) and (A.TypeClassifier<>C.Ancestor) and
             (A.TypeClassifier.Owner<>Model.UnknownPackage) then //Avoid getting temp-types from unknown (java 'int' for example)
           begin
-            if A.TypeClassifier is TClass then
+            if A.TypeClassifier is TMdlClass then
               Panel.AddManagedObject( InCreateBox(A.TypeClassifier,TRtfdClass) );
-            if A.TypeClassifier is TInterface then
+            if A.TypeClassifier is TMdlInterface then
               Panel.AddManagedObject( InCreateBox(A.TypeClassifier,TRtfdInterface) );
           end;
         end;
@@ -374,16 +375,16 @@ begin
     if GetBox(E.FullName)=nil then
       Panel.AddManagedObject( InCreateBox(E,TRtfdClass) );
   end
-  else if E is TInterface then
+  else if E is TMdlInterface then
   //Interface
   begin
     //Ancestor that is in another package and that is not already inserted
     //is added to the diagram.
     if (not IsAllClasses) and
-      Assigned((E as TInterface).Ancestor) and
-      (TInterface(E).Ancestor.Owner<>E.Owner) and
-      ( GetBox(TInterface(E).Ancestor.FullName)=nil ) then
-      Panel.AddManagedObject( InCreateBox((E as TInterface).Ancestor,TRtfdInterface) );
+      Assigned((E as TMdlInterface).Ancestor) and
+      (TMdlInterface(E).Ancestor.Owner<>E.Owner) and
+      ( GetBox(TMdlInterface(E).Ancestor.FullName)=nil ) then
+      Panel.AddManagedObject( InCreateBox((E as TMdlInterface).Ancestor,TRtfdInterface) );
     if GetBox(E.FullName)=nil then
       Panel.AddManagedObject( InCreateBox(E,TRtfdInterface) );
   end;
@@ -410,14 +411,14 @@ begin
     begin //Class
       CBox := (BoxNames.Objects[I] as TRtfdClass);
       //Ancestor
-      if Assigned((CBox.Entity as TClass).Ancestor) then
+      if Assigned((CBox.Entity as TMdlClass).Ancestor) then
       begin
-        DestBox := GetBox( (CBox.Entity as TClass).Ancestor.FullName );
+        DestBox := GetBox( (CBox.Entity as TMdlClass).Ancestor.FullName );
         if Assigned(DestBox) then
           Panel.ConnectObjects(CBox,DestBox);
       end;
       //Implements
-      Mi := (CBox.Entity as TClass).GetImplements;
+      Mi := (CBox.Entity as TMdlClass).GetImplements;
       while Mi.HasNext do
       begin
         DestBox := GetBox( Mi.Next.FullName );
@@ -427,14 +428,14 @@ begin
       //Attributes associations
       if ShowAssoc then
       begin
-        Mi := (CBox.Entity as TClass).GetAttributes;
+        Mi := (CBox.Entity as TMdlClass).GetAttributes;
         while Mi.HasNext do
         begin
           A := TAttribute(Mi.Next);
           //Avoid arrows that points to themselves, also associations to ancestor (double arrows)
           if Assigned(A.TypeClassifier) and
             (A.TypeClassifier<>CBox.Entity) and
-            (A.TypeClassifier<>(CBox.Entity as TClass).Ancestor) then
+            (A.TypeClassifier<>(CBox.Entity as TMdlClass).Ancestor) then
           begin
             DestBox := GetBox( A.TypeClassifier.FullName );
             //Test for same entity, this will filter out TDatatype that can have same name as a class
@@ -447,9 +448,9 @@ begin
     begin //Interface
       IBox := (BoxNames.Objects[I] as TRtfdInterface);
       //Ancestor
-      if Assigned((IBox.Entity as TInterface).Ancestor) then
+      if Assigned((IBox.Entity as TMdlInterface).Ancestor) then
       begin
-        DestBox := GetBox( (IBox.Entity as TInterface).Ancestor.FullName );
+        DestBox := GetBox( (IBox.Entity as TMdlInterface).Ancestor.FullName );
         if Assigned(DestBox) then
           Panel.ConnectObjects(IBox,DestBox);
       end;
@@ -491,8 +492,9 @@ end;
 
 procedure TRtfdDiagram.UnitPackageAfterAddChild(Sender, NewChild: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s : %s', ['UnitPackageAfterAddChild', ClassName, Sender.Name]));
-  if (NewChild is TClass) or (NewChild is TInterface) then
+  Assert(Assigned(Sender), 'Sender not assigned in TRtfdDiagram.UnitPackageAfterAddChild.');
+  ErrorHandler.Trace(Format('UnitPackageAfterAddChild: %s : %s', [ClassName, Sender.Name]));
+  if (NewChild is TMdlClass) or (NewChild is TMdlInterface) then
   begin
     AddBox(NewChild);
     ResolveAssociations;
@@ -500,34 +502,40 @@ begin
 end;
 
 procedure TRtfdDiagram.UnitPackageAfterChange(Sender: TModelEntity);
+var
+  s: String;
 begin
-  ErrorHandler.Trace(Format('%s : %s : %s', ['UnitPackageAfterChange', ClassName, Sender.Name]));
+  s:='';
+  if Assigned(Sender) then
+    s:=Sender.Name;
+  ErrorHandler.Trace(Format('UnitPackageAfterChange: %s : %s', [ClassName, s]));
 end;
 
 procedure TRtfdDiagram.UnitPackageAfterEntityChange(Sender: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s : %s', ['UnitPackageAfterEntityChange', ClassName, Sender.Name]));
+  Assert(Assigned(Sender), 'Sender not assigned in TRtfdDiagram.UnitPackageAfterEntityChange.');
+  ErrorHandler.Trace(Format('UnitPackageAfterEntityChange: %s : %s', [ClassName, Sender.Name]));
 end;
 
 procedure TRtfdDiagram.UnitPackageAfterRemove(Sender: TModelEntity);
 begin
-  ErrorHandler.Trace(Format('%s : %s : %s', ['UnitPackageAfterRemove', ClassName, Sender.Name]));
+  Assert(Assigned(Sender), 'Sender not assigned in TRtfdDiagram.UnitPackageAfterRemove.');
+  ErrorHandler.Trace(Format('UnitPackageAfterRemove: %s : %s', [ClassName, Sender.Name]));
 end;
 
 procedure TRtfdDiagram.OpenSelectedPackage;
 var
-  C: TControl;
+  B: TRtfdBox;
 begin
   //Anropas av frame action
-  C := Panel.GetFirstSelected;
-  if Assigned(C) and (C is TRtfdUnitPackage) then
+  B := Panel.GetFirstSelected;
+  if Assigned(B) and (B is TRtfdUnitPackage) then
   begin
-    Package := (C as TRtfdUnitPackage).P;
+    Package := (B as TRtfdUnitPackage).P;
     InitFromModel;
     CurrentEntity := Package;
   end;
 end;
-
 
 function TRtfdDiagram.HasChanged: boolean;
 begin
@@ -623,7 +631,7 @@ begin
         else
         begin
           //Boxes not in file will get a default postion in upper left corner
-          Box.BoundsRect := Rect(NextX, NextY, NextX + Box.Width, NextY + Box.Height);
+          Box.BoundsRect := Rect(NextX, NextY, NextX+Box.Width, NextY+Box.Height);
           Inc(NextX,25);
           Inc(NextY,25);
         end;
@@ -713,7 +721,7 @@ begin
   begin
     Box := BoxNames.Objects[I] as TRtfdBox;
     S := IntToStr(Box.Left) + ',' + IntToStr(Box.Top) + ',' +
-      IntToStr(Box.Left + Box.Width) + ',' + IntToStr(Box.Top + Box.Height);
+         IntToStr(Box.Left+Box.Width) + ',' + IntToStr(Box.Top+Box.Height);
     Result.AddObject(S,Box.Entity);
   end;
 end;
@@ -722,17 +730,16 @@ end;
 procedure TRtfdDiagram.HideSelectedDiagramElements;
 var
   C: TControl;
-  L : TObjectList;
-  I : integer;
+  L: TControlList;
+  I: integer;
 begin
   //Called from frame action
   L := Panel.GetSelectedControls;
   try
     if L.Count>0 then
-    begin
       for I := 0 to L.Count-1 do
       begin
-        C := L[I] as TControl;
+        C := L[I];
         if (C is TRtfdBox) and Assigned(GetBox( (C as TRtfdBox).Entity.FullName )) then
         begin
           C.Visible := False;
@@ -743,7 +750,6 @@ begin
       Panel.ClearSelection;
       Panel.RecalcSize;
       Panel.Refresh;
-    end;
   finally
     L.Free;
   end;
@@ -785,7 +791,7 @@ begin
   Scale := Min(ScaleX,ScaleY);
   //Clear whole area
   Canvas.Brush.Color := clBtnFace;
-  Canvas.FillRect( Rect(0,0,W,H) );
+  Canvas.FillRect(Rect(0,0,W,H));
   //Fill area for zoomcanvas
   Canvas.Brush.Color := clWhite;
   Canvas.Pen.Color := clBlack;
@@ -799,7 +805,7 @@ begin
   //Draw boxes
   for I := 0 to BoxNames.Count-1 do
   begin
-    Box := TRtfdBox(BoxNames.Objects[I]);
+    Box := BoxNames.Objects[I] as TRtfdBox;
     if not Box.Visible then
       Continue;
     R := Box.BoundsRect;
@@ -853,18 +859,15 @@ var
   P : TModelEntity;
 begin
   inherited;
-
   P := CurrentEntity;
   while Assigned(P) and (not (P is TAbstractPackage)) do
     P := P.Owner;
-
   if Assigned(P) and (P<>Package) then
   begin
     Package := P as TAbstractPackage;
     InitFromModel
   end;
-
-  if (CurrentEntity is TClass) or (CurrentEntity is TInterface) then
+  if (CurrentEntity is TMdlClass) or (CurrentEntity is TMdlInterface) then
     ScreenCenterEntity(CurrentEntity);
 end;
 
@@ -905,9 +908,9 @@ var
   Box : TRtfdBox;
 begin
   for I := 0 to BoxNames.Count-1 do
-    if TRtfdBox(BoxNames.Objects[I]).Entity=E then
+    if (BoxNames.Objects[I] as TRtfdBox).Entity=E then
     begin
-      Box := TRtfdBox(BoxNames.Objects[I]);
+      Box := BoxNames.Objects[I] as TRtfdBox;
 //!!!      Frame.ScrollBox.ScrollInView(Box); // Replaced with AutoScroll.
       Break;
     end;

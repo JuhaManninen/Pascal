@@ -1,30 +1,29 @@
 object OpenFolderForm: TOpenFolderForm
   Left = 174
+  Height = 340
   Top = 107
   Width = 398
-  Height = 340
   Caption = 'Open folder'
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
+  ClientHeight = 340
+  ClientWidth = 398
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
-  Font.Style = []
   Position = poOwnerFormCenter
-  PixelsPerInch = 96
+  LCLVersion = '0.9.29'
   object Label2: TLabel
     Left = 6
-    Top = 262
-    Width = 39
-    Height = 13
+    Height = 14
+    Top = 261
+    Width = 41
     Anchors = [akLeft, akBottom]
     Caption = 'File type'
+    ParentColor = False
   end
   object OkButton: TButton
     Left = 227
+    Height = 25
     Top = 281
     Width = 75
-    Height = 25
     Anchors = [akRight, akBottom]
     Caption = 'OK'
     Default = True
@@ -33,9 +32,9 @@ object OpenFolderForm: TOpenFolderForm
   end
   object Button2: TButton
     Left = 309
+    Height = 25
     Top = 281
     Width = 75
-    Height = 25
     Anchors = [akRight, akBottom]
     Caption = 'Cancel'
     ModalResult = 2
@@ -43,27 +42,28 @@ object OpenFolderForm: TOpenFolderForm
   end
   object FileTypeCombo: TComboBox
     Left = 52
-    Top = 258
+    Height = 24
+    Top = 255
     Width = 69
-    Height = 21
-    Style = csDropDownList
     Anchors = [akLeft, akBottom]
-    ItemHeight = 13
+    ItemHeight = 0
+    Style = csDropDownList
     TabOrder = 2
     TabStop = False
   end
   object PathTreeView: TShellTreeView
     Left = 8
+    Height = 240
     Top = 8
     Width = 372
-    Height = 240
-    ObjectTypes = [otFolders]
-    Anchors = [akLeft, akTop, akRight, akBottom]
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    FileSortType = fstNone
     HideSelection = False
     Indent = 19
-    ParentColor = False
     RightClickSelect = True
     ShowRoot = False
     TabOrder = 3
+    Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoRightClickSelect, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]
+    ObjectTypes = [otFolders]
   end
-end
+end

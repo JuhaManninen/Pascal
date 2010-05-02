@@ -134,19 +134,20 @@ end;
 //Extract nodes from essconnectpanel
 procedure TSugiyamaLayout.ExtractNodes;
 var
-  L : TList;
+  LCont : TControlList;
+  LConn : TConnectionList;
   I : integer;
   C : TControl;
-  Con : essConnectPanel.TConnection;
+  Con : TConnection;
   Node,FromNode,ToNode : TNode;
 begin
   Nodes := TNodeList.Create(True);
 
-  L := Panel.GetManagedObjects;
+  LCont := Panel.GetManagedObjects;
   try
-    for I := 0 to L.Count-1 do
+    for I := 0 to LCont.Count-1 do
     begin
-      C := TControl(L[I]);
+      C := LCont[I];
       if not C.Visible then
         Continue;
       Node := TNode.Create;
@@ -158,17 +159,16 @@ begin
       Nodes.Add(Node);
     end;
   finally
-    L.Free;
+    LCont.Free;
   end;
 
-  L := Panel.GetConnections;
-  try
-    for I := 0 to L.Count-1 do
+  LConn := Panel.Connections;
+//  try
+    for I := 0 to LConn.Count-1 do
     begin
-      Con := TConnection(L[I]);
+      Con := LConn[I];
       if (not Con.FFrom.Visible) or (not Con.FTo.Visible) then
         Continue;
-
       //Here the connection is reversed: from=to, to=from
       //This is because the algorithm assumes that everything points downwards, while
       //we want all arrows to point upwards (descendants pointing up to their baseclass).
@@ -184,11 +184,10 @@ begin
       end;
       AddEdge(FromNode,ToNode);
     end;
-  finally
-    L.Free;
-  end;
+//  finally
+//    LConn.Free;
+//  end;
 end;
-
 
 
 //Writes back layout to essconnectpanel
@@ -289,8 +288,6 @@ begin
   FromNode.OutEdges.Add( TEdge.Create(FromNode,ToNode) );
   ToNode.InEdges.Add( TEdge.Create(FromNode,ToNode) );
 end;
-
-
 
 
 procedure TSugiyamaLayout.MakeAcyclic;

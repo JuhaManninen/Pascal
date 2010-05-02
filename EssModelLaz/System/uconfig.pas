@@ -58,8 +58,7 @@ var
 
 implementation
 
-uses Forms,
-   LCLIntf, LCLType, LMessages,
+uses Forms, LCLIntf, LCLType,
    uConst,
    SysUtils;
 

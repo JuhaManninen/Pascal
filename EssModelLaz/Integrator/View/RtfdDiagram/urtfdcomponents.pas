@@ -24,74 +24,120 @@ unit uRtfdComponents;
 {$ENDIF}
 
 interface
+
 uses
-  LCLIntf, LCLType, LMessages, Messages, ExtCtrls, Classes, StdCtrls, Controls,
+  LCLIntf, LCLType, LMessages, Messages, ExtCtrls, Classes, Controls,
   Contnrs, Forms,
-  uListeners, uModel, uModelEntity, uViewIntegrator, uDiagramFrame;
+  uModel, uModelEntity, uDiagramFrame;
 
 type
+
+  TRtfdBox = class;
+
+  { TRtfdBox }
 
   //Baseclass for a diagram-panel
   TRtfdBoxClass = class of TRtfdBox;
   TRtfdBox = class(TPanel) // , IModelEntityListener
   private
     FMinVisibility : TVisibility;
+    procedure OnChildMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SetMinVisibility(const Value: TVisibility);
-    procedure OnChildMouseDown(Sender: TObject; Button: TMouseButton;  Shift: TShiftState; X, Y: Integer);
   protected
-    procedure Notification(AComponent: TComponent; Operation: Classes.TOperation); override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure Paint; override;
   public
     Frame: TDiagramFrame;
     Entity: TModelEntity;
   public
-    constructor Create(Owner: TComponent; Entity: TModelEntity; Frame: TDiagramFrame; MinVisibility : TVisibility); reintroduce; virtual;
+    constructor Create(Owner: TComponent; Entity: TModelEntity;
+                       Frame: TDiagramFrame; MinVisibility: TVisibility); reintroduce; virtual;
+    destructor Destroy; override;
     procedure RefreshEntities; virtual; abstract;
-    procedure Paint; override;
-    // Listener methods.
-    procedure BeforeChange(Sender: TModelEntity); virtual;
-    procedure AfterChange(Sender: TModelEntity); virtual;
-    procedure BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity); virtual;
-    procedure AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity); virtual;
-    procedure BeforeRemove(Sender: TModelEntity); virtual;
-    procedure AfterRemove(Sender: TModelEntity); virtual;
-    procedure BeforeEntityChange(Sender: TModelEntity); virtual;
-    procedure AfterEntityChange(Sender: TModelEntity); virtual;
   public
     property MinVisibility : TVisibility write SetMinVisibility;
   end;
 
-  TRtfdClass = class(TRtfdBox) // , IAfterClassListener
+
+  TRtfdClass = class;
+
+  // Listener for TRtfdClass.
+  TRtfdClassListener = class(TListenerBase)
+  private
+    FRtfdOwner: TRtfdClass;
   public
-    constructor Create(Owner: TComponent; Entity: TModelEntity; Frame: TDiagramFrame; MinVisibility : TVisibility); override;
-    destructor Destroy; override;
-    procedure RefreshEntities; override;
+    constructor Create(ARtfdOwner: TRtfdClass);
     procedure AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity); override;
   end;
 
-  TRtfdInterface = class(TRtfdBox) // , IAfterInterfaceListener
+  { TRtfdClass }
+  TRtfdClass = class(TRtfdBox) // , IAfterClassListener
+  private
+    FListener: TRtfdClassListener;
   public
-    constructor Create(Owner: TComponent; Entity: TModelEntity; Frame: TDiagramFrame; MinVisibility : TVisibility); override;
+    constructor Create(Owner: TComponent; Entity: TModelEntity;
+                       Frame: TDiagramFrame; MinVisibility: TVisibility); override;
     destructor Destroy; override;
     procedure RefreshEntities; override;
+  public
+    property Listener: TRtfdClassListener read FListener;
+  end;
+
+
+  TRtfdInterface = class;
+
+  // Listener for TRtfdInterface.
+  TRtfdInterfaceListener = class(TListenerBase)
+  private
+    FRtfdOwner: TRtfdInterface;
+  public
+    constructor Create(ARtfdOwner: TRtfdInterface);
     procedure AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity); override;
   end;
+
+  { TRtfdInterface }
+  TRtfdInterface = class(TRtfdBox) // , IAfterInterfaceListener
+  private
+    FListener: TRtfdInterfaceListener;
+  public
+    constructor Create(Owner: TComponent; Entity: TModelEntity;
+                       Frame: TDiagramFrame; MinVisibility : TVisibility); override;
+    destructor Destroy; override;
+    procedure RefreshEntities; override;
+  public
+    property Listener: TRtfdInterfaceListener read FListener;
+  end;
+
 
   TRtfdUnitPackage = class(TRtfdBox)
+  private
+    procedure DblClick(Sender: TObject);
   public
     P: TUnitPackage;
   public
-    constructor Create(Owner: TComponent; Entity: TModelEntity; Frame: TDiagramFrame; MinVisibility : TVisibility); override;
+    constructor Create(Owner: TComponent; Entity: TModelEntity;
+                       Frame: TDiagramFrame; MinVisibility: TVisibility); override;
     procedure RefreshEntities; override;
-    procedure DblClick; override;
   end;
 
+  TRtfdCustomLabel = class;
+
+  // Listener for TRtfdCustomLabel.
+{  TRtfdLabelListener = class(TListenerBase)
+  private
+    FRtfdOwner: TRtfdCustomLabel;
+  public
+    constructor Create(ARtfdOwner: TRtfdCustomLabel);
+  end;
+}
+  { TRtfdCustomLabel }
 //  TRtfdCustomLabel = class(TCustomLabel, IModelEntityListener)
   TRtfdCustomLabel = class(TGraphicControl) // , IModelEntityListener
   private
+    Entity: TModelEntity;
     FCaption: TCaption;
     FAlignment: TAlignment;
     FTransparent: Boolean;
-    Entity: TModelEntity;
     function GetAlignment: TAlignment;
     procedure SetAlignment(const Value: TAlignment);
     procedure SetTransparent(const Value: Boolean);
@@ -99,65 +145,114 @@ type
     procedure AdjustBounds;
     procedure DoDrawText(var Rect: TRect; Flags: Integer);
   protected
-    procedure Paint; override;
     procedure SetText(const Value: TCaption);
     function GetText: TCaption;
+    procedure Paint; override;
   public
     constructor Create(Owner: TComponent; Entity: TModelEntity); reintroduce; virtual;
+    destructor Destroy; override;
     function WidthNeeded : integer; virtual;
-    // Listener methods.
-    procedure BeforeChange(Sender: TModelEntity); virtual;
-    procedure AfterChange(Sender: TModelEntity); virtual;
-    procedure BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity); virtual;
-    procedure AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity); virtual;
-    procedure BeforeRemove(Sender: TModelEntity); virtual;
-    procedure AfterRemove(Sender: TModelEntity); virtual;
-    procedure BeforeEntityChange(Sender: TModelEntity); virtual;
-    procedure AfterEntityChange(Sender: TModelEntity); virtual;
   public
     property Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;
     property Transparent: Boolean read FTransparent write SetTransparent;
+//    property Listener: TRtfdLabelListener read FListener;
   end;
 
+
+  TRtfdClassName = class;
+
+  // Listener for TRtfdClassName.
+  TRtfdClassNameListener = class(TListenerBase)
+  private
+    FRtfdOwner: TRtfdClassName;
+  public
+    constructor Create(ARtfdOwner: TRtfdClassName);
+    procedure AfterEntityChange(Sender: TModelEntity); override;
+  end;
+
+  { TRtfdClassName }
   TRtfdClassName = class(TRtfdCustomLabel) // , IAfterClassListener
+  private
+    FListener: TRtfdClassNameListener;
   public
     constructor Create(Owner: TComponent; Entity: TModelEntity); override;
     destructor Destroy; override;
+  end;
+
+
+  TRtfdInterfaceName = class;
+
+  // Listener for TRtfdInterfaceName.
+  TRtfdInterfaceNameListener = class(TListenerBase)
+  private
+    FRtfdOwner: TRtfdInterfaceName;
+  public
+    constructor Create(ARtfdOwner: TRtfdInterfaceName);
     procedure AfterEntityChange(Sender: TModelEntity); override;
   end;
 
+  { TRtfdInterfaceName }
   TRtfdInterfaceName = class(TRtfdCustomLabel) // , IAfterInterfaceListener
+  private
+    FListener: TRtfdInterfaceNameListener;
   public
     constructor Create(Owner: TComponent; Entity: TModelEntity); override;
     destructor Destroy; override;
-    procedure AfterEntityChange(Sender: TModelEntity); override;
   end;
+
 
   //Left-justified label with visibility-icon
   TVisibilityLabel = class(TRtfdCustomLabel)
-    procedure Paint; override;
+//    procedure Paint; override;
     function WidthNeeded : integer; override;
   end;
 
-  TRtfdOperation = class(TVisibilityLabel) // , IAfterOperationListener
+
+  TRtfdOperation = class;
+
+  // Listener for TRtfdOperation.
+  TRtfdOperationListener = class(TListenerBase)
   private
-    O: TOperation;
+    FRtfdOwner: TRtfdOperation;
   public
-    constructor Create(Owner: TComponent; Entity: TModelEntity); override;
-    destructor Destroy; override;
+    constructor Create(ARtfdOwner: TRtfdOperation);
     procedure AfterEntityChange(Sender: TModelEntity); override;
 //    procedure IAfterOperationListener.EntityChange = EntityChange;
   end;
 
+  { TRtfdOperation }
+  TRtfdOperation = class(TVisibilityLabel) // , IAfterOperationListener
+  private
+    FListener: TRtfdOperationListener;
+    O: TMdlOperation;
+  public
+    constructor Create(Owner: TComponent; Entity: TModelEntity); override;
+    destructor Destroy; override;
+  end;
+
+
+  TRtfdAttribute = class;
+
+  // Listener for TRtfdAttribute.
+  TRtfdAttributeListener = class(TListenerBase)
+  private
+    FRtfdOwner: TRtfdAttribute;
+  public
+    constructor Create(ARtfdOwner: TRtfdAttribute);
+    procedure AfterEntityChange(Sender: TModelEntity); override;
+//    procedure IAfterAttributeListener.EntityChange = EntityChange;
+  end;
+
+  { TRtfdAttribute }
   TRtfdAttribute = class(TVisibilityLabel) // , IAfterAttributeListener
   private
+    FListener: TRtfdAttributeListener;
     A: TAttribute;
   public
     constructor Create(Owner: TComponent; Entity: TModelEntity); override;
     destructor Destroy; override;
-    procedure AfterEntityChange(Sender: TModelEntity); override;
-//    procedure IAfterAttributeListener.EntityChange = EntityChange;
   end;
+
 
   TRtfdSeparator = class(TGraphicControl)
   public
@@ -170,12 +265,38 @@ type
     constructor Create(Owner: TComponent; Entity: TModelEntity; Caption: string); reintroduce;
   end;
 
+
+  TRtfdUnitPackageName = class;
+
+  // Listener for TRtfdUnitPackageName.
+  TRtfdUnitPackageNameListener = class(TListenerBase)
+  private
+    FRtfdOwner: TRtfdUnitPackageName;
+  public
+    constructor Create(ARtfdOwner: TRtfdUnitPackageName);
+    procedure AfterEntityChange(Sender: TModelEntity); override;
+//    procedure IAfterUnitPackageListener.EntityChange = EntityChange;
+  end;
+
+  { TRtfdUnitPackageName }
   TRtfdUnitPackageName = class(TRtfdCustomLabel) // , IAfterUnitPackageListener
   private
+    FListener: TRtfdUnitPackageNameListener;
     P: TUnitPackage;
   public
     constructor Create(Owner: TComponent; Entity: TModelEntity); override;
     destructor Destroy; override;
+  end;
+
+
+  TRtfdUnitPackageDiagram = class;
+
+  // Listener for TRtfdUnitPackageDiagram.
+  TRtfdUnitPackageDiagramListener = class(TListenerBase)
+  private
+    FRtfdOwner: TRtfdUnitPackageDiagram;
+  public
+    constructor Create(ARtfdOwner: TRtfdUnitPackageDiagram);
     procedure AfterEntityChange(Sender: TModelEntity); override;
 //    procedure IAfterUnitPackageListener.EntityChange = EntityChange;
   end;
@@ -183,35 +304,90 @@ type
   //Class to display mame of package at upper-left corner in a unitpackage diagram
   TRtfdUnitPackageDiagram = class(TRtfdCustomLabel) // , IAfterUnitPackageListener
   private
+    FListener: TRtfdUnitPackageDiagramListener;
     P: TUnitPackage;
   public
     constructor Create(Owner: TComponent; Entity: TModelEntity); override;
     destructor Destroy; override;
-    procedure AfterEntityChange(Sender: TModelEntity); override;
-//    procedure IAfterUnitPackageListener.EntityChange = EntityChange;
   end;
+
+  { TRtfdBoxList }
+
+  TRtfdBoxList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TRtfdBox;
+    procedure SetItems(AIndex: integer; const AValue: TRtfdBox);
+  public
+    property Items[AIndex: integer]: TRtfdBox read GetItems write SetItems; default;
+  end;
+
 
 implementation
 
-uses Graphics, uError, SysUtils, essConnectPanel, uIterators,
-uConfig, uRtfdDiagramFrame, Math;
+uses
+  Graphics, uError, SysUtils, essConnectPanel, uIterators,
+  uConfig, Math;
 
 const
   ClassShadowWidth = 3;
   cDefaultWidth = 185;
   cDefaultHeight = 41;
 
+
+//The following declarations are needed for helping essconnectpanel to
+//catch all mouse actions. All controls that are inserted (classname etc)
+//in rtfdbox will get their mousedown-event redefined.
+type
+  TCrackControl = class(TControl);
+
 { TRtfdBox }
-constructor TRtfdBox.Create(Owner: TComponent; Entity: TModelEntity; Frame: TDiagramFrame; MinVisibility : TVisibility);
+
+constructor TRtfdBox.Create(Owner: TComponent; Entity: TModelEntity;
+                            Frame: TDiagramFrame; MinVisibility : TVisibility);
 begin
   inherited Create(Owner);
-  Color := clWhite;
-  BorderWidth := ClassShadowWidth;
   Self.Frame := Frame;
   Self.Entity := Entity;
   Self.FMinVisibility := MinVisibility;
+  Color := clWhite;
+  BorderWidth := ClassShadowWidth;
   ShowHint := True;
   Hint := Entity.Documentation.ShortDescription;
+end;
+
+destructor TRtfdBox.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure TRtfdBox.SetMinVisibility(const Value: TVisibility);
+begin
+  if Value<>FMinVisibility then
+  begin
+    FMinVisibility := Value;
+    RefreshEntities;
+  end;
+end;
+
+procedure TRtfdBox.Notification(AComponent: TComponent; Operation: TOperation);
+begin
+  inherited;
+  //Owner=Self must be tested because notifications are being sent for all components
+  //in the form. TRtfdLabels are created with Owner=box.
+  if (Operation = opInsert) and (Acomponent.Owner = Self) and (Acomponent is TControl) then
+    ; //TCrackControl(AComponent).OnMouseDown := OnChildMouseDown;
+end;
+
+procedure TRtfdBox.OnChildMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  pt: TPoint;
+begin
+  pt.X := X;
+  pt.Y := Y;
+  pt := TControl(Sender).ClientToScreen(pt);
+  pt := ScreenToClient(pt);
+  MouseDown(Button,Shift,pt.X,pt.Y);
 end;
 
 procedure TRtfdBox.Paint;
@@ -249,115 +425,47 @@ begin
   end;
 end;
 
-procedure TRtfdBox.BeforeChange(Sender: TModelEntity);
+
+{ TRtfdClassListener }
+
+constructor TRtfdClassListener.Create(ARtfdOwner: TRtfdClass);
 begin
-  //Stub
+  FRtfdOwner := ARtfdOwner;
 end;
 
-procedure TRtfdBox.AfterChange(Sender: TModelEntity);
+procedure TRtfdClassListener.AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity);
 begin
-  //Stub
+  FRtfdOwner.RefreshEntities;
 end;
-
-procedure TRtfdBox.BeforeAddChild(Sender, NewChild: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdBox.AfterAddChild(Sender, NewChild: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdBox.BeforeEntityChange(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdBox.AfterEntityChange(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdBox.BeforeRemove(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdBox.AfterRemove(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-
-procedure TRtfdBox.SetMinVisibility(const Value: TVisibility);
-begin
-  if Value<>FMinVisibility then
-  begin
-    FMinVisibility := Value;
-    RefreshEntities;
-  end;
-end;
-
-
-//The following declarations are needed for helping essconnectpanel to
-//catch all mouse actions. All controls that are inserted (classname etc)
-//in rtfdbox will get their mousedown-event redefined.
-type
-  TCrackControl = class(TControl);
-
-procedure TRtfdBox.Notification(AComponent: TComponent; Operation: Classes.TOperation);
-begin
-  inherited;
-  //Owner=Self must be tested because notifications are being sent for all components
-  //in the form. TRtfdLabels are created with Owner=box.
-  if (Operation = opInsert) and (Acomponent.Owner = Self) and (Acomponent is TControl) then
-    TCrackControl(AComponent).OnMouseDown := OnChildMouseDown;
-end;
-
-procedure TRtfdBox.OnChildMouseDown(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
-var
-  pt: TPoint;
-begin
-  pt.X := X;
-  pt.Y := Y;
-  pt := TControl(Sender).ClientToScreen(pt);
-  pt := ScreenToClient(pt);
-  MouseDown(Button,Shift,pt.X,pt.Y);
-end;
-
 
 
 { TRtfdClass }
 
-constructor TRtfdClass.Create(Owner: TComponent; Entity: TModelEntity; Frame: TDiagramFrame; MinVisibility : TVisibility);
+constructor TRtfdClass.Create(Owner: TComponent; Entity: TModelEntity;
+                              Frame: TDiagramFrame; MinVisibility : TVisibility);
 begin
   inherited Create(Owner, Entity, Frame, MinVisibility);
   PopupMenu := Frame.ClassInterfacePopupMenu;
-  Entity.AddListener(Self); // IAfterClassListener(
+  FListener := TRtfdClassListener.Create(Self);
+  Entity.AddListener(FListener); // IAfterClassListener(
   RefreshEntities;
 end;
 
 destructor TRtfdClass.Destroy;
 begin
-  Entity.RemoveListener(Self); // IAfterClassListener(
+  Entity.RemoveListener(FListener); // IAfterClassListener(
+  FListener.Free;
   inherited;
-end;
-
-procedure TRtfdClass.AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity);
-begin
-  RefreshEntities;
 end;
 
 procedure TRtfdClass.RefreshEntities;
 var
   NeedH,NeedW,I : integer;
-  C: TClass;
+  C: TMdlClass;
   Omi,Ami : TBaseModelIterator;
   WasVisible : boolean;
 begin
-  C := Entity as TClass;
+  C := Entity as TMdlClass;
 
   WasVisible := Visible;
   Hide;
@@ -370,13 +478,12 @@ begin
   //Get names in visibility order
   if FMinVisibility > Low(TVisibility) then
   begin
-    Omi := TModelIterator.Create(C.GetOperations,TOperation,FMinVisibility,ioVisibility);
-    Ami := TModelIterator.Create(C.GetAttributes,TAttribute,FMinVisibility,ioVisibility);
+    Omi := TModelIterator.Create(C.GetOperations, TMdlOperation, FMinVisibility, ioVisibility);
+    Ami := TModelIterator.Create(C.GetAttributes, TAttribute, FMinVisibility, ioVisibility);
   end
-  else
-  begin
-    Omi := TModelIterator.Create(C.GetOperations,ioVisibility);
-    Ami := TModelIterator.Create(C.GetAttributes,ioVisibility);
+  else begin
+    Omi := TModelIterator.Create(C.GetOperations, ioVisibility);
+    Ami := TModelIterator.Create(C.GetAttributes, ioVisibility);
   end;
 
   //Separator
@@ -395,330 +502,27 @@ begin
   while Omi.HasNext do
     Inc(NeedH, TRtfdOperation.Create(Self,Omi.Next).Height);
 
-  for I := 0 to ControlCount-1 do
+{  for I := 0 to ControlCount-1 do
     if Controls[I] is TRtfdCustomLabel then
-      NeedW := Max( TRtfdCustomLabel(Controls[I]).WidthNeeded,NeedW);
-
-  Height :=  Max(NeedH,cDefaultHeight);
-  Width  :=  Max(NeedW,cDefaultWidth);
-
+      NeedW := Max(TRtfdCustomLabel(Controls[I]).WidthNeeded,NeedW);
+  Width  := Max(NeedW,cDefaultWidth);
+}
+  Height := Max(NeedH, cDefaultHeight);
   Visible := WasVisible;
 end;
 
-{ TRtfdUnitPackage }
 
-constructor TRtfdUnitPackage.Create(Owner: TComponent; Entity: TModelEntity; Frame: TDiagramFrame; MinVisibility : TVisibility);
+{ TRtfdInterfaceListener }
+
+constructor TRtfdInterfaceListener.Create(ARtfdOwner: TRtfdInterface);
 begin
-  inherited Create(Owner, Entity, Frame, MinVisibility);
-  PopupMenu := Frame.PackagePopupMenu;
-  P := Entity as TUnitPackage;
-  RefreshEntities;
+  FRtfdOwner := ARtfdOwner;
 end;
 
-procedure TRtfdUnitPackage.DblClick;
+procedure TRtfdInterfaceListener.AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity);
 begin
-  PostMessage(Frame.Handle, WM_ChangePackage, 0, 0);
+  FRtfdOwner.RefreshEntities;
 end;
-
-procedure TRtfdUnitPackage.RefreshEntities;
-begin
-  DestroyComponents;
-  TRtfdUnitPackageName.Create(Self, P);
-  Height := 45;
-end;
-
-{ TRtfdCustomLabel }
-
-constructor TRtfdCustomLabel.Create(Owner: TComponent;
-  Entity: TModelEntity);
-begin
-  inherited Create(Owner);
-  Parent := Owner as TWinControl;
-  Self.Entity := Entity;
-  Align := alTop;
-  Height := Abs(Font.Height);
-  FAlignment := taLeftJustify;
-  FTransparent := True;
-  //Top must be assigned so that all labels appears beneath each other when align=top
-  Top := MaxInt;
-end;
-
-function TRtfdCustomLabel.WidthNeeded: integer;
-begin
-  Result := Width + 4 + (2 * ClassShadowWidth);
-end;
-
-//
-procedure TRtfdCustomLabel.BeforeEntityChange(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdCustomLabel.AfterEntityChange(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdCustomLabel.BeforeRemove(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdCustomLabel.AfterRemove(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdCustomLabel.BeforeAddChild(Sender, NewChild: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdCustomLabel.AfterAddChild(Sender, NewChild: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdCustomLabel.BeforeChange(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-procedure TRtfdCustomLabel.AfterChange(Sender: TModelEntity);
-begin
-  //Stub
-end;
-
-
-{ TVisibilityLabel }
-
-const
-  IconW = 10;
-
-procedure TVisibilityLabel.Paint;
-var
-  Rect : TRect;
-  Pic : Graphics.TBitmap;
-begin
-{ifdef WIN32}
-  Rect := ClientRect;
-
-  case Entity.Visibility of
-    viPrivate : Pic := ((Parent as TRtfdBox).Frame as TRtfdDiagramFrame).VisPrivateImage.Picture.Bitmap;
-    viProtected : Pic := ((Parent as TRtfdBox).Frame as TRtfdDiagramFrame).VisProtectedImage.Picture.Bitmap;
-    viPublic : Pic := ((Parent as TRtfdBox).Frame as TRtfdDiagramFrame).VisPublicImage.Picture.Bitmap;
-  else
-    Pic := ((Parent as TRtfdBox).Frame as TRtfdDiagramFrame).VisPublicImage.Picture.Bitmap;
-  end;
-  Canvas.Draw(Rect.Left,Rect.Top + 1, Pic );
-
-  Canvas.Font := Font;
-  Canvas.TextOut(Rect.Left + IconW + 4, Rect.Top, Caption);
-{endif}
-end;
-
-
-function TVisibilityLabel.WidthNeeded: integer;
-begin
-  Result := Width + IconW;
-end;
-
-{ TRtfdClassName }
-
-constructor TRtfdClassName.Create(Owner: TComponent; Entity: TModelEntity);
-begin
-  inherited Create(Owner, Entity);
-  Font.Style := [fsBold];
-  Alignment := taCenter;
-  Entity.AddListener(Self); // IAfterClassListener(
-  AfterEntityChange(nil);
-end;
-
-destructor TRtfdClassName.Destroy;
-begin
-  Entity.RemoveListener(Self); // IAfterClassListener(
-  inherited;
-end;
-
-procedure TRtfdClassName.AfterEntityChange(Sender: TModelEntity);
-var
-  Mi : TBaseModelIterator;
-begin
-  Mi := (Entity as TClass).GetOperations;
-  while Mi.HasNext do
-    if (Mi.Next as TOperation).IsAbstract then
-    begin
-      Font.Style := Font.Style + [fsItalic];
-      Break;
-    end;
-  if ((Owner as TRtfdBox).Frame as TDiagramFrame).Diagram.Package<>Entity.Owner then
-    Caption := Entity.FullName
-  else
-    Caption := Entity.Name;
-end;
-
-
-{ TRtfdInterfaceName }
-
-constructor TRtfdInterfaceName.Create(Owner: TComponent;
-  Entity: TModelEntity);
-begin
-  inherited Create(Owner, Entity);
-  Font.Style := [fsBold];
-  Alignment := taCenter;
-  Entity.AddListener(Self); // IAfterInterfaceListener(
-  AfterEntityChange(nil);
-end;
-
-destructor TRtfdInterfaceName.Destroy;
-begin
-  Entity.RemoveListener(Self); // IAfterInterfaceListener(
-  inherited;
-end;
-
-procedure TRtfdInterfaceName.AfterEntityChange(Sender: TModelEntity);
-begin
-  if ((Owner as TRtfdBox).Frame as TDiagramFrame).Diagram.Package<>Entity.Owner then
-    Caption := Entity.FullName
-  else
-    Caption := Entity.Name;
-end;
-
-
-{ TRtfdSeparator }
-
-constructor TRtfdSeparator.Create(Owner: TComponent);
-begin
-  //Cannot inherit from TCustomLabel in Kylix because it does not have a paint-method
-  inherited Create(Owner);
-  Parent := Owner as TWinControl;
-  AutoSize := False;
-  Height := 16;
-  //Top must be assigned so that all labels appears beneath each other when align=top
-  Top := MaxInt;
-  Align := alTop;
-end;
-
-procedure TRtfdSeparator.Paint;
-var
-  R: TRect;
-begin
-  R := ClientRect;
-  //Canvas.FillRect(R);
-  Canvas.Pen.Color := clBlack;
-  Canvas.MoveTo(R.Left, R.Top + (Height div 2));
-  Canvas.LineTo(R.Right, R.Top + (Height div 2));
-end;
-
-{ TRtfdPackageName }
-
-constructor TRtfdUnitPackageName.Create(Owner: TComponent;
-  Entity: TModelEntity);
-begin
-  inherited Create(Owner, Entity);
-  Font.Style := [fsBold];
-  Alignment := taCenter;
-  P := Entity as TUnitPackage;
-  P.AddListener(Self); // IAfterUnitPackageListener(
-  AfterEntityChange(nil);
-end;
-
-destructor TRtfdUnitPackageName.Destroy;
-begin
-  P.RemoveListener(Self); // IAfterUnitPackageListener(
-  inherited;
-end;
-
-procedure TRtfdUnitPackageName.AfterEntityChange(Sender: TModelEntity);
-begin
-  Caption := P.Name;
-end;
-
-{ TRtfdOperation }
-
-constructor TRtfdOperation.Create(Owner: TComponent; Entity: TModelEntity);
-begin
-  inherited Create(Owner, Entity);
-  O := Entity as TOperation;
-  O.AddListener(Self); // IAfterOperationListener(
-  AfterEntityChange(nil);
-end;
-
-destructor TRtfdOperation.Destroy;
-begin
-  O.RemoveListener(Self); // IAfterOperationListener(
-  inherited;
-end;
-
-procedure TRtfdOperation.AfterEntityChange(Sender: TModelEntity);
-const
-  ColorMap: array[TOperationType] of TColor = (clGreen, clRed, clBlack, clGray);
-  //   otConstructor,otDestructor,otProcedure,otFunction);
-begin
-  //Default uml-syntax
-  //visibility name ( parameter-list ) : return-type-expression { property-string }
-  { TODO : show parameters and returntype for operation }
-  Caption := O.Name + '(...)';
-  Font.Style := [];
-  Font.Color := ColorMap[O.OperationType];
-  if O.IsAbstract then
-    Font.Style := [fsItalic];
-end;
-
-{ TRtfdAttribute }
-
-constructor TRtfdAttribute.Create(Owner: TComponent; Entity: TModelEntity);
-begin
-  inherited Create(Owner, Entity);
-  A := Entity as TAttribute;
-  A.AddListener(Self); // IAfterAttributeListener(
-  AfterEntityChange(nil);
-end;
-
-destructor TRtfdAttribute.Destroy;
-begin
-  A.RemoveListener(Self); // IAfterAttributeListener(
-  inherited;
-end;
-
-procedure TRtfdAttribute.AfterEntityChange(Sender: TModelEntity);
-begin
-  //uml standard syntax is:
-  //visibility name [ multiplicity ] : type-expression = initial-value { property-string }
-  if Assigned(A.TypeClassifier) then
-    Caption := A.Name + ' : ' + A.TypeClassifier.Name
-  else
-    Caption := A.Name;
-end;
-
-{ TRtfdUnitPackageDiagram }
-
-constructor TRtfdUnitPackageDiagram.Create(Owner: TComponent;
-  Entity: TModelEntity);
-begin
-  //This class is the caption in upper left corner for a unitdiagram
-  inherited Create(Owner, Entity);
-  Color := clBtnFace;
-  Font.Name := 'Times New Roman';
-  Font.Style := [fsBold];
-  Font.Size := 12;
-  Alignment := taLeftJustify;
-  P := Entity as TUnitPackage;
-  P.AddListener(Self); // IAfterUnitPackageListener(
-  AfterEntityChange(nil);
-end;
-
-destructor TRtfdUnitPackageDiagram.Destroy;
-begin
-  P.RemoveListener(Self); // IAfterUnitPackageListener(
-  inherited;
-end;
-
-procedure TRtfdUnitPackageDiagram.AfterEntityChange(Sender: TModelEntity);
-begin
-  Caption := '   ' + P.FullName;
-end;
-
 
 { TRtfdInterface }
 
@@ -726,14 +530,16 @@ constructor TRtfdInterface.Create(Owner: TComponent; Entity: TModelEntity;
   Frame: TDiagramFrame; MinVisibility : TVisibility);
 begin
   inherited Create(Owner, Entity, Frame, MinVisibility);
-  Entity.AddListener(Self); // IAfterInterfaceListener(
   PopupMenu := Frame.ClassInterfacePopupMenu;
+  FListener := TRtfdInterfaceListener.Create(Self);
+  Entity.AddListener(FListener); // IAfterInterfaceListener(
   RefreshEntities;
 end;
 
 destructor TRtfdInterface.Destroy;
 begin
-  Entity.RemoveListener(Self); // IAfterInterfaceListener(
+  Entity.RemoveListener(FListener); // IAfterInterfaceListener(
+  FListener.Free;
   inherited;
 end;
 
@@ -742,9 +548,9 @@ var
   NeedW,NeedH,I : integer;
   OMi,AMi : TBaseModelIterator;
   WasVisible : boolean;
-  Int : TInterface;
+  Int : TMdlInterface;
 begin
-  Int := Entity as TInterface;
+  Int := Entity as TMdlInterface;
 
   WasVisible := Visible;
   Hide;
@@ -759,13 +565,12 @@ begin
   //Get names in visibility order
   if FMinVisibility > Low(TVisibility) then
   begin
-    Omi := TModelIterator.Create(Int.GetOperations,TOperation,FMinVisibility,ioVisibility);
-    Ami := TModelIterator.Create(Int.GetAttributes,TAttribute,FMinVisibility,ioVisibility);
+    Omi := TModelIterator.Create(Int.GetOperations, TMdlOperation, FMinVisibility, ioVisibility);
+    Ami := TModelIterator.Create(Int.GetAttributes, TAttribute, FMinVisibility, ioVisibility);
   end
-  else
-  begin
-    Omi := TModelIterator.Create(Int.GetOperations,ioVisibility);
-    Ami := TModelIterator.Create(Int.GetAttributes,ioVisibility);
+  else begin
+    Omi := TModelIterator.Create(Int.GetOperations, ioVisibility);
+    Ami := TModelIterator.Create(Int.GetAttributes, ioVisibility);
   end;
 
   //Separator
@@ -784,42 +589,63 @@ begin
   while Omi.HasNext do
     Inc(NeedH, TRtfdOperation.Create(Self,Omi.Next).Height);
 
-  for I := 0 to ControlCount-1 do
+{!!!  for I := 0 to ControlCount-1 do
     if Controls[I] is TRtfdCustomLabel then
       NeedW := Max( TRtfdCustomLabel(Controls[I]).WidthNeeded,NeedW);
-
-  Height :=  Max(NeedH,cDefaultHeight);
-  Width  :=  Max(NeedW,cDefaultWidth);
-
+  Width := Max(NeedW,cDefaultWidth);
+}
+  Height := Max(NeedH,cDefaultHeight);
   Visible := WasVisible;
 end;
 
-procedure TRtfdInterface.AfterAddChild(Sender, NewChild: TModelEntity);
+
+{ TRtfdUnitPackage }
+
+constructor TRtfdUnitPackage.Create(Owner: TComponent; Entity: TModelEntity; Frame: TDiagramFrame; MinVisibility : TVisibility);
 begin
+  inherited Create(Owner, Entity, Frame, MinVisibility);
+  PopupMenu := Frame.PackagePopupMenu;
+  OnDblClick := DblClick;
+  P := Entity as TUnitPackage;
   RefreshEntities;
 end;
 
-{ TRtfdStereotype }
-
-constructor TRtfdStereotype.Create(Owner: TComponent; Entity: TModelEntity; Caption: string);
+procedure TRtfdUnitPackage.DblClick(Sender: TObject);
 begin
-  inherited Create(Owner, Entity);
-  Alignment := taCenter;
-  Self.Caption := '<<' + Caption + '>>';
+  PostMessage(Frame.Handle, WM_ChangePackage, 0, 0);
 end;
 
-function TRtfdCustomLabel.GetAlignment: TAlignment;
+procedure TRtfdUnitPackage.RefreshEntities;
 begin
-  Result := FAlignment;
+  DestroyComponents;
+  TRtfdUnitPackageName.Create(Self, P);
+  Height := 45;
 end;
 
-procedure TRtfdCustomLabel.SetAlignment(const Value: TAlignment);
+
+{ TRtfdCustomLabel }
+
+constructor TRtfdCustomLabel.Create(Owner: TComponent; Entity: TModelEntity);
 begin
-  if Value <> FAlignment then
-    begin
-    FAlignment := Value;
-    Invalidate;
-  end;
+  inherited Create(Owner);
+  Self.Entity := Entity;
+  Parent := Owner as TWinControl;
+  Align := alTop;
+  Height := Abs(Font.Height);
+  FAlignment := taLeftJustify;
+  FTransparent := True;
+  //Top must be assigned so that all labels appears beneath each other when align=top
+  Top := MaxInt;
+end;
+
+destructor TRtfdCustomLabel.Destroy;
+begin
+  inherited;
+end;
+
+function TRtfdCustomLabel.WidthNeeded: integer;
+begin
+  Result := Width + 4 + (2 * ClassShadowWidth);
 end;
 
 procedure TRtfdCustomLabel.Paint;
@@ -838,38 +664,13 @@ begin
     Canvas.Brush.Style := bsSolid;
   Al := DT_LEFT;
   case FAlignment of
-    taLeftJustify: Al := DT_LEFT;
+//    taLeftJustify:  Al := DT_LEFT;
     taRightJustify: Al := DT_RIGHT;
-    taCenter: Al := DT_CENTER;
+    taCenter:       Al := DT_CENTER;
   end;
   r := ClientRect;
   DrawText(Canvas.Handle,PChar(Caption),Length(Caption),r,Al);
   Canvas.Font := oldFont;
-end;
-
-procedure TRtfdCustomLabel.SetTransparent(const Value: Boolean);
-begin
-  if FTransparent <> Value then
-  begin
-    FTransparent := Value;
-    Invalidate;
-  end;
-end;
-
-
-function TRtfdCustomLabel.GetText: TCaption;
-begin
-  Result := FCaption;
-end;
-
-procedure TRtfdCustomLabel.SetText(const Value: TCaption);
-begin
-  inherited;
-  if FCaption <> Value then
-  begin
-    FCaption := Value;
-    Invalidate;
-  end;
 end;
 
 procedure TRtfdCustomLabel.CMTextChanged(var Message: TMessage);
@@ -879,8 +680,7 @@ begin
 end;
 
 procedure TRtfdCustomLabel.AdjustBounds;
-const
-  WordWraps: array[Boolean] of Word = (0, DT_WORDBREAK);
+//const WordWraps: array[Boolean] of Word = (0, DT_WORDBREAK);
 var
   DC: HDC;
   X: Integer;
@@ -924,6 +724,362 @@ begin
   end
   else
     DrawText(Canvas.Handle, PChar(Text), Length(Text), Rect, Flags);
+end;
+
+function TRtfdCustomLabel.GetAlignment: TAlignment;
+begin
+  Result := FAlignment;
+end;
+
+procedure TRtfdCustomLabel.SetAlignment(const Value: TAlignment);
+begin
+  if Value <> FAlignment then
+    begin
+    FAlignment := Value;
+    Invalidate;
+  end;
+end;
+
+procedure TRtfdCustomLabel.SetTransparent(const Value: Boolean);
+begin
+  if FTransparent <> Value then
+  begin
+    FTransparent := Value;
+    Invalidate;
+  end;
+end;
+
+function TRtfdCustomLabel.GetText: TCaption;
+begin
+  Result := FCaption;
+end;
+
+procedure TRtfdCustomLabel.SetText(const Value: TCaption);
+begin
+  inherited;
+  if FCaption <> Value then
+  begin
+    FCaption := Value;
+    Invalidate;
+  end;
+end;
+
+
+{ TVisibilityLabel }
+
+const
+  IconW = 10;
+
+{procedure TVisibilityLabel.Paint;   JuMa
+var
+  Rect : TRect;
+  Pic : Graphics.TBitmap;
+begin  }
+{ifdef WIN32}
+{  Rect := ClientRect;
+
+  case Entity.Visibility of
+    viPrivate : Pic := ((Parent as TRtfdBox).Frame as TRtfdDiagramFrame).VisPrivateImage.Picture.Bitmap;
+    viProtected : Pic := ((Parent as TRtfdBox).Frame as TRtfdDiagramFrame).VisProtectedImage.Picture.Bitmap;
+    viPublic : Pic := ((Parent as TRtfdBox).Frame as TRtfdDiagramFrame).VisPublicImage.Picture.Bitmap;
+  else
+    Pic := ((Parent as TRtfdBox).Frame as TRtfdDiagramFrame).VisPublicImage.Picture.Bitmap;
+  end;
+  Canvas.Draw(Rect.Left,Rect.Top + 1, Pic );
+
+  Canvas.Font := Font;
+  Canvas.TextOut(Rect.Left + IconW + 4, Rect.Top, Caption);  }
+{endif}
+//end;
+
+
+function TVisibilityLabel.WidthNeeded: integer;
+begin
+  Result := Width + IconW;
+end;
+
+
+{ TRtfdClassNameListener }
+
+constructor TRtfdClassNameListener.Create(ARtfdOwner: TRtfdClassName);
+begin
+  FRtfdOwner := ARtfdOwner;
+end;
+
+procedure TRtfdClassNameListener.AfterEntityChange(Sender: TModelEntity);
+var
+  Mi : TBaseModelIterator;
+begin
+  with FRtfdOwner do begin
+    Mi := (Entity as TMdlClass).GetOperations;
+    while Mi.HasNext do
+      if (Mi.Next as TMdlOperation).IsAbstract then
+      begin
+        Font.Style := Font.Style + [fsItalic];
+        Break;
+      end;
+    if ((Owner as TRtfdBox).Frame as TDiagramFrame).Diagram.Package<>Entity.Owner then
+      Caption := Entity.FullName
+    else
+      Caption := Entity.Name;
+  end;
+end;
+
+{ TRtfdClassName }
+
+constructor TRtfdClassName.Create(Owner: TComponent; Entity: TModelEntity);
+begin
+  inherited Create(Owner, Entity);
+  Font.Style := [fsBold];
+  Alignment := taCenter;
+  FListener := TRtfdClassNameListener.Create(Self);
+  Entity.AddListener(FListener); // IAfterClassListener(
+  FListener.AfterEntityChange(nil);
+end;
+
+destructor TRtfdClassName.Destroy;
+begin
+  Entity.RemoveListener(FListener); // IAfterClassListener(
+  FListener.Free;
+  inherited;
+end;
+
+
+{ TRtfdClassNameListener }
+
+constructor TRtfdInterfaceNameListener.Create(ARtfdOwner: TRtfdInterfaceName);
+begin
+  FRtfdOwner := ARtfdOwner;
+end;
+
+procedure TRtfdInterfaceNameListener.AfterEntityChange(Sender: TModelEntity);
+begin
+  with FRtfdOwner do begin
+    if ((Owner as TRtfdBox).Frame as TDiagramFrame).Diagram.Package<>Entity.Owner then
+      FRtfdOwner.Caption := Entity.FullName
+    else
+      FRtfdOwner.Caption := Entity.Name;
+  end;
+end;
+
+{ TRtfdInterfaceName }
+
+constructor TRtfdInterfaceName.Create(Owner: TComponent; Entity: TModelEntity);
+begin
+  inherited Create(Owner, Entity);
+  Font.Style := [fsBold];
+  Alignment := taCenter;
+  FListener := TRtfdInterfaceNameListener.Create(Self);
+  Entity.AddListener(FListener); // IAfterInterfaceListener(
+  FListener.AfterEntityChange(nil);
+end;
+
+destructor TRtfdInterfaceName.Destroy;
+begin
+  Entity.RemoveListener(FListener); // IAfterInterfaceListener(
+  FListener.Free;
+  inherited;
+end;
+
+
+{ TRtfdSeparator }
+
+constructor TRtfdSeparator.Create(Owner: TComponent);
+begin
+  //Cannot inherit from TCustomLabel in Kylix because it does not have a paint-method
+  inherited Create(Owner);
+  Parent := Owner as TWinControl;
+  AutoSize := False;
+  Height := 16;
+  //Top must be assigned so that all labels appears beneath each other when align=top
+  Top := MaxInt;
+  Align := alTop;
+end;
+
+procedure TRtfdSeparator.Paint;
+var
+  R: TRect;
+begin
+  R := ClientRect;
+  //Canvas.FillRect(R);
+  Canvas.Pen.Color := clBlack;
+  Canvas.MoveTo(R.Left, R.Top + (Height div 2));
+  Canvas.LineTo(R.Right, R.Top + (Height div 2));
+end;
+
+
+{ TRtfdStereotype }
+
+constructor TRtfdStereotype.Create(Owner: TComponent; Entity: TModelEntity; Caption: string);
+begin
+  inherited Create(Owner, Entity);
+  Alignment := taCenter;
+  Caption := '<<' + Caption + '>>';
+end;
+
+
+{ TRtfdOperationListener }
+
+constructor TRtfdOperationListener.Create(ARtfdOwner: TRtfdOperation);
+begin
+  FRtfdOwner := ARtfdOwner;
+end;
+
+procedure TRtfdOperationListener.AfterEntityChange(Sender: TModelEntity);
+const
+  ColorMap: array[TOperationType] of TColor = (clGreen, clRed, clBlack, clGray);
+  //   otConstructor,otDestructor,otProcedure,otFunction);
+begin
+  //Default uml-syntax
+  //visibility name ( parameter-list ) : return-type-expression { property-string }
+  { TODO : show parameters and returntype for operation }
+  with FRtfdOwner do begin
+    FRtfdOwner.Caption := O.Name + '(...)';
+    FRtfdOwner.Font.Style := [];
+    FRtfdOwner.Font.Color := ColorMap[O.OperationType];
+    if O.IsAbstract then
+      FRtfdOwner.Font.Style := [fsItalic];
+  end;
+end;
+
+{ TRtfdOperation }
+
+constructor TRtfdOperation.Create(Owner: TComponent; Entity: TModelEntity);
+begin
+  inherited Create(Owner, Entity);
+  O := Entity as TMdlOperation;
+  FListener := TRtfdOperationListener.Create(Self);
+  O.AddListener(FListener); // IAfterOperationListener(
+  FListener.AfterEntityChange(nil);
+end;
+
+destructor TRtfdOperation.Destroy;
+begin
+  O.RemoveListener(FListener); // IAfterOperationListener(
+  FListener.Free;
+  inherited;
+end;
+
+
+{ TRtfdAttributeListener }
+
+constructor TRtfdAttributeListener.Create(ARtfdOwner: TRtfdAttribute);
+begin
+  FRtfdOwner := ARtfdOwner;
+end;
+
+procedure TRtfdAttributeListener.AfterEntityChange(Sender: TModelEntity);
+begin
+  //uml standard syntax is:
+  //visibility name [ multiplicity ] : type-expression = initial-value { property-string }
+  with FRtfdOwner do begin
+    if Assigned(A.TypeClassifier) then
+      FRtfdOwner.Caption := A.Name + ' : ' + A.TypeClassifier.Name
+    else
+      FRtfdOwner.Caption := A.Name;
+  end;
+end;
+
+{ TRtfdAttribute }
+
+constructor TRtfdAttribute.Create(Owner: TComponent; Entity: TModelEntity);
+begin
+  inherited Create(Owner, Entity);
+  A := Entity as TAttribute;
+  FListener := TRtfdAttributeListener.Create(Self);
+  A.AddListener(FListener); // IAfterAttributeListener(
+  FListener.AfterEntityChange(nil);
+end;
+
+destructor TRtfdAttribute.Destroy;
+begin
+  A.RemoveListener(FListener); // IAfterAttributeListener(
+  FListener.Free;
+  inherited;
+end;
+
+
+{ TRtfdUnitPackageNameListener }
+
+constructor TRtfdUnitPackageNameListener.Create(ARtfdOwner: TRtfdUnitPackageName);
+begin
+  FRtfdOwner := ARtfdOwner;
+end;
+
+procedure TRtfdUnitPackageNameListener.AfterEntityChange(Sender: TModelEntity);
+begin
+  with FRtfdOwner do
+    Caption := P.Name;
+end;
+
+{ TRtfdUnitPackageName }
+
+constructor TRtfdUnitPackageName.Create(Owner: TComponent; Entity: TModelEntity);
+begin
+  inherited Create(Owner, Entity);
+  Font.Style := [fsBold];
+  Alignment := taCenter;
+  P := Entity as TUnitPackage;
+  FListener := TRtfdUnitPackageNameListener.Create(Self);
+  P.AddListener(FListener); // IAfterUnitPackageListener(
+  FListener.AfterEntityChange(nil);
+end;
+
+destructor TRtfdUnitPackageName.Destroy;
+begin
+  P.RemoveListener(FListener); // IAfterUnitPackageListener(
+  FListener.Free;
+  inherited;
+end;
+
+
+{ TRtfdUnitPackageDiagramListener }
+
+constructor TRtfdUnitPackageDiagramListener.Create(ARtfdOwner: TRtfdUnitPackageDiagram);
+begin
+  FRtfdOwner := ARtfdOwner;
+end;
+
+procedure TRtfdUnitPackageDiagramListener.AfterEntityChange(Sender: TModelEntity);
+begin
+  FRtfdOwner.Caption := '   ' + FRtfdOwner.P.FullName;
+end;
+
+{ TRtfdUnitPackageDiagram }
+
+constructor TRtfdUnitPackageDiagram.Create(Owner: TComponent; Entity: TModelEntity);
+begin
+  //This class is the caption in upper left corner for a unitdiagram
+  inherited Create(Owner, Entity);
+  Color := clBtnFace;
+  Font.Name := 'Times New Roman';
+  Font.Style := [fsBold];
+  Font.Size := 12;
+  Alignment := taLeftJustify;
+  P := Entity as TUnitPackage;
+  FListener := TRtfdUnitPackageDiagramListener.Create(Self);
+  P.AddListener(FListener); // IAfterUnitPackageListener(
+  FListener.AfterEntityChange(nil);
+end;
+
+destructor TRtfdUnitPackageDiagram.Destroy;
+begin
+  P.RemoveListener(FListener); // IAfterUnitPackageListener(
+  FListener.Free;
+  inherited;
+end;
+
+
+{ TRtfdBoxList }
+
+function TRtfdBoxList.GetItems(AIndex: integer): TRtfdBox;
+begin
+  Result := (inherited Items[AIndex]) as TRtfdBox;
+end;
+
+procedure TRtfdBoxList.SetItems(AIndex: integer; const AValue: TRtfdBox);
+begin
+  Items[AIndex] := AValue;
 end;
 
 

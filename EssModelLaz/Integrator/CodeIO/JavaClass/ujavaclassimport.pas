@@ -25,7 +25,7 @@ unit uJavaClassImport;
 
 interface
 
-uses uCodeParser, Classes, uModel, uIntegrator, uModelEntity, uCodeProvider;
+uses uCodeParser, Classes, uModel, uIntegrator, uModelEntity;
 
 type
   TJavaClassImporter = class(TImportIntegrator)
@@ -102,12 +102,12 @@ procedure TJavaClassParser.ParseStream(AStream: TStream; AModel: TAbstractPackag
 var
   JC : TClassFile;
   U : TUnitPackage;
-  C : TClass;
-  Int : TInterface;
+  C : TMdlClass;
+  Int : TMdlInterface;
   I : integer;
   PName,S : string;
 
-  procedure ParseOp(Op : TOperation; Met : TMethodInfo);
+  procedure ParseOp(Op : TMdlOperation; Met : TMethodInfo);
   var
     Desc : string;
     I,J : integer;
@@ -186,11 +186,13 @@ begin
       begin
         S := TObjNameFormat.ToDotSeparator(JC.classDecl.superClass.getString);
         if S<>'java.lang.Object' then
-          C.Ancestor := NeedClassifier( S , TClass) as TClass;
+          C.Ancestor := NeedClassifier(S, TMdlClass) as TMdlClass;
       end;
       //implements
       for I := 0 to Length(JC.classDecl.interfaces)-1 do
-        C.AddImplements( NeedClassifier( TObjNameFormat.toDotSeparator(JC.classDecl.interfaces[I].getString), TInterface ) as TInterface);
+        C.AddImplements(NeedClassifier(
+            TObjNameFormat.toDotSeparator(JC.classDecl.interfaces[I].getString),
+                                       TMdlInterface) as TMdlInterface);
       C.Visibility := GetVisibility( JC.classDecl.accessFlags );
       for I:=0 to Length(JC.classFields.classFields)-1 do
       begin
@@ -289,12 +291,12 @@ begin
   if not Assigned(Result) then
   begin
     //Look in unknown package
-    Result := OM.UnknownPackage.FindClassifier(CName,False,TheClass,True);
+    Result := OM.UnknownPackage.FindClassifier(CName, False, TheClass, True);
     if not Assigned(Result) then
     begin
-      if (TheClass=nil) or (TheClass=TClass) then
+      if (TheClass=nil) or (TheClass=TMdlClass) then
         Result := OM.UnknownPackage.AddClass(CName)
-      else if TheClass=TInterface then
+      else if TheClass=TMdlInterface then
         Result := OM.UnknownPackage.AddInterface(CName)
       else if TheClass=TDataType then
         Result := OM.UnknownPackage.AddDataType(CName)
@@ -358,4 +360,4 @@ initialization
 
   Integrators.Register(TJavaClassImporter);
 
-end.
+end.

@@ -42,8 +42,8 @@ type
     procedure WritePackage(P : TAbstractPackage);
     procedure WriteLogicPackage(L : TLogicPackage);
     procedure WriteUnitPackage(U : TUnitPackage);
-    procedure WriteClass(C : TClass);
-    procedure WriteInterface(I : TInterface);
+    procedure WriteClass(C : TMdlClass);
+    procedure WriteInterface(I : TMdlInterface);
     procedure WriteEntityHeader(E : TModelEntity; const XmiName : string);
     procedure WriteFeatures(C : TClassifier);
     procedure WriteDataType(T : TDataType);
@@ -67,7 +67,7 @@ type
   end;
 
 implementation
-uses SysUtils, uIterators, Dialogs, uConst;
+uses SysUtils, Dialogs, uConst;
 
 const
   Core = 'Foundation.Core.';
@@ -164,12 +164,11 @@ begin
 end;
 
 
-procedure TXMIExporter.WriteClass(C: TClass);
+procedure TXMIExporter.WriteClass(C: TMdlClass);
 var
   Mi : TBaseModelIterator;
 begin
   WriteEntityHeader(C, Core + 'Class');
-
   WriteFeatures(C);
 
   if Assigned(C.Ancestor) then
@@ -220,7 +219,7 @@ var
     Write( XmlClose(Core + 'Attribute') );
   end;
 
-  procedure WriteOperation(O : TOperation);
+  procedure WriteOperation(O : TMdlOperation);
   var
     Mio : TBaseModelIterator;
     P : TParameter;
@@ -263,8 +262,8 @@ begin
       F := Mi.Next;
       if F is TAttribute then
         WriteAttribute(F as TAttribute)
-      else if F is TOperation then
-        WriteOperation(F as TOperation);
+      else if F is TMdlOperation then
+        WriteOperation(F as TMdlOperation);
     end;
     Write( XmlClose(Core + 'Classifier.feature') );
   end;
@@ -321,10 +320,10 @@ begin
   while Mi.HasNext do
   begin
     C := Mi.Next;
-    if C is TClass then
-      WriteClass(C as TClass)
-    else if C is TInterface then
-      WriteInterface(C as TInterface)
+    if C is TMdlClass then
+      WriteClass(C as TMdlClass)
+    else if C is TMdlInterface then
+      WriteInterface(C as TMdlInterface)
     else if C is TDataType then
       WriteDataType(C as TDataType);
   end;
@@ -346,11 +345,11 @@ function TXMIExporter.MakeTypeRef(C: TClassifier) : string;
 var
   S : string;
 begin
-  if C is TClass then
+  if C is TMdlClass then
     S := 'Class'
   else if C is TDataType then
     S := 'DataType'
-  else if C is TInterface then
+  else if C is TMdlInterface then
     S := 'Interface';
   Result := '<' + Core + S +' xmi.idref="' + MakeId(C.FullName) + '"/>';
 end;
@@ -369,7 +368,7 @@ begin
     end;
 end;
 
-procedure TXMIExporter.WriteInterface(I: TInterface);
+procedure TXMIExporter.WriteInterface(I: TMdlInterface);
 {
           <Foundation.Core.ModelElement.supplierDependency>
             <Foundation.Core.Abstraction xmi.idref="xmi.37"/>

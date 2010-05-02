@@ -46,11 +46,11 @@ type
     //Fernando
     bolWritePackage : boolean;
     dataTypeVoid : TDataType;
-    procedure WritePackage(P : TAbstractPackage; TC:TTypeClassifier = tcAll;IdPai : string='');
-    procedure WriteLogicPackage(L : TLogicPackage; TC:TTypeClassifier = tcAll;IdPai : string='');
-    procedure WriteUnitPackage(U : TUnitPackage; TC:TTypeClassifier = tcAll;IdPai : string='');
-    procedure WriteClass(C : TClass;IdPai : string='');
-    procedure WriteInterface(I : TInterface;IdPai : string='');
+    procedure WritePackage(P : TAbstractPackage; TC:TTypeClassifier = tcAll; IdPai : string='');
+    procedure WriteLogicPackage(L : TLogicPackage; TC:TTypeClassifier = tcAll; IdPai : string='');
+    procedure WriteUnitPackage(U : TUnitPackage; TC:TTypeClassifier = tcAll; IdPai : string='');
+    procedure WriteClass(C : TMdlClass; IdPai : string='');
+    procedure WriteInterface(I : TMdlInterface; IdPai : string='');
 //Fernando    procedure WriteEntityHeader(E : TModelEntity; const XmiName : string);
     function WriteEntityHeader(E : TModelEntity; const XmiName : string) : string;
     procedure WriteFeatures(C : TClassifier; pID: string);
@@ -214,7 +214,7 @@ begin
 end;
 
 
-procedure TXMIExporterArgoUML.WriteClass(C: TClass;IdPai : string);
+procedure TXMIExporterArgoUML.WriteClass(C: TMdlClass;IdPai : string);
 var
   ID : string;
   Mi : TBaseModelIterator;
@@ -281,7 +281,7 @@ var
     Write( XmlClose(Core + headerCoreAttribute) );
   end;
 
-  procedure WriteOperation(O : TOperation; pID: string);
+  procedure WriteOperation(O : TMdlOperation; pID: string);
   var
     Mio : TBaseModelIterator;
     P : TParameter;
@@ -339,8 +339,8 @@ begin
       F := Mi.Next;
       if F is TAttribute then
         WriteAttribute(F as TAttribute, pId)
-      else if F is TOperation then
-        WriteOperation(F as TOperation, pId);
+      else if F is TMdlOperation then
+        WriteOperation(F as TMdlOperation, pId);
     end;
     Write( XmlClose(Core + 'Classifier.feature') );
   end;
@@ -461,10 +461,10 @@ begin
   while Mi.HasNext do
   begin
     C := Mi.Next;
-    if (C is TClass) AND (TC in [tcAll,tcNotDataType]) then
-      WriteClass(C as TClass,IdPai)
-    else if (C is TInterface) AND (TC in [tcAll,tcNotDataType]) then
-      WriteInterface(C as TInterface,IdPai)
+    if (C is TMdlClass) AND (TC in [tcAll,tcNotDataType]) then
+      WriteClass(C as TMdlClass,IdPai)
+    else if (C is TMdlInterface) AND (TC in [tcAll,tcNotDataType]) then
+      WriteInterface(C as TMdlInterface,IdPai)
     else if (C is TDataType) AND (TC in [tcAll,tcDataType]) then
       WriteDataType(C as TDataType,IdPai);
   end;
@@ -487,11 +487,11 @@ var
   S : string;
 begin
   S := '';
-  if (C is TClass)   then
+  if (C is TMdlClass)   then
     S := headerCoreClass
   else if (C is TDataType ) then
     S := headerCoreDataType
-  else if (C is TInterface ) then
+  else if (C is TMdlInterface ) then
     S := headerCoreInterface;
 
   Result := '<' + Core + S +' xmi.idref="' + MakeId(S+'_'+C.FullName) + '"/>'
@@ -511,7 +511,7 @@ begin
     end;
 end;
 
-procedure TXMIExporterArgoUML.WriteInterface(I: TInterface;IdPai : string);
+procedure TXMIExporterArgoUML.WriteInterface(I: TMdlInterface; IdPai: string);
 {
           <Foundation.Core.ModelElement.supplierDependency>
             <Foundation.Core.Abstraction xmi.idref="xmi.37"/>

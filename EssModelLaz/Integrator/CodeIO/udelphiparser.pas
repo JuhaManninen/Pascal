@@ -48,7 +48,9 @@ unit uDelphiParser;
 {$ENDIF}
 
 interface
-uses Classes, uCodeParser, uParseTree, uModel, uModelEntity;
+uses
+  Classes, LCLIntf, LCLType, Dialogs, SysUtils,
+  uCodeParser, uModel, uModelEntity;
 
 type
 
@@ -114,14 +116,14 @@ type
     procedure ParseVarSection;
     procedure ParseResourcestringSection;
 
-    procedure ParseClass(AClass: TClass);
-    procedure ParseInterface(AClass: TInterface);
+    procedure ParseClass(AClass: TMdlClass);
+    procedure ParseInterface(AClass: TMdlInterface);
     procedure ParseRecord(ARecord: TDataType; DoSkip : boolean = True);
 
-    procedure ParseFunction(AOperation: TOperation; Visibility: TVisibility = viPublic);
+    procedure ParseFunction(AOperation: TMdlOperation; Visibility: TVisibility = viPublic);
     procedure ParseFunctionImplementation;
-    procedure ParseParamList(AOperation: TOperation);
-    procedure ParseReturnType(AOperation: TOperation);
+    procedure ParseParamList(AOperation: TMdlOperation);
+    procedure ParseReturnType(AOperation: TMdlOperation);
     procedure ParseAttribute(AAttribute: TAttribute; Visibility: TVisibility = viPublic);
     procedure ParseProperty(AProperty: TProperty; Visibility: TVisibility = viPublic);
 
@@ -140,7 +142,7 @@ type
 
 implementation
 
-uses LCLIntf, LCLType, LMessages, Dialogs, SysUtils, uError;
+uses uError;
 
 { TDelphiParser }
 
@@ -916,13 +918,13 @@ begin
     begin
       if LowerCase(NextToken) <> 'of' then
       begin
-        ex := FUnit.FindClassifier(tName,False,TClass);
+        ex := FUnit.FindClassifier(tName,False,TMdlClass);
         //Have to be in the current unit, it is ok to decalre a new class with the
         // same name as an existing class
         if (not Assigned(ex)) or (ex.Owner<>FUnit) then
           ex := FUnit.AddClass(tName);
         ex.Visibility := Visibility;
-        ParseClass(ex as TClass);
+        ParseClass(ex as TMdlClass);
       end
       else
       begin
@@ -933,11 +935,11 @@ begin
     end
     else if (lToken = 'interface') or (lToken = 'dispinterface') then
     begin
-      ex := FUnit.FindClassifier(tName,False,TInterface);
+      ex := FUnit.FindClassifier(tName,False,TMdlInterface);
       if (not Assigned(ex)) or (ex.Owner<>FUnit)  then
         ex := FUnit.AddInterface(tName);
       ex.Visibility := Visibility;
-      ParseInterface(ex as TInterface)
+      ParseInterface(ex as TMdlInterface)
     end
     else if Token = '(' then // Enum
     begin
@@ -1019,11 +1021,11 @@ begin // Token = var
   end;
 end;
 
-procedure TDelphiParser.ParseClass(AClass: TClass);
+procedure TDelphiParser.ParseClass(AClass: TMdlClass);
 var
   Visibility: TVisibility;
-  ancestor: TClass;
-  interf: TInterface;
+  ancestor: TMdlClass;
+  interf: TMdlInterface;
   classif: TClassifier;
 begin // Token is class
   AClass.Documentation.Description := FComment;
@@ -1033,12 +1035,12 @@ begin // Token is class
     if Token = '(' then
     begin
       GetNextToken; // Should be Ancestor
-      ancestor := FUnit.FindClassifier(Token,False,TClass) as TClass;
+      ancestor := FUnit.FindClassifier(Token, False, TMdlClass) as TMdlClass;
       if not Assigned(ancestor) then
       begin
-        classif := FOM.UnknownPackage.FindClassifier(Token,False,TClass);
-        if Assigned(classif) and (classif is TClass) then
-          ancestor := classif as TClass;
+        classif := FOM.UnknownPackage.FindClassifier(Token, False, TMdlClass);
+        if Assigned(classif) and (classif is TMdlClass) then
+          ancestor := classif as TMdlClass;
       end;
       if Assigned(ancestor) then
         AClass.Ancestor := ancestor
@@ -1051,12 +1053,12 @@ begin // Token is class
       begin
         GetNextToken;
         // Should be an implemented interface
-        interf := FUnit.FindClassifier(Token,False,TInterface) as TInterface;
+        interf := FUnit.FindClassifier(Token, False, TMdlInterface) as TMdlInterface;
         if not Assigned(interf) then
         begin
-          classif := FOM.UnknownPackage.FindClassifier(Token,False,TInterface);
+          classif := FOM.UnknownPackage.FindClassifier(Token, False, TMdlInterface);
           if Assigned(classif) then
-            interf := classif as TInterface;
+            interf := classif as TMdlInterface;
         end;
         if Assigned(interf) then
           AClass.AddImplements(interf)
@@ -1124,9 +1126,9 @@ begin // Token is class
   end;
 end;
 
-procedure TDelphiParser.ParseInterface(AClass: TInterface);
+procedure TDelphiParser.ParseInterface(AClass: TMdlInterface);
 var
-  interf: TInterface;
+  interf: TMdlInterface;
   classif: TClassifier;
 begin // Token = interface|dispinterface
   if GetNextToken then
@@ -1135,12 +1137,12 @@ begin // Token = interface|dispinterface
     begin
       // This interface inherits from...
       GetNextToken; // Should be Ancestor
-      interf := FUnit.FindClassifier(Token,False,TInterface) as TInterface;
+      interf := FUnit.FindClassifier(Token,False,TMdlInterface) as TMdlInterface;
       if not Assigned(interf) then
       begin
-        classif := FOM.UnknownPackage.FindClassifier(Token,False,TInterface);
-        if Assigned(classif) and (classif is TInterface) then
-          interf := classif as TInterface;
+        classif := FOM.UnknownPackage.FindClassifier(Token,False,TMdlInterface);
+        if Assigned(classif) and (classif is TMdlInterface) then
+          interf := classif as TMdlInterface;
       end;
       if Assigned(interf) then
         AClass.Ancestor := interf
@@ -1187,7 +1189,7 @@ begin
   // Depending on DoSkip current is either after ';' or on ';'
 end;
 
-procedure TDelphiParser.ParseFunction(AOperation: TOperation; Visibility: TVisibility);
+procedure TDelphiParser.ParseFunction(AOperation: TMdlOperation; Visibility: TVisibility);
 begin // Token = function|procedure|constructor|destructor
   if Assigned(AOperation) then
   begin
@@ -1256,17 +1258,17 @@ end;
 
 procedure TDelphiParser.ParseFunctionImplementation;
 var
-  IsClass: TClass;
-  IsOperation, IterOperation: TOperation;
+  IsClass: TMdlClass;
+  IsOperation, IterOperation: TMdlOperation;
 begin // Token = procedure|function|constructor|destructor
    // Skip forward declaration
   GetNextToken;
   if NextToken = '.' then
   begin
-    IsClass := FUnit.FindClassifier(Token,False,TClass) as TClass;
-    IsOperation := TOperation.Create(nil);
+    IsClass := FUnit.FindClassifier(Token, False, TMdlClass) as TMdlClass;
+    IsOperation := TMdlOperation.Create(nil);
     try
-      //Parse to a temporary TOperation to be able to locate a matching operation in a class.
+      //Parse to a temporary TMdlOperation to be able to locate a matching operation in a class.
       GetNextToken; GetNextToken; // Skip the '.'
       IsOperation.Name := Token;
       GetNextToken;
@@ -1339,18 +1341,20 @@ end;
 
 procedure TDelphiParser.ParseAttribute(AAttribute: TAttribute; Visibility: TVisibility);
 var
-  attribs: TList;
+  attribs: TAttributeList;
+  AA: TAttribute;
   i: Integer;
   classifier: TClassifier;
 begin // Token = Attributename
   AAttribute.Visibility := Visibility;
-  attribs := TList.Create;
+  attribs := TAttributeList.Create(False);
   attribs.Add(AAttribute);
   try
     while NextToken = ',' do
     begin
       GetNextToken; GetNextToken;
-      attribs.Add((AAttribute.Owner as TClass).AddAttribute(Token));
+      AA := (AAttribute.Owner as TMdlClass).AddAttribute(Token);
+      attribs.Add(AA);
     end;
     if NextToken = ':' then
     begin
@@ -1358,7 +1362,7 @@ begin // Token = Attributename
       GetNextToken; GetNextToken;
       classifier := ParseType;
       for i:=0 to attribs.Count -1 do
-        TAttribute(attribs[i]).TypeClassifier := classifier;
+        attribs[i].TypeClassifier := classifier;
     end
     else
       // The line below is needed to step ahead if ':' is missing (an error)
@@ -1371,13 +1375,14 @@ begin // Token = Attributename
   end;
 end;
 
-procedure TDelphiParser.ParseParamList(AOperation: TOperation);
+procedure TDelphiParser.ParseParamList(AOperation: TMdlOperation);
 var
-  params: TList;
+  params: TParameterList;
+  param: TParameter;
   i,parenLevel: Integer;
   classifier: TClassifier;
 begin // Token = (
-  params := TList.Create;
+  params := TParameterList.Create(False);
   parenLevel := 0;
   try
     GetNextToken;
@@ -1391,7 +1396,8 @@ begin // Token = (
 
       if (NextToken = ',') or (NextToken = ':') then
       begin
-        params.Add(AOperation.AddParameter(Token));
+        param := AOperation.AddParameter(Token);
+        params.Add(param);
       end;
 
       if Token = ':' then
@@ -1400,7 +1406,7 @@ begin // Token = (
         classifier := ParseType;
 
         for i:= 0 to params.Count -1 do
-          TParameter(params[i]).TypeClassifier := classifier;
+          params[i].TypeClassifier := classifier;
         params.Clear;
         continue;
       end;
@@ -1409,15 +1415,16 @@ begin // Token = (
 
     GetNextToken;
   finally
-  FreeAndNil(params);
+    FreeAndNil(params);
   end;
 end;
 
-procedure TDelphiParser.ParseReturnType(AOperation: TOperation);
+procedure TDelphiParser.ParseReturnType(AOperation: TMdlOperation);
 var
   return: string;
   dt: TClassifier;
 begin // Token =
+  return := '';
   // Do not include Token ':'
   while GetNextToken and (Token <> ';') and (not IsCallingConvention(lToken)) do
     return := return + Token;

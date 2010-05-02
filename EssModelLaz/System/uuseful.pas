@@ -30,9 +30,9 @@ uses
 {$IFNDEF FPC}
   windows, shlobj, activex,
 {$ELSE}
-  LCLIntf, LCLType, LMessages,
+  LCLIntf, LCLType,
 {$ENDIF}
-Classes, Controls, SysUtils, StdCtrls, Forms, ComCtrls;
+Classes, Controls, SysUtils, Forms, ComCtrls;
 
 
 type

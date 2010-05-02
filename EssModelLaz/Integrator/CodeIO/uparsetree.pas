@@ -24,7 +24,7 @@ unit uParseTree;
 {$ENDIF}
 
 interface
-uses uModel, uModelEntity, Contnrs;
+uses uModelEntity, Contnrs;
 
 type
 
@@ -216,4 +216,4 @@ begin
   end;
 end;
 
-end.
+end.

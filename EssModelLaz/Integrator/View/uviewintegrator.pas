@@ -44,9 +44,6 @@ type
   public
     constructor Create(om: TObjectModel; Parent: TWinControl; Feedback : IEldeanFeedback = nil); virtual;
     destructor Destroy; override;
-    // Listener methods, inherited when needed.
-    procedure BeforeChange(Sender: TModelEntity); virtual;
-    procedure AfterChange(Sender: TModelEntity); virtual;
   public
     //Current entity, all view integratros share the same instance
     property CurrentEntity : TModelEntity read GetCurrentEntity write SetCurrentEntity;
@@ -100,7 +97,7 @@ type
 
 implementation
 
-uses uRtfdDiagram, SysUtils, Forms, Contnrs, math, uConfig; {$ifdef PNG_SUPPORT}pngimage,{$endif}
+uses uRtfdDiagram, SysUtils, Forms, Contnrs, uConfig; {$ifdef PNG_SUPPORT}pngimage,{$endif}
 
 var
   _CurrentEntity : TModelEntity = nil;
@@ -258,25 +255,15 @@ end;
 
 //--------------------------------------
 
-procedure TViewIntegrator.CurrentEntityChanged;
-begin
-//stub
-end;
-
 destructor TViewIntegrator.Destroy;
 begin
   _ViewIntegrators.Remove(Self);
   inherited;
 end;
 
-procedure TViewIntegrator.BeforeChange(Sender: TModelEntity);
+procedure TViewIntegrator.CurrentEntityChanged;
 begin
-  ;
-end;
-
-procedure TViewIntegrator.AfterChange(Sender: TModelEntity);
-begin
-  ;
+//stub
 end;
 
 function TViewIntegrator.GetCurrentEntity: TModelEntity;

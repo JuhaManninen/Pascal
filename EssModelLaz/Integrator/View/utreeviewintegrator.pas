@@ -25,12 +25,13 @@ unit uTreeViewIntegrator;
 
 interface
 
-uses SysUtils, uViewIntegrator, uTreeViewFrame, uModel, Controls, uFeedback,
-  ComCtrls, uModelEntity, uListeners;
+uses
+  SysUtils, Controls, ComCtrls, contnrs,
+  uViewIntegrator, uTreeViewFrame, uModel, uModelEntity, uFeedback;
 
 
 type
-  TTreeNodeClass = class of TTreeNode;
+//  TTreeNodeClass = class of TTreeNode;
 
   TTreeViewIntegrator = class(TViewIntegrator) // , IAfterObjectModelListener
   private
@@ -39,11 +40,10 @@ type
     procedure BuildAllClassesView(ATreeRoot: TTreeNode; AEntity: TLogicPackage);
     procedure BuildLogicPackageView(ATreeRoot: TTreeNode; AEntity: TLogicPackage);
     procedure BuildUnitPackageView(ATreeRoot: TTreeNode; AEntity: TUnitPackage);
-    procedure BuildClassView(ATreeRoot: TTreeNode; AEntity: uModel.TClass);
-    procedure BuildInterfaceView(ATreeRoot: TTreeNode; AEntity: uModel.TInterface);
+    procedure BuildClassView(ATreeRoot: TTreeNode; AEntity: TMdlClass);
+    procedure BuildInterfaceView(ATreeRoot: TTreeNode; AEntity: TMdlInterface);
 
-//    procedure tvModelCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
-    procedure tvModelCreateItem(Sender: TCustomTreeView; var ATreeNode: TTreenode);
+    procedure tvModelCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
     procedure tvModelChange(Sender: TObject; Node: TTreeNode);
     procedure tvModelAddition(Sender: TObject; Node: TTreeNode);
     procedure CurrentEntityChanged; override;
@@ -68,21 +68,32 @@ type
     property IsImplementation: Boolean read FIsImplementation;
   end;
 
+  { TViewNodeList }
+
+  TViewNodeList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TViewNode;
+    procedure SetItems(AIndex: integer; const AValue: TViewNode);
+  public
+    property Items[AIndex: integer]: TViewNode read GetItems write SetItems; default;
+  end;
+
+
 implementation
-uses uIntegrator, uIterators, Classes, Contnrs;
+uses uIntegrator, uIterators, Classes;
 
 const
   ALL_CLASSES_TEXT: string = 'All classes';
   PACKAGES_TEXT: string = 'Packages';
 var
-  NodesList: TObjectList;
+  NodesList: TViewNodeList;
 
 procedure TViewNode.AfterConstruction;
 begin
   inherited;
   FIsImplementation := False;
   if not Assigned(NodesList) then
-    NodesList := TObjectList.Create(False);
+    NodesList := TViewNodeList.Create(False);
   NodesList.Add(Self);
 end;
 
@@ -100,23 +111,18 @@ var
 begin
   for i := 0 to NodesList.Count - 1 do
   begin
-    Result := NodesList[i] as TViewNode;
+    Result := NodesList[i];
     if (Result.Data = data) and (Result.IsImplementation = IsImplState) then exit;
   end;
   Result := nil;
 end;
 
 { TTreeViewIntegrator }
-{
+
 procedure TTreeViewIntegrator.tvModelCreateNodeClass(
   Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
 begin
   NodeClass := TViewNode;
-end;
-}
-procedure TTreeViewIntegrator.tvModelCreateItem(Sender: TCustomTreeView; var ATreeNode: TTreenode);
-begin
-  ATreeNode := TViewNode.Create(Frame.tvModel.Items);
 end;
 
 procedure TTreeViewIntegrator.tvModelChange(Sender: TObject; Node: TTreeNode);
@@ -143,13 +149,12 @@ begin
     imIndex := 0;
     if ent is TAbstractPackage then
       imIndex := 1
-    else if ent is uModel.TClass then
+    else if ent is TMdlClass then
       imIndex := 2
-    else if ent is uModel.TInterface then
+    else if ent is TMdlInterface then
       imIndex := 3;
-
-    Node.ImageIndex := imIndex;
-    Node.SelectedIndex := Node.ImageIndex;
+//    Node.ImageIndex := imIndex;
+//    Node.SelectedIndex := Node.ImageIndex;
   end;
 end;
 
@@ -164,13 +169,13 @@ begin
   while Ci.HasNext do
   begin
     cent := Ci.Next;
-    if not ((cent is uModel.TClass) or (cent is uModel.TInterface)) then continue;
+    if not ((cent is TMdlClass) or (cent is TMdlInterface)) then continue;
 
     newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, cent.Name, cent);
-    if cent is uModel.TClass then
-      BuildClassView(newRoot, cent as uModel.TClass)
-    else if cent is uModel.TInterface then
-      BuildInterfaceView(newRoot, cent as uModel.TInterface);
+    if cent is TMdlClass then
+      BuildClassView(newRoot, cent as TMdlClass)
+    else if cent is TMdlInterface then
+      BuildInterfaceView(newRoot, cent as TMdlInterface);
   end;
 end;
 
@@ -212,25 +217,23 @@ begin
       ATreeRoot.Owner.AddChildObject(newRoot, (ent as TUnitDependency).Package.Name, (ent as TUnitDependency).Package);
     end;
   end;
-
   Mi := TModelIterator.Create(AEntity.GetClassifiers, ioAlpha);
   while Mi.HasNext do
   begin
     ent := Mi.Next as TClassifier;
-    if (ent is uModel.TClass) or (ent is uModel.TInterface) then
+    if (ent is TMdlClass) or (ent is TMdlInterface) then
     begin
       newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, ent.Name, ent);
       (newRoot as TViewNode).FIsImplementation := True;
-      if ent is uModel.TClass then
-        BuildClassView(newRoot, ent as uModel.TClass)
+      if ent is TMdlClass then
+        BuildClassView(newRoot, ent as TMdlClass)
       else
-        BuildInterfaceView(newRoot, ent as uModel.TInterface)
+        BuildInterfaceView(newRoot, ent as TMdlInterface)
     end;
   end;
 end;
 
-procedure TTreeViewIntegrator.BuildClassView(ATreeRoot: TTreeNode;
-  AEntity: TClass);
+procedure TTreeViewIntegrator.BuildClassView(ATreeRoot: TTreeNode; AEntity: TMdlClass);
 var
   Mi: TBaseModelIterator;
   newRoot: TTreeNode;
@@ -248,7 +251,6 @@ begin
       ATreeRoot.Owner.AddChildObject(newRoot, ent.Name, ent);
     end;
   end;
-
   Mi := TModelIterator.Create(AEntity.GetDescendants, ioAlpha);
   if Mi.Count > 0 then
   begin
@@ -261,8 +263,7 @@ begin
   end;
 end;
 
-procedure TTreeViewIntegrator.BuildInterfaceView(ATreeRoot: TTreeNode;
-  AEntity: TInterface);
+procedure TTreeViewIntegrator.BuildInterfaceView(ATreeRoot: TTreeNode; AEntity: TMdlInterface);
 var
   Mi: TBaseModelIterator;
   newRoot: TTreeNode;
@@ -290,13 +291,9 @@ begin
   Frame.Parent := Parent;
   Model.AddListener(Self); // IAfterObjectModelListener()
 
-// TTVCustomCreateNodeEvent = procedure(Sender: TCustomTreeView; var ATreeNode: TTreenode) of object;
-//     procedure tvModelCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
-
-//!!!  Frame.tvModel.OnCreateNodeClass := tvModelCreateNodeClass;
-  Frame.tvModel.OnCustomCreateItem := tvModelCreateItem;
+  Frame.tvModel.OnCreateNodeClass := tvModelCreateNodeClass; // Frame.tvModel.OnCustomCreateItem := tvModelCreateItem;
   Frame.tvModel.OnChange := tvModelChange;
-//!!!  Frame.tvModel.OnAddition := tvModelAddition;
+  Frame.tvModel.OnAddition := tvModelAddition;
 end;
 
 destructor TTreeViewIntegrator.Destroy;
@@ -335,6 +332,18 @@ end;
 procedure TTreeViewIntegrator.AfterChange(Sender: TModelEntity);
 begin
   InitFromModel;
+end;
+
+{ TViewNodeList }
+
+function TViewNodeList.GetItems(AIndex: integer): TViewNode;
+begin
+  Result := (inherited Items[AIndex]) as TViewNode;
+end;
+
+procedure TViewNodeList.SetItems(AIndex: integer; const AValue: TViewNode);
+begin
+  Items[AIndex] := AValue;
 end;
 
 end.

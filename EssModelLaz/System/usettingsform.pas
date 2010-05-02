@@ -26,7 +26,7 @@ unit uSettingsForm;
 interface
 
 uses
-  LCLIntf, LCLType, LMessages, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  LCLIntf, LCLType, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   contnrs, StdCtrls;
 
 type
@@ -55,7 +55,7 @@ type
 
 implementation
 
-uses uRegisterExtension, uConst, uIntegrator, uConfig;
+uses uRegisterExtension, uIntegrator, uConfig;
 
 {$IFNDEF FPC}
   {$R *.dfm}

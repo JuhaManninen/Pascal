@@ -67,7 +67,7 @@ procedure TSimpleLayout.Execute;
 var
   I,NextX,NextY : integer;
   C : TControl;
-  L : TList;
+  L : TControlList;
 begin
   NextX := 50;
   NextY := 50;
@@ -75,7 +75,7 @@ begin
   try
     for I := 0 to L.Count-1 do
     begin
-      C := TControl(L[I]);
+      C := L[I];
       if C is TCustomPanel then
       begin
         C.BoundsRect := Rect(NextX, NextY, NextX + C.Width, NextY + C.Height);

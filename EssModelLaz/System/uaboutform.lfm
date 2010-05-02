@@ -1,25 +1,24 @@
 object AboutForm: TAboutForm
   Left = 192
+  Height = 198
   Top = 107
+  Width = 336
   BorderIcons = []
   BorderStyle = bsDialog
   Caption = 'About'
   ClientHeight = 198
   ClientWidth = 336
   Color = clWhite
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
-  Font.Style = []
-  Position = poScreenCenter
   OnActivate = FormActivate
-  PixelsPerInch = 96
+  Position = poScreenCenter
+  LCLVersion = '0.9.29'
   object Image1: TImage
     Left = 11
+    Height = 64
     Top = 13
     Width = 54
-    Height = 64
     AutoSize = True
     Picture.Data = {
       07544269746D617036120000424D361200000000000036040000280000003600
@@ -168,81 +167,85 @@ object AboutForm: TAboutForm
       FBFB7E7E7E7E7E7E7EFBFBFBFBFBFBFBFB7E7E7E7E7E7EFBFBFBFBFBFBFBFB7E
       7E7E7E7E7E7EFBFB0000FBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFB
       FBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFBFB
-      0000}
+      0000
+    }
   end
   object NameLabel: TLabel
     Left = 77
+    Height = 13
     Top = 13
     Width = 185
-    Height = 13
     AutoSize = False
     Caption = 'NameLabel'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
     Font.Style = [fsBold]
+    ParentColor = False
     ParentFont = False
   end
   object UrlLabel: TLabel
     Left = 77
+    Height = 14
     Top = 58
-    Width = 32
-    Height = 13
+    Width = 39
     Caption = 'www.x'
+    ParentColor = False
   end
   object IconImage: TImage
     Left = 295
+    Height = 32
     Top = 13
     Width = 32
-    Height = 32
     Anchors = [akTop, akRight]
   end
   object Label2: TLabel
     Left = 77
+    Height = 14
     Top = 43
-    Width = 155
-    Height = 13
+    Width = 161
     Caption = 'Copyright (C) Eldean AB Sweden'
+    ParentColor = False
   end
   object MailLabel: TLabel
     Left = 77
+    Height = 14
     Top = 75
-    Width = 48
-    Height = 13
+    Width = 50
     Caption = 'Contact: x'
+    ParentColor = False
   end
   object RegLabel: TLabel
     Left = 77
+    Height = 38
     Top = 115
     Width = 253
-    Height = 38
     AutoSize = False
     Caption = 'Open Source'
+    ParentColor = False
     WordWrap = True
   end
   object Label1: TLabel
     Left = 4
-    Top = 182
-    Width = 211
     Height = 12
+    Top = 182
+    Width = 212
     Anchors = [akLeft, akBottom]
-    Caption = 'Developed by Ville Krumlinde and Peter S'#246'derman'
-    Font.Charset = ANSI_CHARSET
+    Caption = 'Developed by Ville Krumlinde and Peter Söderman'
+    Font.CharSet = ANSI_CHARSET
     Font.Color = clGray
     Font.Height = -9
     Font.Name = 'Arial'
-    Font.Style = []
+    ParentColor = False
     ParentFont = False
   end
   object Button1: TButton
     Left = 254
+    Height = 25
     Top = 166
     Width = 75
-    Height = 25
     Anchors = [akRight, akBottom]
     Caption = 'OK'
     ModalResult = 1
     TabOrder = 0
   end
-end
+end
