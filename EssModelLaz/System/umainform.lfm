@@ -109,10 +109,9 @@ object MainForm: TMainForm
     object OpenButton: TSpeedButton
       Left = 1
       Height = 22
-      Hint = 'Open...'
       Top = 3
       Width = 71
-      Caption = 'Open...'
+      Action = FileOpenAction
       Color = clBtnFace
       Flat = True
       Glyph.Data = {
@@ -145,7 +144,6 @@ object MainForm: TMainForm
         D3D6CED3D600
       }
       NumGlyphs = 0
-      OnClick = FileOpenActionExecute
     end
   end
   object MainMenu1: TMainMenu
