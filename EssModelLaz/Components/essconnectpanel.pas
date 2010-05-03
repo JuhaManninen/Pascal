@@ -51,7 +51,7 @@ type
   private
     FBox: TRtfdBox;
     // Old eventhandlers
-//    FOnMouseDown :TMouseEvent;
+    FOnMouseDown :TMouseEvent;
     FOnMouseMove :TMouseMoveEvent;
     FOnMouseUp :TMouseEvent;
     FOnClick :TNotifyEvent;
@@ -376,7 +376,7 @@ end;
 { TessConnectPanel }
 function TessConnectPanel.AddManagedObject(ABox: TRtfdBox): TControl;
 var
-//  crkObj : TCrackControl;
+  crkObj : TCrackControl;
   newObj: TManagedObject;
   C: TControl;
 begin
@@ -395,7 +395,7 @@ begin
     newObj.FBox := ABox;
     FManagedObjects.Add(newObj);
 
-{!!!    crkObj := TCrackControl(C);
+    crkObj := TCrackControl(C);
     newObj.FOnMouseDown := crkObj.OnMouseDown;
     newObj.FOnMouseMove := crkObj.OnMouseMove;
     newObj.FOnMouseUp := crkObj.OnMouseUp;
@@ -406,7 +406,7 @@ begin
     crkObj.OnMouseMove := OnManagedObjectMouseMove;
     crkObj.OnMouseUp := OnManagedObjectMouseUp;
     crkObj.OnClick := OnManagedObjectClick;
-    crkObj.OnDblClick := OnManagedObjectDblClick; }
+    crkObj.OnDblClick := OnManagedObjectDblClick;
 //    Result := ABox;
   end;
 end;
@@ -446,8 +446,8 @@ begin
       ClearSelection;
     if Assigned(mcont) then
       mcont.Selected := True;
-//!!!    if found <> Self then
-//!!!      TCrackControl(found).Click;
+    if found <> Self then
+      TCrackControl(found).Click;
   end;
 end;
 
@@ -625,11 +625,11 @@ begin
         ClearSelection;
       mcont.Selected := True;
     end;
-{!!!    if Assigned(TCrackControl(found).OnMouseDown) then
+    if Assigned(TCrackControl(found).OnMouseDown) then
     begin
       p2 := found.ScreenToClient(Mouse.CursorPos);
       TCrackControl(found).OnMouseDown(found,Button,Shift,p2.x,p2.y);
-    end; }
+    end;
   end else
   begin if Button = mbLeft then
     FIsRectSelecting := True;
@@ -750,12 +750,12 @@ begin
       end;
     end else if Assigned(found) then
     begin
-{!!!      CrackFound := TCrackControl(found);
+      CrackFound := TCrackControl(found);
       if Assigned(CrackFound.OnMouseMove) then
       begin
         p2 := found.ScreenToClient(pt);
         CrackFound.OnMouseMove(found,Shift,p2.x,p2.y);
-      end; }
+      end;
     end;
   end;
 end;
