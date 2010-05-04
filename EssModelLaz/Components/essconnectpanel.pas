@@ -395,6 +395,7 @@ begin
     newObj.FBox := ABox;
     FManagedObjects.Add(newObj);
 
+    if C is TControl then begin
     crkObj := TCrackControl(C);
     newObj.FOnMouseDown := crkObj.OnMouseDown;
     newObj.FOnMouseMove := crkObj.OnMouseMove;
@@ -407,6 +408,7 @@ begin
     crkObj.OnMouseUp := OnManagedObjectMouseUp;
     crkObj.OnClick := OnManagedObjectClick;
     crkObj.OnDblClick := OnManagedObjectDblClick;
+    end;
 //    Result := ABox;
   end;
 end;
