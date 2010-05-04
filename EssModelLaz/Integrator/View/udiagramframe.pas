@@ -112,7 +112,7 @@ diagramframe
 
 implementation
 
-uses uError;
+uses uError, uMainForm;
 
 {$IFNDEF FPC}
   {$R *.dfm}
@@ -163,7 +163,9 @@ begin
   Model.AddListener(FListener); // IAfterObjectModelListener(
   VisibilityCombo.ItemIndex := 0;
   // Hindra att caption från FileOpenAction syns på knapp, vi vill bara ha glyfen
+  OpenButton.Action:=MainForm.FileOpenAction;
   OpenButton.Caption:='';
+  LayoutButton.Action:=MainForm.LayoutDiagramAction;
   LayoutButton.Caption:='';
   ScrollBox := TScrollBoxWithNotify.Create(Self);
   ScrollBox.Parent := Self;
