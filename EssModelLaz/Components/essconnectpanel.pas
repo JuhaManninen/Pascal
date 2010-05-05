@@ -515,7 +515,7 @@ begin
   found := FindLCLWindow(Mouse.CursorPos);
   if Assigned(found) then
   begin
-    FindManagedControl(found);
+//    FindManagedControl(found); // useless call, was already in original EssModel code
     if found <> Self then
       TCrackControl(found).DblClick;
   end;
