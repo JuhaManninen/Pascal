@@ -584,7 +584,7 @@ begin
         Ini.WriteBool(S,'ShowAssoc', ShowAssoc);
 
         //Commit
-//!!!        OldMode:=SetErrorMode(SEM_FAILCRITICALERRORS);
+//ToDo!!!        OldMode:=SetErrorMode(SEM_FAILCRITICALERRORS);
         try
           try
             Ini.UpdateFile;
@@ -911,7 +911,7 @@ begin
     if (BoxNames.Objects[I] as TRtfdBox).Entity=E then
     begin
       Box := BoxNames.Objects[I] as TRtfdBox;
-//!!!      Frame.ScrollBox.ScrollInView(Box); // Replaced with AutoScroll.
+//      Frame.ScrollBox.ScrollInView(Box); // !!! Replaced with AutoScroll.
       Break;
     end;
 end;

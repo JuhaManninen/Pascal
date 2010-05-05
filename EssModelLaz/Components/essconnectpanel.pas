@@ -146,10 +146,6 @@ type
     // The list should be freed by the caller.
     function GetManagedObjects: TControlList;
 
-    // Returns a list with all interobject connections.
-    // The list should be freed by the caller.
-//    function GetConnections : TConnectionList;
-
     // Add a connection from Src to Dst with the supplied style
     function ConnectObjects(Src, Dst: TRtfdBox;
       AStyle:TessConnectionStyle = csNormal;
@@ -229,6 +225,7 @@ type
 procedure Register;
 
 implementation
+
 uses Math;
 
 type
@@ -395,7 +392,6 @@ begin
     newObj.FBox := ABox;
     FManagedObjects.Add(newObj);
 
-    if C is TControl then begin
     crkObj := TCrackControl(C);
     newObj.FOnMouseDown := crkObj.OnMouseDown;
     newObj.FOnMouseMove := crkObj.OnMouseMove;
@@ -408,7 +404,6 @@ begin
     crkObj.OnMouseUp := OnManagedObjectMouseUp;
     crkObj.OnClick := OnManagedObjectClick;
     crkObj.OnDblClick := OnManagedObjectDblClick;
-    end;
 //    Result := ABox;
   end;
 end;
@@ -552,16 +547,7 @@ begin
     end;
   end;
 end;
-{
-function TessConnectPanel.GetConnections: TConnectionList;
-var
-  i: Integer;
-begin
-  Result := TConnectionList.Create(False);
-  for i := 0 to FConnections.Count-1 do
-    Result.Add(FConnections[I]);
-end;
-}
+
 function TessConnectPanel.GetManagedObjects: TControlList;
 var
   i: Integer;
@@ -900,15 +886,15 @@ begin
   if BevelOuter <> bvNone then
   begin
     AdjustColors(BevelOuter);
-//!!!    Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
+//ToDo!!! was: Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
     Canvas.Frame3D(Rect, BevelWidth, bvLowered);
   end;
-//!!!  Frame3D(Canvas, Rect, Color, Color, BorderWidth);
+// was: Frame3D(Canvas, Rect, Color, Color, BorderWidth);
   Canvas.Frame3D(Rect, BorderWidth, bvLowered);
   if BevelInner <> bvNone then
   begin
     AdjustColors(BevelInner);
-//!!!    Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
+// was: Frame3D(Canvas, Rect, TopColor, BottomColor, BevelWidth);
     Canvas.Frame3D(Rect, BevelWidth, bvLowered); // TopColor, BottomColor,
   end;
 

@@ -17,12 +17,6 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 }
 
-{
-  Definition of TModelEntity is in it's own unit to avoid a circular unit
-  reference bwtween uModel and uListeners
-
-  TBaseModelIterator is defined here for the same reason.
-}
 unit uModelEntity;
 
 {$IFDEF FPC}
@@ -75,7 +69,6 @@ type
     FDocumentation : TDocumentation;
     FVisibility: TVisibility;
     FListeners: TListenerList; // TInterfaceList;
-//    FListenerTypes: TListenerTypes;
     FLocked: boolean;
     procedure SetName(const Value: string); virtual;
     function GetFullName: string;
@@ -162,42 +155,42 @@ implementation
 
 procedure TListenerBase.BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity);
 begin
-  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+  ;
 end;
 
 procedure TListenerBase.BeforeRemove(Sender: TModelEntity);
 begin
-  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+  ;
 end;
 
 procedure TListenerBase.BeforeChange(Sender: TModelEntity);
 begin
-  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+  ;
 end;
 
 procedure TListenerBase.BeforeEntityChange(Sender: TModelEntity);
 begin
-  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+  ;
 end;
 
 procedure TListenerBase.AfterAddChild(Sender: TModelEntity; NewChild: TModelEntity);
 begin
-  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+  ;
 end;
 
 procedure TListenerBase.AfterRemove(Sender: TModelEntity);
 begin
-  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+  ;
 end;
 
 procedure TListenerBase.AfterChange(Sender: TModelEntity);
 begin
-  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+  ;
 end;
 
 procedure TListenerBase.AfterEntityChange(Sender: TModelEntity);
 begin
-  ; //raise Exception.Create('TListenerBase placeholder method. Should not come here!');
+  ;
 end;
 
 

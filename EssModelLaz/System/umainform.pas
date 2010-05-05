@@ -97,13 +97,11 @@ type
     procedure DocGenPreviewActionExecute(Sender: TObject);
     procedure CloseTimerTimer(Sender: TObject);
     procedure OpenFolderActionExecute(Sender: TObject);
-///
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
-//    Created : boolean;
     FModel: TObjectModel;
     FDiagram: TDiagramIntegrator;
     //FBackEnd: TCodeIntegrator;
@@ -118,11 +116,11 @@ type
     procedure DoXmiFile(const DestFile : string = '');
     procedure RefreshRecentFiles;
     procedure OnRecentFilesClicked(Sender : TObject);
+// protected
+    //property BackEnd: TCodeIntegrator read FBackEnd;
   public
     procedure LoadProject(FileNames : TStrings); overload;
     procedure LoadProject(FileName : string); overload;
-//  protected
-    //property BackEnd: TCodeIntegrator read FBackEnd;
     property Diagram: TDiagramIntegrator read FDiagram;
   public
     property Model: TObjectModel read FModel;
@@ -286,14 +284,14 @@ end;
 
 procedure TMainForm.CopyDiagramClipboardActionExecute(Sender: TObject);
 var
-//!!!  Wmf, Wmf1: TMetaFile;
-//!!!  WmfCanvas, WmfCanvas1: TMetaFileCanvas;
+//ToDo!!!  Wmf, Wmf1: TMetaFile;
+//  WmfCanvas, WmfCanvas1: TMetaFileCanvas;
   W,H : integer;
   SrcRect: TRect;
 begin
   Diagram.GetDiagramSize(W,H);
   SrcRect := Diagram.GetSelectedRect;
-{!!!  Wmf := TMetafile.Create;
+{  Wmf := TMetafile.Create;
   Wmf1 := TMetafile.Create;
   try
     if (SrcRect.Right - SrcRect.Left) <> 0 then
@@ -353,8 +351,8 @@ var
 begin
   F := TAboutForm.Create(nil);
   try
-    F.IconImage.Picture.Icon.LoadFromFile('');
-//    F.IconImage.Picture.Icon.Handle := LoadIcon(HInstance,'MAINICON');
+    F.IconImage.Picture.Icon.LoadFromFile(''); // ToDo!!! How to load the icon?
+// was:  F.IconImage.Picture.Icon.Handle := LoadIcon(HInstance,'MAINICON');
     F.NameLabel.Caption := uConst.ProgName + ' ' + uConst.ProgVersion;
     F.ShowModal;
   finally
@@ -597,17 +595,15 @@ end;
 
 procedure TMainForm.RefreshRecentFiles;
 var
-//  Items : array of TMenuItem;
   M : TMenuItem;
   I : integer;
 begin
-  //MAke sure the list never grows beyond 10 items
+  // Make sure the list never grows beyond 10 items
   while RecentFiles.Count>10 do
     RecentFiles.Delete(RecentFiles.Count-1);
   // Erase old menuitems
   while MainForm.ReopenMenuItem.Count>0 do
     MainForm.ReopenMenuItem.Items[0].Free;
-//!!!  SetLength(Items,RecentFiles.Count);
   for I := 0 to RecentFiles.Count-1 do
   begin
     M := TMenuItem.Create(MainForm);
@@ -615,9 +611,7 @@ begin
     M.OnClick := OnRecentFilesClicked;
     M.Tag := I;
     MainForm.ReopenMenuItem.Add(M);
-//!!!    Items[I]:= M;
   end;
-//!!!  MainForm.ReopenMenuItem.Add(Items);
 end;
 
 procedure TMainForm.OnRecentFilesClicked(Sender: TObject);
@@ -703,7 +697,7 @@ begin
     end;
     if F.ShowModal=mrOk then
     begin
-      _AddFileNames(L, {F.PathTreeView.Path} './', //!!!
+      _AddFileNames(L, {F.PathTreeView.Path} './', //!!! Needs TShellTreeView.Path
               Copy(F.FileTypeCombo.Items[ F.FileTypeCombo.ItemIndex ],2,10) );
       if L.Count>0 then
         LoadProject(L)

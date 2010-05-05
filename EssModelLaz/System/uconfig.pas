@@ -140,7 +140,8 @@ end;
 
 procedure TConfig.WriteStr(const Key, Value: string);
 begin
-  Reg.WriteString(Key,Value)
+  // ToDo!!! This raises an exception. Why? Could not reproduce in a small test application.
+  Reg.WriteString(Key,Value);
 end;
 
 procedure TConfig.StoreSettings;

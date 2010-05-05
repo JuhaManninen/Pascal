@@ -62,24 +62,17 @@ type
     property UnknownPackage: TUnitPackage read FUnknownPackage;
   end;
 
-  // Forward declarations.
-//  TFeatureList = class;
-//  TParameterList = class;
-//  TClassifierList = class;
-
   // Class definition.
   TFeature = class(TModelEntity);
 
   TClassifier = class(TModelEntity)
   private
     FFeatures: TModelEntityList;
-//    FListenerTypes: TListenerTypes;
     FIsPlaceholder: boolean;
   public
     constructor Create(Owner: TModelEntity); override;
     destructor Destroy; override;
     property IsPlaceholder: boolean read FIsPlaceHolder write FIsPlaceholder;
-//    property ListenerTypes: TListenerTypes read FListenerTypes;
     function GetFeatures : TBaseModelIterator;
   end;
 
@@ -247,15 +240,6 @@ type
   end;
 
 
-  { TFeatureList }
-{  TFeatureList = class(TObjectList)
-  private
-    function GetItems(AIndex: integer): TFeature;
-    procedure SetItems(AIndex: integer; const AValue: TFeature);
-  public
-    property Items[AIndex: integer]: TFeature read GetItems write SetItems; default;
-  end; }
-
   { TAttributeList }
   TAttributeList = class(TObjectList)
   private
@@ -273,15 +257,6 @@ type
   public
     property Items[AIndex: integer]: TParameter read GetItems write SetItems; default;
   end;
-
-  { TClassifierList }
-{  TClassifierList = class(TObjectList)
-  private
-    function GetItems(AIndex: integer): TClassifier;
-    procedure SetItems(AIndex: integer; const AValue: TClassifier);
-  public
-    property Items[AIndex: integer]: TClassifier read GetItems write SetItems; default;
-  end; }
 
   function AllClassesPackage : TAbstractPackage;
 
@@ -684,12 +659,12 @@ end;
 constructor TMdlClass.Create(Owner: TModelEntity);
 begin
   inherited Create(Owner);
-  FImplements := TModelEntityList.Create(False); //Only reference
+  FImplements := TModelEntityList.Create(False); // Only reference
 end;
 
 destructor TMdlClass.Destroy;
 begin
-  //Dont touch listeners if the model is locked.
+  // Don't touch listeners if the model is locked.
   if not Locked then
   begin
     Fire(mtBeforeRemove);
@@ -1204,27 +1179,6 @@ begin
   Items[AIndex] := AValue;
 end;
 
-{ TFeatureList
 
-function TFeatureList.GetItems(AIndex: integer): TFeature;
-begin
-  Result := (inherited Items[AIndex]) as TFeature;
-end;
-
-procedure TFeatureList.SetItems(AIndex: integer; const AValue: TFeature);
-begin
-  Items[AIndex] := AValue;
-end;
-
-function TClassifierList.GetItems(AIndex: integer): TClassifier;
-begin
-  Result := (inherited Items[AIndex]) as TClassifier;
-end;
-
-procedure TClassifierList.SetItems(AIndex: integer; const AValue: TClassifier);
-begin
-  Items[AIndex] := AValue;
-end;
-}
 end.
 

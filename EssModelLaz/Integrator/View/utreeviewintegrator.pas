@@ -153,7 +153,7 @@ begin
       imIndex := 2
     else if ent is TMdlInterface then
       imIndex := 3;
-//    Node.ImageIndex := imIndex;
+//    Node.ImageIndex := imIndex;   // ToDo!!!: images are not there yet
 //    Node.SelectedIndex := Node.ImageIndex;
   end;
 end;

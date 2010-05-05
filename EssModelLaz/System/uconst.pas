@@ -41,8 +41,6 @@ const
 
   RegKey = 'Software\Eldean\EssModel';
 
-//  PathDelim = {$ifdef WIN32}'\'{$else}'/'{$endif};
-
 implementation
 
 end.

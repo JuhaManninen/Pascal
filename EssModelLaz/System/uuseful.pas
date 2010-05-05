@@ -104,14 +104,14 @@ end;
 
 function SetSelProc(Wnd: HWND; uMsg: UINT; lParam, lpData: LPARAM): Integer stdcall;
 begin
-//!!!  if uMsg=BFFM_INITIALIZED then
-//!!!    Windows.SendMessage(Wnd, BFFM_SETSELECTION, 1, lpData );
+//ToDo!!!  if uMsg=BFFM_INITIALIZED then
+//    Windows.SendMessage(Wnd, BFFM_SETSELECTION, 1, lpData );
   Result := 0;
 end;
 
 function TBrowseForFolderDialog.Execute: Boolean;
 var
-//!!!  bi: TBROWSEINFO;
+//ToDo!!!  bi: TBROWSEINFO;
 //  pIDListItem: PItemIDList;
   str: array[0..1024] of Char;
   pStr: PChar;

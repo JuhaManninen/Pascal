@@ -24,24 +24,15 @@ unit uListeners;
 {$ENDIF}
 
 {
-  Changed now, interfaces are not used any more:
-  (Listener interface for the objectmodel)
-
-  (Object that are listeners have to inherit from TComponent.
-   If TInterfaceObject is used there will be an error in refcount.
-   TComponent implements it's own queryinterface and addref.)
-
- alternativ implementation:
-   TMethodReference
-   AddListener(Self, [ [mtBeforeChange,OnBeforeChange] , [mtBeforeAdd,OnBeforeAdd] ]);
+  Changed by JuMa, interfaces are not used any more. They are replaced by
+  listener classes derived from TListenerBase, defined in unit uModelEntity.
 }
 
 interface
 
-type
+//type
 
-  // Original interfaces moved to text file "Interfaces.txt" and the same names
-  // are used for enum.
+  // Original interface names are used for enum.
   // Methods defined in these interfaces must be defined in implementing classes.
 {  IObjectModelListener = interface(IUnknown)
     procedure Change(Sender: TModelEntity);
@@ -51,7 +42,7 @@ type
     procedure Remove(Sender: TModelEntity);
     procedure EntityChange(Sender: TModelEntity);
   end;  }
-
+{
   TListenerType = (
     ltObjectModelListener,        // IObjectModelListener,
     ltBeforeObjectModelListener,  // IBeforeObjectModelListener,
@@ -91,7 +82,7 @@ type
     ltAfterParameterListener);    // IAfterParameterListener);
 
   TListenerTypes = set of TListenerType;
-
+}
 ////////////////////////////////
 ////////////////////////////////
 implementation

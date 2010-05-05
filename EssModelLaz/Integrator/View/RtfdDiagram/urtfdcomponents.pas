@@ -122,14 +122,6 @@ type
 
   TRtfdCustomLabel = class;
 
-  // Listener for TRtfdCustomLabel.
-{  TRtfdLabelListener = class(TListenerBase)
-  private
-    FRtfdOwner: TRtfdCustomLabel;
-  public
-    constructor Create(ARtfdOwner: TRtfdCustomLabel);
-  end;
-}
   { TRtfdCustomLabel }
 //  TRtfdCustomLabel = class(TCustomLabel, IModelEntityListener)
   TRtfdCustomLabel = class(TGraphicControl) // , IModelEntityListener
@@ -155,7 +147,6 @@ type
   public
     property Alignment: TAlignment read GetAlignment write SetAlignment default taLeftJustify;
     property Transparent: Boolean read FTransparent write SetTransparent;
-//    property Listener: TRtfdLabelListener read FListener;
   end;
 
 
@@ -375,7 +366,7 @@ begin
   //Owner=Self must be tested because notifications are being sent for all components
   //in the form. TRtfdLabels are created with Owner=box.
   if (Operation = opInsert) and (Acomponent.Owner = Self) and (Acomponent is TControl) then
-    ; //TCrackControl(AComponent).OnMouseDown := OnChildMouseDown;
+    TCrackControl(AComponent).OnMouseDown := OnChildMouseDown;
 end;
 
 procedure TRtfdBox.OnChildMouseDown(Sender: TObject; Button: TMouseButton;
@@ -502,11 +493,11 @@ begin
   while Omi.HasNext do
     Inc(NeedH, TRtfdOperation.Create(Self,Omi.Next).Height);
 
-{  for I := 0 to ControlCount-1 do
+  for I := 0 to ControlCount-1 do
     if Controls[I] is TRtfdCustomLabel then
       NeedW := Max(TRtfdCustomLabel(Controls[I]).WidthNeeded,NeedW);
   Width  := Max(NeedW,cDefaultWidth);
-}
+
   Height := Max(NeedH, cDefaultHeight);
   Visible := WasVisible;
 end;
@@ -589,11 +580,11 @@ begin
   while Omi.HasNext do
     Inc(NeedH, TRtfdOperation.Create(Self,Omi.Next).Height);
 
-{!!!  for I := 0 to ControlCount-1 do
+  for I := 0 to ControlCount-1 do
     if Controls[I] is TRtfdCustomLabel then
       NeedW := Max( TRtfdCustomLabel(Controls[I]).WidthNeeded,NeedW);
   Width := Max(NeedW,cDefaultWidth);
-}
+
   Height := Max(NeedH,cDefaultHeight);
   Visible := WasVisible;
 end;
@@ -711,7 +702,7 @@ begin
   if (Flags and DT_CALCRECT <> 0) and ((Text = '') and
     (Text[1] = '&') and (Text[2] = #0)) then Text := Text + ' ';
   Flags := Flags or DT_NOPREFIX;
-//!!!  Flags := DrawTextBiDiModeFlags(Flags);
+//ToDo!!!  Flags := DrawTextBiDiModeFlags(Flags);
   Canvas.Font := Font;
   if not Enabled then
   begin
@@ -770,7 +761,7 @@ end;
 const
   IconW = 10;
 
-{procedure TVisibilityLabel.Paint;   JuMa
+{ToDo!!! procedure TVisibilityLabel.Paint;
 var
   Rect : TRect;
   Pic : Graphics.TBitmap;

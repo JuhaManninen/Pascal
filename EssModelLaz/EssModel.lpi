@@ -38,6 +38,7 @@
       <Unit0>
         <Filename Value="essmodel.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="EssModel"/>
       </Unit0>
       <Unit1>
         <Filename Value="System/uMainForm.pas"/>
