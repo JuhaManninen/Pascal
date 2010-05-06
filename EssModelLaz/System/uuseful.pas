@@ -32,18 +32,13 @@ uses
 {$ELSE}
   LCLIntf, LCLType,
 {$ENDIF}
-Classes, Controls, SysUtils, Forms, ComCtrls;
-
+  Classes, Controls, SysUtils, Forms, ComCtrls;
 
 type
-  IEldeanProgress = interface(IUnknown)
-    ['{E446EEFB-DABB-4AD9-BE49-104A6F265CB4}']
-    procedure Tick;
-  end;
 
-  TEldeanProgress = class(TInterfacedObject,IEldeanProgress)
+  TEldeanProgress = class
    public
-     constructor Create(Text : string; Max : integer); reintroduce;
+     constructor Create(Text : string; Max : integer);
      destructor Destroy; override;
      procedure Tick;
    private
@@ -67,7 +62,7 @@ implementation
 
 constructor TEldeanProgress.Create(Text: string; Max: integer);
 begin
-  F := TForm.Create(Application.MainForm);
+  F := TForm.Create(nil);
 
   F.BorderIcons := [];
   F.BorderStyle := bsDialog; { TODO : Fix for Linux }

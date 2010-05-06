@@ -164,19 +164,19 @@ begin
   RecentFiles := TStringList.Create;
   RecentFiles.CommaText := Config.ReadStr('RecentFiles','');
   RefreshRecentFiles;
-  Feedback := TGuiFeedback.Create(MainForm.StatusPanel);
+  Feedback := TGuiFeedback.Create(StatusPanel);
   FModel := TObjectModel.Create;
-  FDiagram := TDiagramIntegrator.CreateDiagram(FModel, MainForm.DiagramPanel, Feedback);
+  FDiagram := TDiagramIntegrator.CreateDiagram(FModel, DiagramPanel, Feedback);
 //  FBackEnd := TDelphiIntegrator.Create(FModel);
 //  FBackend.CodeProvider := TFileProvider.Create;
-  FTreeView := TTreeViewIntegrator.Create(FModel,MainForm.TreePanel,Feedback);
-  TZoomFrame.Create(MainForm.ZoomPanel, FDiagram);
+  FTreeView := TTreeViewIntegrator.Create(FModel, TreePanel, Feedback);
+  TZoomFrame.Create(ZoomPanel, FDiagram);
 
   {$if Defined(DRAG_SUPPORT)}
   Drop := TDropFileTarget.Create(Self);
   Drop.DragTypes := [dtCopy];
   Drop.OnDrop := DropFileTargetDrop;
-  Drop.Register(MainForm);
+  Drop.Register(self);
   {$ifend}
 
   if ParamCount>0 then
@@ -481,7 +481,7 @@ begin
       DoXmiFile(XmiFile);
     if IsDocGen or IsXmi then
       //Delayed exit by using a timer, this is so that all global objects have
-      //time to initialize (MainForm). Otherwise this would be a special case exit.
+      //time to initialize. Otherwise this would be a special case exit.
       CloseTimer.Enabled := True;
   finally
     Files.Free;
@@ -490,14 +490,12 @@ end;
 
 
 procedure TMainForm.FileOpenActionExecute(Sender: TObject);
-const
-  // Keep dialog alive between calls so the searchpath is retained
-  D : TOpenDialog = nil;
 var
   Ints : TClassList;
   Exts : TStringList;
   I,J : integer;
   AnyFilter, Filter : string;
+  D : TOpenDialog;
 begin
   AnyFilter := '';
   Filter := '';
@@ -524,20 +522,22 @@ begin
     Ints.Free;
   end;
   Filter := 'All types (' + AnyFilter + ')|' + AnyFilter + '|' + Filter;
-  if not Assigned(D) then
-  begin
-    D := TOpenDialog.Create(MainForm);
+  // was: Keep dialog alive between calls so the searchpath is retained
+  D := TOpenDialog.Create(nil);
+  try
     D.Filter := Filter;
     D.Options := D.Options + [ofAllowMultiSelect];
+    if D.Execute then
+      LoadProject(D.Files);
+  finally
+    d.Free;
   end;
-  if D.Execute then
-    LoadProject(D.Files);
 end;
 
 
 procedure TMainForm.ExitActionExecute(Sender: TObject);
 begin
-  Application.MainForm.Close;
+  Close;
 end;
 
 
@@ -609,15 +609,15 @@ begin
   while RecentFiles.Count>10 do
     RecentFiles.Delete(RecentFiles.Count-1);
   // Erase old menuitems
-  while MainForm.ReopenMenuItem.Count>0 do
-    MainForm.ReopenMenuItem.Items[0].Free;
+  while ReopenMenuItem.Count>0 do
+    ReopenMenuItem.Items[0].Free;
   for I := 0 to RecentFiles.Count-1 do
   begin
-    M := TMenuItem.Create(MainForm);
+    M := TMenuItem.Create(ReopenMenuItem);
     M.Caption := '&' + IntToStr(I) + ' ' + RecentFiles[I];
     M.OnClick := OnRecentFilesClicked;
     M.Tag := I;
-    MainForm.ReopenMenuItem.Add(M);
+    ReopenMenuItem.Add(M);
   end;
 end;
 
@@ -627,25 +627,27 @@ begin
 end;
 
 procedure TMainForm.SaveDiagramActionExecute(Sender: TObject);
-const
-  D : TSaveDialog = nil;
+var
+  D : TSaveDialog;
 begin
-  if not Assigned(D) then
-  begin
-    D := TSaveDialog.Create(MainForm);
+  D := TSaveDialog.Create(nil);
+  try
     D.InitialDir := ExtractFilePath( Model.ModelRoot.GetConfigFile );
     D.Filter := 'PNG files (*.png)|*.gif|WMF files (*.wmf)|*.wmf|All files (*.*)|*.*';
     D.Options := D.Options + [ofOverwritePrompt];
-  end;
-  if D.Execute then
-  begin
-    if ExtractFileExt(D.FileName)='' then
+    if D.Execute then
     begin
-      if D.FilterIndex=1 then
-        D.FileName := ChangeFileExt(D.FileName,'.png')
-      else D.FileName := ChangeFileExt(D.FileName,'.wmf');
+      if ExtractFileExt(D.FileName)='' then
+      begin
+        if D.FilterIndex=1 then
+          D.FileName := ChangeFileExt(D.FileName,'.png')
+        else
+          D.FileName := ChangeFileExt(D.FileName,'.wmf');
+      end;
+      Diagram.SaveAsPicture( D.FileName );
     end;
-    Diagram.SaveAsPicture( D.FileName );
+  finally
+    D.Free;
   end;
 end;
 
@@ -660,9 +662,8 @@ begin
 end;
 
 procedure TMainForm.OpenFolderActionExecute(Sender: TObject);
-const
-  F : TOpenFolderForm = nil;
 var
+  F : TOpenFolderForm;
   L : TStringList;
   Ints : TClassList;
   Exts : TStringList;
@@ -691,17 +692,14 @@ var
 begin
   L := TStringList.Create;
   Ints := Integrators.Get(TImportIntegrator);
+  F := TOpenFolderForm.Create(nil);
   try
-    if not Assigned(F) then
+    for I := 0 to Ints.Count - 1 do
     begin
-      F := TOpenFolderForm.Create(MainForm);
-      for I := 0 to Ints.Count - 1 do
-      begin
-        Exts := TImportIntegratorClass(Ints[I]).GetFileExtensions;
-        F.FileTypeCombo.Items.Add( '*' + Exts.Names[0]);
-      end;
-      F.FileTypeCombo.ItemIndex := F.FileTypeCombo.Items.Count-1;
+      Exts := TImportIntegratorClass(Ints[I]).GetFileExtensions;
+      F.FileTypeCombo.Items.Add( '*' + Exts.Names[0]);
     end;
+    F.FileTypeCombo.ItemIndex := F.FileTypeCombo.Items.Count-1;
     if F.ShowModal=mrOk then
     begin
       _AddFileNames(L, {F.PathTreeView.Path} './', //!!! Needs TShellTreeView.Path
@@ -712,6 +710,7 @@ begin
         ShowMessage('No files found');
     end;
   finally
+    F.Free;
     L.Free;
     Ints.Free;
   end;

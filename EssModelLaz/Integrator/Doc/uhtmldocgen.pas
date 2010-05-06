@@ -115,8 +115,8 @@ end;
 procedure THtmlDocGen.DocFinished;
 begin
   {$IFDEF Win32}
-  if Assigned(Application.MainForm) then
-    ShellExecute(Application.MainForm.Handle,'open',PChar( DestPath +  'overview.html' ),'',
+  if Assigned(MainForm) then
+    ShellExecute(MainForm.Handle,'open',PChar( DestPath +  'overview.html' ),'',
       PChar( DestPath ),SW_SHOWDEFAULT);
   {$ENDIF}
 end;

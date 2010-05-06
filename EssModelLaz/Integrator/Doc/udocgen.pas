@@ -97,7 +97,7 @@ procedure TDocGen.TraverseModel;
 var
   P : TUnitPackage;
   Mi : TBaseModelIterator;
-  Pro : IEldeanProgress;
+  Pro : TEldeanProgress;
   PCount : integer;
 begin
   //Overview with packagenames
@@ -113,21 +113,24 @@ begin
   end;
   Packages.Reset;
   Pro := TEldeanProgress.Create('Generating documentation...',PCount);
-
-  while Packages.HasNext do
-  begin
-    //Packagedetails
-    P := Packages.Next as TUnitPackage;
-    WritePackageDetail(P);
-    //Class details
-    Mi := TModelIterator.Create(P.GetClassifiers, TMdlClass, Low(TVisibility), ioAlpha);
-    while Mi.HasNext do
-      WriteClassDetail(Mi.Next as TMdlClass);
-    //Interface details
-    Mi := TModelIterator.Create(P.GetClassifiers,TMdlInterface,Low(TVisibility),ioAlpha);
-    while Mi.HasNext do
-      WriteInterfaceDetail(Mi.Next as TMdlInterface);
-    Pro.Tick;
+  try
+    while Packages.HasNext do
+    begin
+      //Packagedetails
+      P := Packages.Next as TUnitPackage;
+      WritePackageDetail(P);
+      //Class details
+      Mi := TModelIterator.Create(P.GetClassifiers, TMdlClass, Low(TVisibility), ioAlpha);
+      while Mi.HasNext do
+        WriteClassDetail(Mi.Next as TMdlClass);
+      //Interface details
+      Mi := TModelIterator.Create(P.GetClassifiers,TMdlInterface,Low(TVisibility),ioAlpha);
+      while Mi.HasNext do
+        WriteInterfaceDetail(Mi.Next as TMdlInterface);
+      Pro.Tick;
+    end;
+  finally
+    Pro.Free;
   end;
 end;
 

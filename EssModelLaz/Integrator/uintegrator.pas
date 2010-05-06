@@ -172,7 +172,7 @@ end;
 procedure TImportIntegrator.BuildModelFrom(FileNames: TStrings);
 var
   I : integer;
-  P : IEldeanProgress;
+  P : TEldeanProgress;
 begin
   Model.Lock;
   try
@@ -181,16 +181,22 @@ begin
     for I := 0 to FileNames.Count-1 do
       CodeProvider.AddSearchPath(ExtractFilePath(FileNames[I]));
     // 'Build' all files..
+    P := nil;
     if FileNames.Count>3 then
       P := TEldeanProgress.Create('Reading files...',FileNames.Count);
-    for I := 0 to FileNames.Count-1 do
-    begin
-      if FilesRead.IndexOf( FileNames[I] )=-1 then
-        BuildModelFrom(FileNames[I], I=0, False)
-      else
-        ErrorHandler.Trace('Skipping file, already parsed: ' + FileNames[I]);
-      if P<>nil then
-        P.Tick;
+    try
+      for I := 0 to FileNames.Count-1 do
+      begin
+        if FilesRead.IndexOf( FileNames[I] )=-1 then
+          BuildModelFrom(FileNames[I], I=0, False)
+        else
+          ErrorHandler.Trace('Skipping file, already parsed: ' + FileNames[I]);
+        if Assigned(P) then
+          P.Tick;
+      end;
+    finally
+      if Assigned(P) then
+        P.Free;
     end;
   finally
     Model.UnLock;
