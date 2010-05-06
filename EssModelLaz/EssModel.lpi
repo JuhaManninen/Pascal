@@ -228,6 +228,7 @@
       <Debugging>
         <GenerateDebugInfo Value="True"/>
         <GenerateDwarf Value="True"/>
+        <UseHeaptrc Value="True"/>
       </Debugging>
     </Linking>
     <Other>
