@@ -71,7 +71,7 @@ type
     procedure CurrentEntityChanged; override;
     procedure SetShowAssoc(const Value: boolean); override;
   public
-    constructor Create(om: TObjectModel; Parent: TWinControl; Feedback : IEldeanFeedback = nil); override;
+    constructor Create(om: TObjectModel; Parent: TWinControl; Feedback : TEldeanFeedback = nil); override;
     destructor Destroy; override;
     procedure InitFromModel; override;
     procedure PaintTo(Canvas: TCanvas; X, Y: integer; SelectedOnly : boolean); override;
@@ -103,7 +103,7 @@ uses uRtfdDiagramFrame, Math, LCLIntf, LCLType, uError, SysUtils,
 
 { TRtfdDiagram }
 
-constructor TRtfdDiagram.Create(om: TObjectModel; Parent: TWinControl; Feedback : IEldeanFeedback = nil);
+constructor TRtfdDiagram.Create(om: TObjectModel; Parent: TWinControl; Feedback : TEldeanFeedback = nil);
 begin
   inherited Create(Om, Parent, Feedback);
   Frame := TRtfdDiagramFrame.Create(Parent, Self);
@@ -482,11 +482,11 @@ begin
   inherited SetPackage(Value);
   if Assigned(FPackage) and (FPackage is TUnitPackage) then
     FPackage.AddListener(Self); // IAfterUnitPackageListener(
-  if Assigned(Frame.ScrollBox) and (not Config.IsTerminating) then
-  begin
-    Frame.ScrollBox.HorzScrollBar.Position := 0;
-    Frame.ScrollBox.VertScrollBar.Position := 0;
-  end;
+  if Assigned(Frame.ScrollBox) then
+    if not Config.IsTerminating then begin
+      Frame.ScrollBox.HorzScrollBar.Position := 0;
+      Frame.ScrollBox.VertScrollBar.Position := 0;
+    end;
 end;
 
 

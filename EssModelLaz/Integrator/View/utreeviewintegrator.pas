@@ -48,7 +48,7 @@ type
     procedure tvModelAddition(Sender: TObject; Node: TTreeNode);
     procedure CurrentEntityChanged; override;
   public
-    constructor Create(om: TObjectModel; Parent: TWinControl; Feedback: IEldeanFeedback = nil); override;
+    constructor Create(om: TObjectModel; Parent: TWinControl; Feedback: TEldeanFeedback = nil); override;
     destructor Destroy; override;
     procedure InitFromModel; override;
     // Listener methods
@@ -284,7 +284,7 @@ begin
 end;
 
 constructor TTreeViewIntegrator.Create(om: TObjectModel;
-  Parent: TWinControl; Feedback: IEldeanFeedback);
+  Parent: TWinControl; Feedback: TEldeanFeedback);
 begin
   inherited Create(Om, Parent, Feedback);
   Frame := TTreeViewFrame.Create(Parent);

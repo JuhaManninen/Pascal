@@ -110,7 +110,7 @@ type
     {$if Defined(DRAG_SUPPORT)}
     Drop : TDropFileTarget;
     {$ifend}
-    Feedback : IEldeanFeedback;
+    Feedback : TEldeanFeedback;
     procedure ProcessCommandLine;
     procedure DoDocGen(IsPreview : boolean; const DestPath : string = '');
     procedure DoXmiFile(const DestFile : string = '');
@@ -160,6 +160,7 @@ begin
   Height := Max( Round(Screen.Height * 0.75), 480 );
   Width := Max( Round(Screen.Width * 0.75) , 640 );
   Caption := uConst.ProgName;
+  Config := TConfig.Create;
   RecentFiles := TStringList.Create;
   RecentFiles.CommaText := Config.ReadStr('RecentFiles','');
   RefreshRecentFiles;
@@ -169,7 +170,7 @@ begin
 //  FBackEnd := TDelphiIntegrator.Create(FModel);
 //  FBackend.CodeProvider := TFileProvider.Create;
   FTreeView := TTreeViewIntegrator.Create(FModel,MainForm.TreePanel,Feedback);
-  TZoomFrame.Create(MainForm.ZoomPanel,Diagram);
+  TZoomFrame.Create(MainForm.ZoomPanel, FDiagram);
 
   {$if Defined(DRAG_SUPPORT)}
   Drop := TDropFileTarget.Create(Self);
@@ -185,7 +186,11 @@ end;
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   Config.IsTerminating := True;
-  Config.WriteStr('RecentFiles',RecentFiles.CommaText);
+  try
+    Config.WriteStr('RecentFiles',RecentFiles.CommaText);
+  except
+    ShowMessage('Failed writing RecentFiles to config settings. Why???');
+  end;
   {$if Defined(DRAG_SUPPORT)}
   if Assigned(Drop) then
     Drop.Unregister;
@@ -194,7 +199,9 @@ begin
 //  FreeAndNil(FBackEnd);
   FreeAndNil(FTreeView);
   FreeAndNil(FModel);
+  FreeAndNil(Feedback);
   FreeAndNil(RecentFiles);
+  FreeAndNil(Config);
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);

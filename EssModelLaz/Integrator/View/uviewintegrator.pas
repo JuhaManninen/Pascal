@@ -39,10 +39,10 @@ type
     function GetCurrentEntity: TModelEntity;
     class procedure SetCurrentEntity(const Value: TModelEntity);
   protected
-    Feedback : IEldeanFeedback;
+    Feedback : TEldeanFeedback;
     procedure CurrentEntityChanged; virtual;
   public
-    constructor Create(om: TObjectModel; Parent: TWinControl; Feedback : IEldeanFeedback = nil); virtual;
+    constructor Create(om: TObjectModel; Parent: TWinControl; Feedback : TEldeanFeedback = nil); virtual;
     destructor Destroy; override;
   public
     //Current entity, all view integratros share the same instance
@@ -50,6 +50,9 @@ type
   end;
 
   //Class to show/edit a model in a powerpointy view
+
+  { TDiagramIntegrator }
+
   TDiagramIntegrator = class(TViewIntegrator)
   private
     FOnUpdateToolbar: TNotifyEvent;
@@ -67,8 +70,10 @@ type
     procedure DoOnUpdateToolbar;
     procedure DoOnUpdateZoom;
   public
-    class function CreateDiagram(om: TObjectModel; Parent: TWinControl; Feedback : IEldeanFeedback = nil) : TDiagramIntegrator;
-    constructor Create(om: TObjectModel; Parent: TWinControl; Feedback : IEldeanFeedback = nil); override;
+    class function CreateDiagram(om: TObjectModel; Parent: TWinControl;
+                          Feedback : TEldeanFeedback = nil) : TDiagramIntegrator;
+    constructor Create(om: TObjectModel; Parent: TWinControl; Feedback : TEldeanFeedback = nil); override;
+    destructor Destroy; override;
     procedure GetDiagramSize(var W,H : integer); virtual; abstract;
     function GetSelectedRect : TRect; virtual; abstract;
     procedure PaintTo(Canvas: TCanvas; X, Y: integer; SelectedOnly : boolean); virtual; abstract;
@@ -105,7 +110,7 @@ var
 
 { TViewIntegrator }
 
-constructor TViewIntegrator.Create(om: TObjectModel; Parent: TWinControl; Feedback : IEldeanFeedback = nil);
+constructor TViewIntegrator.Create(om: TObjectModel; Parent: TWinControl; Feedback : TEldeanFeedback = nil);
 begin
   inherited Create(om);
   Self.Parent := Parent;
@@ -119,9 +124,23 @@ end;
 { TDiagramIntegrator }
 
 //Factoryfunction, creates an instance of TDiagramIntegrator
-class function TDiagramIntegrator.CreateDiagram(om: TObjectModel; Parent: TWinControl; Feedback : IEldeanFeedback = nil): TDiagramIntegrator;
+class function TDiagramIntegrator.CreateDiagram(om: TObjectModel; Parent: TWinControl;
+                           Feedback : TEldeanFeedback = nil): TDiagramIntegrator;
 begin
   Result := TRtfdDiagram.Create(om, Parent, Feedback);
+end;
+
+constructor TDiagramIntegrator.Create(om: TObjectModel;
+  Parent: TWinControl; Feedback: TEldeanFeedback);
+begin
+  inherited Create(om, Parent, Feedback);
+  FShowAssoc := Config.DiShowAssoc;
+  FVisibilityFilter := TVisibility( Config.DiVisibilityFilter );
+end;
+
+destructor TDiagramIntegrator.Destroy;
+begin
+  inherited Destroy;
 end;
 
 procedure TDiagramIntegrator.SetPackage(const Value: TAbstractPackage);
@@ -289,14 +308,6 @@ begin
   uViewIntegrator.SetCurrentEntity(Value);
 end;
 
-
-constructor TDiagramIntegrator.Create(om: TObjectModel;
-  Parent: TWinControl; Feedback: IEldeanFeedback);
-begin
-  inherited Create(om, Parent, Feedback);
-  FShowAssoc := Config.DiShowAssoc;
-  FVisibilityFilter := TVisibility( Config.DiVisibilityFilter );
-end;
 
 initialization
   _ViewIntegrators := TObjectList.Create(False);

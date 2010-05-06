@@ -42,7 +42,7 @@ type
     IdModel : string;
     Output : TMemoryStream;
     NextId : integer;
-    Feedback : IEldeanFeedback;
+    Feedback : TEldeanFeedback;
     //Fernando
     bolWritePackage : boolean;
     dataTypeVoid : TDataType;
@@ -69,7 +69,7 @@ type
                                           bolPrintNameSpace : boolean = True);
     function xmiUUID(Id: string): string;
   public
-    constructor Create(om: TObjectModel; Feedback : IEldeanFeedback = nil); reintroduce;
+    constructor Create(om: TObjectModel; Feedback : TEldeanFeedback = nil); reintroduce;
     destructor Destroy; override;
     procedure InitFromModel; override;
     procedure ShowSaveDialog;
@@ -118,7 +118,7 @@ const
 
 { TXMIExporterArgoUML }
 
-constructor TXMIExporterArgoUML.Create(om: TObjectModel; Feedback : IEldeanFeedback = nil);
+constructor TXMIExporterArgoUML.Create(om: TObjectModel; Feedback : TEldeanFeedback = nil);
 begin
   inherited Create(om);
   Output := TMemoryStream.Create;

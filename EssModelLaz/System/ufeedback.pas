@@ -27,12 +27,11 @@ interface
 uses classes, extctrls;
 
 type
-  IEldeanFeedback = interface(IUnknown)
-    ['{130C7331-3B65-4D90-BF5C-07DF47B17317}']
-    procedure Message(const M : string);
+  TEldeanFeedback = class abstract
+    procedure Message(const M : string); virtual; abstract;
   end;
 
-  TGuiFeedback = class(TInterfacedObject,IEldeanFeedback)
+  TGuiFeedback = class(TEldeanFeedback)
   private
     P : TPanel;
     T : TTimer;
@@ -41,11 +40,11 @@ type
   public
     constructor Create(P : TPanel);
     destructor Destroy; override;
-    procedure Message(const M : string);
+    procedure Message(const M : string); override;
   end;
 
 var
-  NilFeedback : IEldeanFeedback;
+  NilFeedback : TEldeanFeedback;
 
 
 implementation
@@ -98,8 +97,8 @@ end;
 { TNilFeedback }
 
 type
-  TNilFeedback = class(TInterfacedObject,IEldeanFeedback)
-    procedure Message(const M : string);
+  TNilFeedback = class(TEldeanFeedback)
+    procedure Message(const M : string); override;
   end;
 
 procedure TNilFeedback.Message(const M: string);
@@ -111,5 +110,5 @@ end;
 initialization
   NilFeedBack := TNilFeedback.Create;
 finalization
-
+  NilFeedBack.Free;
 end.

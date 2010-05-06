@@ -44,13 +44,13 @@ type
     FWatched: TStringList;
     procedure SetActive(const Value: Boolean);
   protected
-    Feedback : IEldeanFeedback;
+    Feedback : TEldeanFeedback;
     LoadedCount : integer;
     procedure HookChanges; virtual; abstract;
     procedure UnhookChanges; virtual; abstract;
     procedure AddChangeWatch(AName: string);
   public
-    constructor Create(Feedback : IEldeanFeedback = nil);
+    constructor Create(Feedback : TEldeanFeedback = nil);
     destructor Destroy; override;
 
     function LoadStream(const AName: string): TStream; virtual; abstract;
@@ -98,7 +98,7 @@ begin
   end;
 end;
 
-constructor TCodeProvider.Create(Feedback : IEldeanFeedback = nil);
+constructor TCodeProvider.Create(Feedback : TEldeanFeedback = nil);
 begin
   inherited Create;
   FSearchPath := TStringList.Create;

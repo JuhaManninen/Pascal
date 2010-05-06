@@ -67,6 +67,7 @@ constructor TConfig.Create;
 var
   DC : integer;
 begin
+  IsTerminating := False;
   IsLimitedColors := False;
   DC := GetDC(0);
   IsLimitedColors := GetDeviceCaps( DC ,BITSPIXEL) <= 8;
@@ -140,7 +141,6 @@ end;
 
 procedure TConfig.WriteStr(const Key, Value: string);
 begin
-  // ToDo!!! This raises an exception. Why? Could not reproduce in a small test application.
   Reg.WriteString(Key,Value);
 end;
 
@@ -151,8 +151,4 @@ begin
   Reg.WriteInteger('DiVisibilityFilter',FDiVisibilityFilter);
 end;
 
-initialization
-  Config := TConfig.Create;
-finalization
-  Config.Free;
 end.

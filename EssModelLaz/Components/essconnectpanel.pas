@@ -493,7 +493,7 @@ end;
 
 constructor TessConnectPanel.Create(AOwner: TComponent);
 begin
-  inherited;
+  inherited Create(AOwner);
   FManagedObjects := TManagedList.Create(false);
   FConnections := TConnectionList.Create(True);
   Color := clWhite;

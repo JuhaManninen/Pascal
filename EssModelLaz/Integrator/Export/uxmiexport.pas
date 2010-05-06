@@ -38,7 +38,7 @@ type
     LaterList : TStringList;
     Output : TMemoryStream;
     NextId : integer;
-    Feedback : IEldeanFeedback;
+    Feedback : TEldeanFeedback;
     procedure WritePackage(P : TAbstractPackage);
     procedure WriteLogicPackage(L : TLogicPackage);
     procedure WriteUnitPackage(U : TUnitPackage);
@@ -57,7 +57,7 @@ type
     function Xml(const S : string) : string;
     procedure Write(const S : string);
   public
-    constructor Create(om: TObjectModel; Feedback : IEldeanFeedback = nil); reintroduce;
+    constructor Create(om: TObjectModel; Feedback : TEldeanFeedback = nil); reintroduce;
     destructor Destroy; override;
     procedure InitFromModel; override;
     procedure ShowSaveDialog;
@@ -92,7 +92,7 @@ const
 
 { TXMIExporter }
 
-constructor TXMIExporter.Create(om: TObjectModel; Feedback : IEldeanFeedback = nil);
+constructor TXMIExporter.Create(om: TObjectModel; Feedback : TEldeanFeedback = nil);
 begin
   inherited Create(om);
   Output := TMemoryStream.Create;
