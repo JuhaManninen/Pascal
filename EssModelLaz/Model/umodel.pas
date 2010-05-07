@@ -185,6 +185,8 @@ type
     procedure BeforeAddChild(Sender: TModelEntity; NewChild: TModelEntity); override;
     procedure BeforeRemove(Sender: TModelEntity); override;
     procedure BeforeEntityChange(Sender: TModelEntity); override;
+  public
+    property xImplements: TModelEntityList read FImplements;
   end;
 
 
@@ -199,7 +201,7 @@ type
   //Represents the link between one package that uses another
   TUnitDependency = class(TModelEntity)
   public
-    Package : TUnitPackage;
+    xPackage : TUnitPackage;
   end;
 
   TUnitPackage = class(TAbstractPackage)
@@ -216,9 +218,13 @@ type
     function AddInterface(const NewName: string): TMdlInterface;
     function AddDatatype(const NewName: string): TDataType;
     function AddUnitDependency(U : TUnitPackage; Visibility : TVisibility): TUnitDependency;
-    function FindClassifier(const CName: string; RaiseException: boolean = False; TheClass : TModelEntityClass = nil; CaseSense : boolean = False): TClassifier;
+    function FindClassifier(const CName: string; RaiseException: boolean = False;
+        TheClass : TModelEntityClass = nil; CaseSense : boolean = False): TClassifier;
     function GetClassifiers : TBaseModelIterator;
     function GetUnitDependencies : TBaseModelIterator;
+  public
+    property Classifiers: TModelEntityList read FClassifiers;
+    property UnitDependencies: TModelEntityList read FUnitDependencies;
   end;
 
 
@@ -233,10 +239,13 @@ type
     destructor Destroy; override;
     function AddUnit(const NewUnitName: string): TUnitPackage;
     //Might need a AddLogicPackage also
-    function FindUnitPackage(const PName: string; RaiseException: boolean = False; CaseSense : boolean = False): TUnitPackage;
+    function FindUnitPackage(const PName: string; RaiseException: boolean = False;
+                             CaseSense : boolean = False): TUnitPackage;
     function GetPackages : TBaseModelIterator;
     function GetAllUnitPackages : TBaseModelIterator;
     function GetAllClassifiers : TBaseModelIterator;
+  public
+    property Packages: TModelEntityList read FPackages;
   end;
 
 
@@ -259,6 +268,7 @@ type
   end;
 
   function AllClassesPackage : TAbstractPackage;
+
 
 implementation
 
@@ -287,6 +297,9 @@ type
 
 const
   CompareFunc : array[boolean] of TStrCompare = (CompareText, CompareStr);
+
+var
+  _AllClassesPackage : TAbstractPackage = nil;
 
 { TObjectModel }
 
@@ -444,10 +457,7 @@ begin
 end;
 
 function TLogicPackage.GetPackages: TBaseModelIterator;
-var
-  i: LongInt;
 begin
-  i := FPackages.Count;
   Result := TModelIterator.Create(FPackages);
 end;
 
@@ -463,14 +473,18 @@ var
     P : TModelEntity;
   begin
     Mi := L.GetPackages;
-    while Mi.HasNext do
-    begin
-      P := Mi.Next;
-      if P is TLogicPackage then
-        InAddNested(P as TLogicPackage)
-      else //Not logicpackage, must be unitpackage.
-        if (P.Name<>UNKNOWNPACKAGE_NAME) then
-          List.Add( P );
+    try
+      while Mi.HasNext do
+      begin
+        P := Mi.Next;
+        if P is TLogicPackage then
+          InAddNested(P as TLogicPackage)
+        else //Not logicpackage, must be unitpackage.
+          if (P.Name<>UNKNOWNPACKAGE_NAME) then
+            List.Add( P );
+      end;
+    finally
+      Mi.Free;
     end;
   end;
 
@@ -493,11 +507,19 @@ begin
   List := TModelEntityList.Create(False);
   try
     Pmi := GetAllUnitPackages;
-    while Pmi.HasNext do
-    begin
-      Cmi := (Pmi.Next as TUnitPackage).GetClassifiers;
-      while Cmi.HasNext do
-        List.Add( Cmi.Next );
+    try
+      while Pmi.HasNext do
+      begin
+        Cmi := (Pmi.Next as TUnitPackage).GetClassifiers;
+        try
+          while Cmi.HasNext do
+            List.Add( Cmi.Next );
+        finally
+          Cmi.Free;
+        end;
+      end;
+    finally
+      Pmi.Free;
     end;
     Result := TModelIterator.Create(List,True);
   finally
@@ -522,13 +544,10 @@ begin
 end;
 
 function TUnitPackage.AddClass(const NewName: string): TMdlClass;
-var
-  i: LongInt;
 begin
   Result := TMdlClass.Create(Self);
   Result.FName := NewName;
   FClassifiers.Add(Result);
-  i := FClassifiers.Count;
   try
     Fire(mtBeforeAddChild, Result);
   except
@@ -587,28 +606,37 @@ function TUnitPackage.FindClassifier(const CName: string;
   CaseSense : boolean = False): TClassifier;
 var
   C : TClassifier;
-  Mi : TBaseModelIterator;
+  Mim : TBaseModelIterator;
   P : TUnitPackage;
   F : TStrCompare;
 
   function InFind(P : TUnitPackage) : TClassifier;
   var
-    Mi : TBaseModelIterator;
+    Mi, tempMi : TBaseModelIterator;
   begin
     Result := nil;
+    tempMi := nil;
     //Search in this unit
-    if Assigned(TheClass) then
-      Mi := TModelIterator.Create( P.GetClassifiers , TheClass )
+    if Assigned(TheClass) then begin
+      tempMi := TModelIterator.Create(P.Classifiers);
+      Mi := TModelIterator.Create(tempMi, TheClass);
+    end
     else
       Mi := P.GetClassifiers;
-    while Mi.HasNext do
-    begin
-      C := Mi.Next as TClassifier;
-      if F(C.Name,CName)=0 then
+    try
+      while Mi.HasNext do
       begin
-        Result := C;
-        Break;
+        C := Mi.Next as TClassifier;
+        if F(C.Name,CName)=0 then
+        begin
+          Result := C;
+          Break;
+        end;
       end;
+    finally
+      Mi.Free;
+      if Assigned(tempMi) then
+        tempMi.Free;
     end;
   end;
 
@@ -619,13 +647,17 @@ begin
   //If nil search in public dependencies
   if not Assigned(Result) then
   begin
-    Mi := GetUnitDependencies;
-    while Mi.HasNext do
-    begin
-      P := (Mi.Next as TUnitDependency).Package;
-      Result := InFind(P);
-      if Assigned(Result) then
-        Break;
+    Mim := GetUnitDependencies;
+    try
+      while Mim.HasNext do
+      begin
+        P := (Mim.Next as TUnitDependency).xPackage;
+        Result := InFind(P);
+        if Assigned(Result) then
+          Break;
+      end;
+    finally
+      Mim.Free;
     end;
   end;
   if not Assigned(Result) and RaiseException then
@@ -633,10 +665,7 @@ begin
 end;
 
 function TUnitPackage.GetClassifiers: TBaseModelIterator;
-var
-  i: LongInt;
 begin
-  i := FClassifiers.Count;
   Result := TModelIterator.Create( FClassifiers );
 end;
 
@@ -644,7 +673,7 @@ function TUnitPackage.AddUnitDependency(U: TUnitPackage; Visibility: TVisibility
 begin
   Assert( (U<>Self) and (U<>nil) ,ClassName + '.AddUnitDependency invalid parameter');
   Result := TUnitDependency.Create( Self );
-  Result.Package := U;
+  Result.xPackage := U;
   Result.Visibility := Visibility;
   FUnitDependencies.Add( Result );
 end;
@@ -780,13 +809,27 @@ begin
 end;
 
 function TMdlClass.GetOperations: TBaseModelIterator;
+var
+  tempMi: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create( GetFeatures , TMdlOperation);
+  tempMi := GetFeatures;
+  try
+    Result := TModelIterator.Create( tempMi , TMdlOperation);
+  finally
+    tempMi.Free;
+  end;
 end;
 
 function TMdlClass.GetAttributes: TBaseModelIterator;
+var
+  tempMi: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create( GetFeatures , TAttribute);
+  tempMi := GetFeatures;
+  try
+    Result := TModelIterator.Create( tempMi , TAttribute);
+  finally
+    tempMi.Free;
+  end;
 end;
 
 function TMdlClass.GetImplements: TBaseModelIterator;
@@ -796,10 +839,15 @@ end;
 
 //Returns a list of classes that inherits from this class.
 function TMdlClass.GetDescendants: TBaseModelIterator;
+var
+  tempMi: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create(
-    (Root as TLogicPackage).GetAllClassifiers,
-    TClassDescendantFilter.Create(Self) );
+  tempMi := (Root as TLogicPackage).GetAllClassifiers;
+  try
+    Result := TModelIterator.Create(tempMi, TClassDescendantFilter.Create(Self));
+  finally
+    tempMi.Free;
+  end;
 end;
 
 
@@ -809,33 +857,48 @@ end;
 }
 function TMdlClass.FindOperation(O: TMdlOperation): TMdlOperation;
 var
-  Mi,Omi1,Omi2 : TBaseModelIterator;
+  Mi, Omi1, Omi2 : TBaseModelIterator;
   O2 : TMdlOperation;
-  label Skip;
+  IsMatch: Boolean;
 begin
   Assert(O<>nil,ClassName + '.FindOperation invalid parameter');
   Result := nil;
   Mi := GetOperations;
-  while Mi.HasNext do
-  begin
-    O2 := Mi.Next as TMdlOperation;
-    //Compare nr of parameters
-    if O.FParameters.Count <> O2.FParameters.Count then
-      Continue;
-    { TODO -ovk : case sensitive match? java/delphi. only delphi-parser calls this method. }
-    //Compare operation name
-    if CompareText(O.Name,O2.Name)<>0 then
-      Continue;
-    //Compare parameters
-    Omi1 := O.GetParameters;
-    Omi2 := O2.GetParameters;
-    while Omi1.HasNext do
-      if CompareText((Omi1.Next as TParameter).Name,(Omi2.Next as TParameter).Name)<>0 then
-        goto Skip;
-    //Ok, match
-    Result := O2;
-    Break;
-  Skip:
+  try
+    while Mi.HasNext do
+    begin
+      O2 := Mi.Next as TMdlOperation;
+      //Compare nr of parameters
+      if O.FParameters.Count <> O2.FParameters.Count then
+        Continue;
+      { TODO -ovk : case sensitive match? java/delphi. only delphi-parser calls this method. }
+      //Compare operation name
+      if CompareText(O.Name,O2.Name)<>0 then
+        Continue;
+      //Compare parameters
+      Omi1 := O.GetParameters;
+      Omi2 := O2.GetParameters;
+      try
+        IsMatch := True;
+        while Omi1.HasNext do
+        begin
+          if CompareText((Omi1.Next as TParameter).Name,
+                         (Omi2.Next as TParameter).Name)<>0 then
+            IsMatch := False;
+            Break;
+        end;
+        if IsMatch then  //Ok, match
+        begin
+          Result := O2;
+          Break;
+        end;
+      finally
+        Omi2.Free;
+        Omi1.Free;
+      end;
+    end;
+  finally
+    Mi.Free;
   end;
 end;
 
@@ -1048,8 +1111,15 @@ begin
 end;
 }
 function TMdlInterface.GetOperations: TBaseModelIterator;
+var
+  tempMi: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create( GetFeatures , TMdlOperation);
+  tempMi := GetFeatures;
+  try
+    Result := TModelIterator.Create( tempMi , TMdlOperation);
+  finally
+    tempMi.Free;
+  end;
 end;
 
 procedure TMdlInterface.SetAncestor(const Value: TMdlInterface);
@@ -1060,10 +1130,20 @@ end;
 
 //Returns a list of classes that implements this interface.
 function TMdlInterface.GetImplementingClasses: TBaseModelIterator;
+var
+//  List: TModelEntityList;
+  TempMi: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create(
+//  List := (Root as TLogicPackage).GetAllClassifierList;
+  TempMi := (Root as TLogicPackage).GetAllClassifiers;
+  try
+    Result := TModelIterator.Create(TempMi, TInterfaceImplementsFilter.Create(Self));
+  finally
+    TempMi.Free;
+  end;
+{  Result := TModelIterator.Create(
     (Root as TLogicPackage).GetAllClassifiers,
-    TInterfaceImplementsFilter.Create(Self) );
+    TInterfaceImplementsFilter.Create(Self) );  }
 end;
 
 function TMdlInterface.AddAttribute(const NewName: string): TAttribute;
@@ -1081,8 +1161,15 @@ begin
 end;
 
 function TMdlInterface.GetAttributes : TBaseModelIterator;
+var
+  tempMi: TBaseModelIterator;
 begin
-  Result := TModelIterator.Create( GetFeatures , TAttribute);
+  tempMi := GetFeatures;
+  try
+    Result := TModelIterator.Create( GetFeatures , TAttribute);
+  finally
+    tempMi.Free;
+  end;
 end;
 
 { TDataType }
@@ -1147,8 +1234,6 @@ end;
 
 //Unique Flag-instance, if Integrator.CurrentEntity=AllClassesPackage then show all classes
 function AllClassesPackage : TAbstractPackage;
-const
-  _AllClassesPackage : TAbstractPackage = nil;
 begin
   if _AllClassesPackage=nil then
     _AllClassesPackage := TAbstractPackage.Create(nil);
@@ -1179,6 +1264,12 @@ begin
   Items[AIndex] := AValue;
 end;
 
+
+initialization
+
+finalization
+  if Assigned(_AllClassesPackage) then
+    _AllClassesPackage.Free;
 
 end.
 

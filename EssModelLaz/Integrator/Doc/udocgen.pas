@@ -29,6 +29,9 @@ uses uIntegrator, uModel, uModelEntity;
 
 type
   //Baseclass for documenation generators.
+
+  { TDocGen }
+
   TDocGen = class(TExportIntegrator)
   protected
     Packages : TBaseModelIterator;
@@ -43,6 +46,8 @@ type
   public
     DestPath : string;     //Let user select path in dialog if not set
     IsPreview : boolean;   //If true generate doc in tempdir
+    constructor Create(om: TObjectModel); reintroduce;
+    destructor Destroy; override;
     procedure InitFromModel; override;
   end;
 
@@ -60,6 +65,19 @@ uses uIterators,
 
 { TDocGen }
 
+constructor TDocGen.Create(om: TObjectModel);
+begin
+  inherited Create(om);
+  Packages := nil;
+end;
+
+destructor TDocGen.Destroy;
+begin
+  if Assigned(Packages) then
+    Packages.Free;
+  inherited Destroy;
+end;
+
 procedure TDocGen.InitFromModel;
 begin
   if IsPreview then
@@ -72,7 +90,7 @@ begin
     DestPath := DestPath + PathDelim;
 
   //Get all unitpackages sorted in name order
-  Packages := TModelIterator.Create(Model.ModelRoot.GetAllUnitPackages,ioAlpha);
+  Packages := TModelIterator.Create(Model.ModelRoot.GetAllUnitPackages, ioAlpha);
   DocStart;
   TraverseModel;
   DocFinished;
@@ -96,7 +114,7 @@ end;
 procedure TDocGen.TraverseModel;
 var
   P : TUnitPackage;
-  Mi : TBaseModelIterator;
+  Mi, tempMi : TBaseModelIterator;
   Pro : TEldeanProgress;
   PCount : integer;
 begin
@@ -120,13 +138,25 @@ begin
       P := Packages.Next as TUnitPackage;
       WritePackageDetail(P);
       //Class details
-      Mi := TModelIterator.Create(P.GetClassifiers, TMdlClass, Low(TVisibility), ioAlpha);
-      while Mi.HasNext do
-        WriteClassDetail(Mi.Next as TMdlClass);
+      tempMi := TModelIterator.Create(P.Classifiers);
+      Mi := TModelIterator.Create(tempMi, TMdlClass, Low(TVisibility), ioAlpha);
+      try
+        while Mi.HasNext do
+          WriteClassDetail(Mi.Next as TMdlClass);
+      finally
+        Mi.Free;
+        tempMi.Free;
+      end;
       //Interface details
-      Mi := TModelIterator.Create(P.GetClassifiers,TMdlInterface,Low(TVisibility),ioAlpha);
-      while Mi.HasNext do
-        WriteInterfaceDetail(Mi.Next as TMdlInterface);
+      tempMi := TModelIterator.Create(P.Classifiers);
+      Mi := TModelIterator.Create(tempMi, TMdlInterface, Low(TVisibility), ioAlpha);
+      try
+        while Mi.HasNext do
+          WriteInterfaceDetail(Mi.Next as TMdlInterface);
+      finally
+        Mi.Free;
+        tempMi.Free;
+      end;
       Pro.Tick;
     end;
   finally

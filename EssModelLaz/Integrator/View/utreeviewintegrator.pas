@@ -161,41 +161,53 @@ end;
 procedure TTreeViewIntegrator.BuildAllClassesView(ATreeRoot: TTreeNode;
   AEntity: TLogicPackage);
 var
-  Ci: TBaseModelIterator;
+  Ci, tempCi: TBaseModelIterator;
   cent: TModelEntity;
   newRoot: TTreeNode;
 begin
-  Ci := TModelIterator.Create(Model.ModelRoot.GetAllClassifiers, ioAlpha);
-  while Ci.HasNext do
-  begin
-    cent := Ci.Next;
-    if not ((cent is TMdlClass) or (cent is TMdlInterface)) then continue;
+  tempCi := Model.ModelRoot.GetAllClassifiers;
+  Ci := TModelIterator.Create(tempCi, ioAlpha);
+  try
+    while Ci.HasNext do
+    begin
+      cent := Ci.Next;
+      if not ((cent is TMdlClass) or (cent is TMdlInterface)) then continue;
 
-    newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, cent.Name, cent);
-    if cent is TMdlClass then
-      BuildClassView(newRoot, cent as TMdlClass)
-    else if cent is TMdlInterface then
-      BuildInterfaceView(newRoot, cent as TMdlInterface);
+      newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, cent.Name, cent);
+      if cent is TMdlClass then
+        BuildClassView(newRoot, cent as TMdlClass)
+      else if cent is TMdlInterface then
+        BuildInterfaceView(newRoot, cent as TMdlInterface);
+    end;
+  finally
+    Ci.Free;
+    tempCi.Free;
   end;
 end;
 
 procedure TTreeViewIntegrator.BuildLogicPackageView(ATreeRoot: TTreeNode;
   AEntity: TLogicPackage);
 var
-  Mi: TBaseModelIterator;
+  Mi, tempMi: TBaseModelIterator;
   ent: TModelEntity;
   newRoot: TTreeNode;
 begin
-  Mi := TModelIterator.Create(AEntity.GetPackages, ioAlpha);
-  while Mi.HasNext do
-  begin
-    ent := Mi.Next;
-    newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, (ent as TAbstractPackage).Name, ent);
-    (newRoot as TViewNode).FIsImplementation := True;
-    if ent is TUnitPackage then
-      BuildUnitPackageView(newRoot, ent as TUnitPackage)
-    else
-      BuildLogicPackageView(newRoot, ent as TLogicPackage);
+  tempMi := AEntity.GetPackages;
+  Mi := TModelIterator.Create(tempMi, ioAlpha);
+  try
+    while Mi.HasNext do
+    begin
+      ent := Mi.Next;
+      newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, (ent as TAbstractPackage).Name, ent);
+      (newRoot as TViewNode).FIsImplementation := True;
+      if ent is TUnitPackage then
+        BuildUnitPackageView(newRoot, ent as TUnitPackage)
+      else
+        BuildLogicPackageView(newRoot, ent as TLogicPackage);
+    end;
+  finally
+    Mi.Free;
+    tempMi.Free;
   end;
   ATreeRoot.Expand(False);
 end;
@@ -203,83 +215,119 @@ end;
 procedure TTreeViewIntegrator.BuildUnitPackageView(ATreeRoot: TTreeNode;
   AEntity: TUnitPackage);
 var
-  Mi: TBaseModelIterator;
+  Mi, tempMi: TBaseModelIterator;
   ent: TModelEntity;
   newRoot: TTreeNode;
 begin
-  Mi := TModelIterator.Create(AEntity.GetUnitDependencies, ioAlpha);
-  if Mi.Count > 0 then
-  begin
-    newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, 'dependencies', nil);
+  // UnitDependencies
+  tempMi := AEntity.GetUnitDependencies;
+  Mi := TModelIterator.Create(tempMi, ioAlpha);
+  try
+    if Mi.Count > 0 then
+    begin
+      newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, 'dependencies', nil);
+      while Mi.HasNext do
+      begin
+        ent := Mi.Next;
+        ATreeRoot.Owner.AddChildObject(newRoot, (ent as TUnitDependency).xPackage.Name,
+                                                (ent as TUnitDependency).xPackage);
+      end;
+    end;
+  finally
+    Mi.Free;
+    tempMi.Free;
+  end;
+  // Classifiers
+  tempMi := AEntity.GetClassifiers;
+  Mi := TModelIterator.Create(tempMi, ioAlpha);
+  try
     while Mi.HasNext do
     begin
-      ent := Mi.Next;
-      ATreeRoot.Owner.AddChildObject(newRoot, (ent as TUnitDependency).Package.Name, (ent as TUnitDependency).Package);
+      ent := Mi.Next as TClassifier;
+      if (ent is TMdlClass) or (ent is TMdlInterface) then
+      begin
+        newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, ent.Name, ent);
+        (newRoot as TViewNode).FIsImplementation := True;
+        if ent is TMdlClass then
+          BuildClassView(newRoot, ent as TMdlClass)
+        else
+          BuildInterfaceView(newRoot, ent as TMdlInterface)
+      end;
     end;
-  end;
-  Mi := TModelIterator.Create(AEntity.GetClassifiers, ioAlpha);
-  while Mi.HasNext do
-  begin
-    ent := Mi.Next as TClassifier;
-    if (ent is TMdlClass) or (ent is TMdlInterface) then
-    begin
-      newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, ent.Name, ent);
-      (newRoot as TViewNode).FIsImplementation := True;
-      if ent is TMdlClass then
-        BuildClassView(newRoot, ent as TMdlClass)
-      else
-        BuildInterfaceView(newRoot, ent as TMdlInterface)
-    end;
+  finally
+    Mi.Free;
+    tempMi.Free;
   end;
 end;
 
 procedure TTreeViewIntegrator.BuildClassView(ATreeRoot: TTreeNode; AEntity: TMdlClass);
 var
-  Mi: TBaseModelIterator;
+  Mi, tempMi: TBaseModelIterator;
   newRoot: TTreeNode;
   ent: TModelEntity;
 begin
   if Assigned(AEntity.Ancestor) then
     ATreeRoot.Owner.AddChildObject(ATreeRoot, 'Ancestor: ' + AEntity.Ancestor.Name, AEntity.Ancestor);
-  Mi := TModelIterator.Create(AEntity.GetImplements, ioAlpha);
-  if Mi.Count > 0 then
-  begin
-    newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, 'interfaces', nil);
-    while Mi.HasNext do
+  // Implements
+  tempMi := AEntity.GetImplements;
+  Mi := TModelIterator.Create(tempMi, ioAlpha);
+  try
+    if Mi.Count > 0 then
     begin
-      ent := Mi.Next;
-      ATreeRoot.Owner.AddChildObject(newRoot, ent.Name, ent);
+      newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, 'interfaces', nil);
+      while Mi.HasNext do
+      begin
+        ent := Mi.Next;
+        ATreeRoot.Owner.AddChildObject(newRoot, ent.Name, ent);
+      end;
     end;
+  finally
+    Mi.Free;
+    tempMi.Free;
   end;
-  Mi := TModelIterator.Create(AEntity.GetDescendants, ioAlpha);
-  if Mi.Count > 0 then
-  begin
-    newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, 'subclasses', nil);
-    while Mi.HasNext do
+  // Descendants
+  tempMi := AEntity.GetDescendants;
+  Mi := TModelIterator.Create(tempMi, ioAlpha);
+  try
+    if Mi.Count > 0 then
     begin
-      ent := Mi.Next;
-      ATreeRoot.Owner.AddChildObject(newRoot, ent.Name, ent);
+      newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, 'subclasses', nil);
+      while Mi.HasNext do
+      begin
+        ent := Mi.Next;
+        ATreeRoot.Owner.AddChildObject(newRoot, ent.Name, ent);
+      end;
     end;
+  finally
+    Mi.Free;
+    tempMi.Free;
   end;
 end;
 
 procedure TTreeViewIntegrator.BuildInterfaceView(ATreeRoot: TTreeNode; AEntity: TMdlInterface);
 var
-  Mi: TBaseModelIterator;
+  Mi, tempMi: TBaseModelIterator;
   newRoot: TTreeNode;
   ent: TModelEntity;
 begin
   if Assigned(AEntity.Ancestor) then
-    ATreeRoot.Owner.AddChildObject(ATreeRoot, 'Ancestor: ' + AEntity.Ancestor.Name, AEntity.Ancestor);
-  Mi := TModelIterator.Create(AEntity.GetImplementingClasses, ioAlpha);
-  if Mi.Count > 0 then
-  begin
-    newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, 'implementors', nil);
-    while Mi.HasNext do
+    ATreeRoot.Owner.AddChildObject(ATreeRoot, 'Ancestor: ' + AEntity.Ancestor.Name,
+                                   AEntity.Ancestor);
+  tempMi := AEntity.GetImplementingClasses;
+  Mi := TModelIterator.Create(tempMi, ioAlpha);
+  try
+    if Mi.Count > 0 then
     begin
-      ent := Mi.Next;
-      ATreeRoot.Owner.AddChildObject(newRoot, ent.Name, ent);
+      newRoot := ATreeRoot.Owner.AddChildObject(ATreeRoot, 'implementors', nil);
+      while Mi.HasNext do
+      begin
+        ent := Mi.Next;
+        ATreeRoot.Owner.AddChildObject(newRoot, ent.Name, ent);
+      end;
     end;
+  finally
+    Mi.Free;
+    tempMi.Free;
   end;
 end;
 

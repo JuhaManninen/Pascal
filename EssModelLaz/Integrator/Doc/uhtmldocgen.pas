@@ -181,7 +181,7 @@ begin
   TempForm := TForm.CreateNew(nil);
   Di := TDiagramIntegrator.CreateDiagram(Model, TempForm);
   try
-    Di.Package := P;
+    Di.xPackage := P;
     Di.InitFromModel;
     Di.GetDiagramSize(W,H);
     Clicks := Di.GetClickAreas;

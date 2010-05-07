@@ -89,7 +89,7 @@ type
     procedure UnHideAllElements; virtual; abstract;
 
     //Current package
-    property Package: TAbstractPackage read FPackage write SetPackage;
+    property xPackage: TAbstractPackage read FPackage write SetPackage;
 
     property VisibilityFilter : TVisibility read FVisibilityFilter write SetVisibilityFilter;
     property OnUpdateToolbar : TNotifyEvent read FOnUpdateToolbar write FOnUpdateToolbar;

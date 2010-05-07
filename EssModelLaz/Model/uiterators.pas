@@ -40,11 +40,12 @@ type
     FNext : TModelEntity;
     FHasNext : boolean;
   private
-    procedure Init(List : TBaseModelIterator; Filter : TBaseIteratorFilter; Order : TIteratorOrder);
+    procedure Init(List: TBaseModelIterator; Filter: TBaseIteratorFilter; Order: TIteratorOrder);
   protected
     procedure Advance; virtual;
   public
     constructor Create(ObList: TModelEntityList; MakeCopy: boolean = False); overload;
+//    constructor Create(ObList: TModelEntityList; Order : TIteratorOrder = ioNone); overload;
     constructor Create(List: TBaseModelIterator; Filter: TBaseIteratorFilter; Order : TIteratorOrder = ioNone); overload;
     constructor Create(List: TBaseModelIterator;
       OneClass : TModelEntityClass;
@@ -114,7 +115,21 @@ begin
   Advance;
 end;
 
-
+{
+constructor TModelIterator.Create(ObList: TModelEntityList; Order : TIteratorOrder = ioNone);
+begin
+  inherited Create;
+  OwnsItems := False;
+  FItems := ObList;  // Reference same list instead of copy
+  //Sort
+  case Order of
+    ioNone : ;
+    ioVisibility : FItems.Sort( SortVisibility );
+    ioAlpha      : FItems.Sort( SortAlpha );
+  end;
+  Advance;
+end;
+}
 //Creates an iterator based on another iterator, filter with Filter, sort on Order.
 constructor TModelIterator.Create(List: TBaseModelIterator; Filter : TBaseIteratorFilter; Order : TIteratorOrder = ioNone);
 begin
@@ -151,7 +166,6 @@ begin
 end;
 
 
-
 destructor TModelIterator.Destroy;
 begin
   if OwnsItems then
@@ -182,7 +196,8 @@ end;
 
 //Called by all iterator constructors that has an iterator as a parameter
 //Initializes iterator
-procedure TModelIterator.Init(List: TBaseModelIterator; Filter: TBaseIteratorFilter; Order : TIteratorOrder);
+procedure TModelIterator.Init(List: TBaseModelIterator; Filter: TBaseIteratorFilter;
+                              Order : TIteratorOrder);
 var
   E : TModelEntity;
 begin
@@ -196,6 +211,7 @@ begin
       if Filter.Accept( E ) then
         FItems.Add( E );
     end;
+    Filter.Free;   // Created by caller and not needed any more.
   end
   else begin //Not filtered
     while List.HasNext do

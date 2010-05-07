@@ -44,6 +44,9 @@ type
   end;
 
   { Wrapper around a control managed by essConnectPanel }
+
+  { TManagedObject }
+
   TManagedObject = class
   private
     FSelected: Boolean;
@@ -58,6 +61,7 @@ type
     FOnDblClick :TNotifyEvent;
     property Selected: Boolean read FSelected write SetSelected;
   public
+    constructor Create(ABox: TRtfdBox);
     destructor Destroy; override;
     property Box: TRtfdBox read FBox;
   end;
@@ -388,8 +392,7 @@ begin
   C.Visible := True;
   if FindManagedControl(C) = nil then
   begin
-    newObj := TManagedObject.Create;
-    newObj.FBox := ABox;
+    newObj := TManagedObject.Create(ABox);
     FManagedObjects.Add(newObj);
 
     crkObj := TCrackControl(C);
@@ -501,6 +504,14 @@ begin
   UseDockManager := True;
 end;
 
+destructor TessConnectPanel.Destroy;
+begin
+  FreeAndNil(TempHidden);
+  FreeAndNil(FManagedObjects);
+  FreeAndNil(FConnections);
+  inherited;
+end;
+
 procedure TessConnectPanel.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
@@ -519,16 +530,6 @@ begin
     if found <> Self then
       TCrackControl(found).DblClick;
   end;
-end;
-
-destructor TessConnectPanel.Destroy;
-begin
-  FreeAndNil(TempHidden);
-  if Assigned(FManagedObjects) then
-    FreeAndNil(FManagedObjects);
-  if Assigned(FConnections) then
-    FreeAndNil(FConnections);
-  inherited;
 end;
 
 function TessConnectPanel.FindManagedControl(AControl: TControl): TManagedObject;
@@ -987,6 +988,7 @@ procedure TessConnectPanel.SelectObjectsInRect(SelRect: TRect);
 var
   i: Integer;
   r1,r2: TRect;
+  MO: TManagedObject;
 begin
   r1 := SelRect;
   if (SelRect.Top > SelRect.Bottom) then
@@ -1002,10 +1004,11 @@ begin
 
   for i:=0 to FManagedObjects.Count -1 do
   begin
-    r1 := FManagedObjects[i].FBox.BoundsRect;
+    MO := FManagedObjects[i];
+    r1 := MO.FBox.BoundsRect;
     IntersectRect(r2,SelRect,r1);
-    if EqualRect(r1,r2) and FManagedObjects[i].FBox.Visible then
-      FManagedObjects[i].Selected := True;
+    if EqualRect(r1,r2) and MO.FBox.Visible then
+      MO.Selected := True;
   end;
 end;
 
@@ -1053,38 +1056,45 @@ end;
 procedure TessConnectPanel.SetSelectedOnly(const Value : boolean);
 var
   I : integer;
+  MO: TManagedObject;
 begin
   if FSelectedOnly <> Value then
   begin
     FSelectedOnly := Value;
-
     if FSelectedOnly then
     begin
       TempHidden.Clear;
       for i:=0 to FManagedObjects.Count -1 do
-        if (not FManagedObjects[i].Selected) and
-            FManagedObjects[i].FBox.Visible then
+      begin
+        MO := FManagedObjects[i];
+        if (not MO.Selected) and MO.FBox.Visible then
         begin
-          FManagedObjects[i].FBox.Visible := False;
-          TempHidden.Add(FManagedObjects[i]);
+          MO.FBox.Visible := False;
+          TempHidden.Add(MO);
         end;
+      end;
     end
-    else
-    begin
+    else begin
       for I := 0 to TempHidden.Count-1 do
         TempHidden[I].FBox.Visible := True;
       TempHidden.Clear;
     end;
-
   end;
 end;
 
 
 { TManagedObject }
 
+constructor TManagedObject.Create(ABox: TRtfdBox);
+begin
+  inherited Create;
+  FBox := ABox;
+end;
+
 destructor TManagedObject.Destroy;
 begin
-  if Assigned(FBox) then FreeAndNil(FBox);
+//!!!Mem  if Assigned(FBox) then
+//    FreeAndNil(FBox);
   inherited;
 end;
 

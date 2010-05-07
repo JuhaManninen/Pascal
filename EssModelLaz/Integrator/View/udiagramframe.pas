@@ -145,11 +145,15 @@ end;
 
 procedure TDiagramFrameListener.AfterChange(Sender: TModelEntity);
 var
-  HasModel : boolean;
+  Mi: TBaseModelIterator;
 begin
-  HasModel := FFrameOwner.Model.ModelRoot.GetAllUnitPackages.Count > 0;
-  FFrameOwner.VisibilityCombo.Enabled := HasModel;
-  FFrameOwner.ConnectionsCombo.Enabled := HasModel;
+  Mi := FFrameOwner.Model.ModelRoot.GetAllUnitPackages;
+  try
+    FFrameOwner.VisibilityCombo.Enabled := Mi.Count > 0;
+    FFrameOwner.ConnectionsCombo.Enabled := Mi.Count > 0;
+  finally
+    Mi.Free;
+  end;
 end;
 
 
@@ -221,9 +225,9 @@ begin
   begin
     Diagram.ShowAssoc := ConnectionsCombo.ItemIndex=0;
     //We have to do a full refresh with store/fetch, this is only done at setpackage
-    P := Diagram.Package;
-    Diagram.Package := nil;
-    Diagram.Package := P;
+    P := Diagram.xPackage;
+    Diagram.xPackage := nil;
+    Diagram.xPackage := P;
     Diagram.InitFromModel;
   end;
 end;

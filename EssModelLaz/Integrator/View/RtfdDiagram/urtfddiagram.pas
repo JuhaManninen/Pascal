@@ -131,40 +131,49 @@ destructor TRtfdDiagram.Destroy;
 begin
   //Force listeners to release, and diagram to persist.
   Panel.Hide;
-  Package := nil;
+  xPackage := nil;
   ClearDiagram;
   Model.RemoveListener(Self); // IBeforeObjectModelListener(
   FreeAndNil(BoxNames);
   inherited;
 end;
 
+
 procedure TRtfdDiagram.InitFromModel;
-var
-  Mi : TBaseModelIterator;
-  FetchCount : integer;
 
   procedure InAddUnit(Up: TUnitPackage);
   var
     Mi : TBaseModelIterator;
   begin
     Mi := Up.GetClassifiers;
-    while Mi.HasNext do
-      AddBox( Mi.Next );
+    try
+      while Mi.HasNext do
+        AddBox( Mi.Next );
+    finally
+      Mi.Free;
+    end;
   end;
 
+var
+  Mi, tempMi : TBaseModelIterator;
+  FetchCount : integer;
 begin
-  IsAllClasses := Package=AllClassesPackage;
+  IsAllClasses := FPackage=AllClassesPackage;
   Panel.Hide;
   if not Assigned(FPackage) then
   begin
-    Package := Model.ModelRoot;
+    FPackage := Model.ModelRoot;
     //If there is only one package (except unknown) then show it.
     //Assign with Package-property to trigger listeners
     Mi := (FPackage as TLogicPackage).GetPackages;
-    if Mi.Count=2 then
-    begin
-      Mi.Next;
-      Package := Mi.Next as TAbstractPackage;
+    try
+      if Mi.Count=2 then
+      begin
+        Mi.Next;
+        FPackage := Mi.Next as TAbstractPackage;
+      end;
+    finally
+      Mi.Free;
     end;
   end;
 
@@ -185,15 +194,29 @@ begin
     if IsAllClasses then
     begin
       //These lines show all members of a package on one diagram
-      Mi := TModelIterator.Create( (Model.ModelRoot as TLogicPackage).GetPackages, TEntitySkipFilter.Create(Model.UnknownPackage) );
-      while Mi.HasNext do
-        InAddUnit( Mi.Next as TUnitPackage )
+      tempMi := (Model.ModelRoot as TLogicPackage).GetPackages;
+      Mi := TModelIterator.Create(tempMi,
+                                  TEntitySkipFilter.Create(Model.UnknownPackage));
+      try
+        while Mi.HasNext do
+          InAddUnit( Mi.Next as TUnitPackage )
+      finally
+        Mi.Free;
+        tempMi.Free;
+      end;
     end
     else
     begin
-      Mi := TModelIterator.Create( (FPackage as TLogicPackage).GetPackages, TEntitySkipFilter.Create(Model.UnknownPackage) );
-      while Mi.HasNext do
-        AddBox( Mi.Next );
+      tempMi := (FPackage as TLogicPackage).GetPackages;
+      Mi := TModelIterator.Create(tempMi,
+                                  TEntitySkipFilter.Create(Model.UnknownPackage));
+      try
+        while Mi.HasNext do
+          AddBox( Mi.Next );
+      finally
+        Mi.Free;
+        tempMi.Free;
+      end;
     end;
   end;
 
@@ -266,7 +289,7 @@ end;
 procedure TRtfdDiagram.ModelBeforeChange(Sender: TModelEntity);
 begin
   ErrorHandler.Trace(Format('ModelBeforeChange: %s', [ClassName]));
-  Package := nil;
+  xPackage := nil;
   IsAllClasses := False;
   ClearDiagram;
 end;
@@ -301,11 +324,9 @@ end;
 
 procedure TRtfdDiagram.ClearDiagram;
 begin
+  Panel.ClearManagedObjects;
   if not (csDestroying in Panel.ComponentState) then
-  begin
-    Panel.ClearManagedObjects;
     Panel.DestroyComponents;
-  end;
   BoxNames.Clear;
   FHasHidden := False;
   FHasChanged := False;
@@ -346,29 +367,37 @@ begin
       //Implementing interface that is in another package and is not already inserted
       //is added to the diagram.
       Mi := C.GetImplements;
-      while Mi.HasNext do
-      begin
-        Int := Mi.Next as TMdlInterface;
-        if (Int.Owner<>E.Owner) and
-          ( GetBox( Int.FullName )=nil ) then
-          Panel.AddManagedObject( InCreateBox(Int,TRtfdInterface) );
+      try
+        while Mi.HasNext do
+        begin
+          Int := Mi.Next as TMdlInterface;
+          if (Int.Owner<>E.Owner) and
+            ( GetBox( Int.FullName )=nil ) then
+            Panel.AddManagedObject( InCreateBox(Int,TRtfdInterface) );
+        end;
+      finally
+        Mi.Free;
       end;
       //Attribute associations that are in other packages are added
       if ShowAssoc then
       begin
         Mi := C.GetAttributes;
-        while Mi.HasNext do
-        begin
-          A := TAttribute(Mi.Next);
-          if Assigned(A.TypeClassifier) and (GetBox(A.TypeClassifier.FullName)=nil) and
-            (A.TypeClassifier<>C) and (A.TypeClassifier<>C.Ancestor) and
-            (A.TypeClassifier.Owner<>Model.UnknownPackage) then //Avoid getting temp-types from unknown (java 'int' for example)
+        try
+          while Mi.HasNext do
           begin
-            if A.TypeClassifier is TMdlClass then
-              Panel.AddManagedObject( InCreateBox(A.TypeClassifier,TRtfdClass) );
-            if A.TypeClassifier is TMdlInterface then
-              Panel.AddManagedObject( InCreateBox(A.TypeClassifier,TRtfdInterface) );
+            A := TAttribute(Mi.Next);
+            if Assigned(A.TypeClassifier) and (GetBox(A.TypeClassifier.FullName)=nil) and
+              (A.TypeClassifier<>C) and (A.TypeClassifier<>C.Ancestor) and
+              (A.TypeClassifier.Owner<>Model.UnknownPackage) then //Avoid getting temp-types from unknown (java 'int' for example)
+            begin
+              if A.TypeClassifier is TMdlClass then
+                Panel.AddManagedObject( InCreateBox(A.TypeClassifier,TRtfdClass) );
+              if A.TypeClassifier is TMdlInterface then
+                Panel.AddManagedObject( InCreateBox(A.TypeClassifier,TRtfdInterface) );
+            end;
           end;
+        finally
+          Mi.Free;
         end;
       end;
     end;
@@ -419,29 +448,37 @@ begin
       end;
       //Implements
       Mi := (CBox.Entity as TMdlClass).GetImplements;
-      while Mi.HasNext do
-      begin
-        DestBox := GetBox( Mi.Next.FullName );
-        if Assigned(DestBox) then
-          Panel.ConnectObjects(CBox,DestBox,csThinDash);
+      try
+        while Mi.HasNext do
+        begin
+          DestBox := GetBox( Mi.Next.FullName );
+          if Assigned(DestBox) then
+            Panel.ConnectObjects(CBox,DestBox,csThinDash);
+        end;
+      finally
+        Mi.Free;
       end;
       //Attributes associations
       if ShowAssoc then
       begin
         Mi := (CBox.Entity as TMdlClass).GetAttributes;
-        while Mi.HasNext do
-        begin
-          A := TAttribute(Mi.Next);
-          //Avoid arrows that points to themselves, also associations to ancestor (double arrows)
-          if Assigned(A.TypeClassifier) and
-            (A.TypeClassifier<>CBox.Entity) and
-            (A.TypeClassifier<>(CBox.Entity as TMdlClass).Ancestor) then
+        try
+          while Mi.HasNext do
           begin
-            DestBox := GetBox( A.TypeClassifier.FullName );
-            //Test for same entity, this will filter out TDatatype that can have same name as a class
-            if Assigned(DestBox) and (DestBox.Entity=A.TypeClassifier) then
-              Panel.ConnectObjects(CBox,DestBox,csThin,asEmptyOpen);
+            A := TAttribute(Mi.Next);
+            //Avoid arrows that points to themselves, also associations to ancestor (double arrows)
+            if Assigned(A.TypeClassifier) and
+              (A.TypeClassifier<>CBox.Entity) and
+              (A.TypeClassifier<>(CBox.Entity as TMdlClass).Ancestor) then
+            begin
+              DestBox := GetBox( A.TypeClassifier.FullName );
+              //Test for same entity, this will filter out TDatatype that can have same name as a class
+              if Assigned(DestBox) and (DestBox.Entity=A.TypeClassifier) then
+                Panel.ConnectObjects(CBox,DestBox,csThin,asEmptyOpen);
+            end;
           end;
+        finally
+          Mi.Free;
         end;
       end;
     end else if (BoxNames.Objects[I] is TRtfdInterface) then
@@ -459,15 +496,19 @@ begin
       UBox := (BoxNames.Objects[I] as TRtfdUnitPackage);
       U := UBox.Entity as TUnitPackage;
       Mi := U.GetUnitDependencies;
-      while Mi.HasNext do
-      begin
-        Dep := Mi.Next as TUnitDependency;
-        if Dep.Visibility=viPublic then
+      try
+        while Mi.HasNext do
         begin
-          DestBox := GetBox( Dep.Package.FullName );
-          if Assigned(DestBox) then
-            Panel.ConnectObjects(UBox,DestBox,csThinDash,asEmptyOpen);
+          Dep := Mi.Next as TUnitDependency;
+          if Dep.Visibility=viPublic then
+          begin
+            DestBox := GetBox( Dep.xPackage.FullName );
+            if Assigned(DestBox) then
+              Panel.ConnectObjects(UBox,DestBox,csThinDash,asEmptyOpen);
+          end;
         end;
+      finally
+        Mi.Free;
       end;
     end;
 end;
@@ -531,9 +572,9 @@ begin
   B := Panel.GetFirstSelected;
   if Assigned(B) and (B is TRtfdUnitPackage) then
   begin
-    Package := (B as TRtfdUnitPackage).P;
+    xPackage := (B as TRtfdUnitPackage).P;
     InitFromModel;
-    CurrentEntity := Package;
+    CurrentEntity := xPackage;
   end;
 end;
 
@@ -565,7 +606,7 @@ begin
         for I := 0 to BoxNames.Count - 1 do
         begin
           Box := BoxNames.Objects[I] as TRtfdBox;
-          S := 'Box: ' + Package.FullName + ' - ' + Box.Entity.FullName;
+          S := 'Box: ' + xPackage.FullName + ' - ' + Box.Entity.FullName;
           Ini.EraseSection(S);
           Ini.WriteInteger(S,'X', Box.Left);
           Ini.WriteInteger(S,'Y', Box.Top);
@@ -576,7 +617,7 @@ begin
         end;
 
         //Diagram stuff
-        S := 'Diagram: ' + Package.FullName;
+        S := 'Diagram: ' + xPackage.FullName;
         Ini.EraseSection(S);
         Ini.WriteInteger(S,'OffsetX',Frame.ScrollBox.VertScrollBar.Position);
         Ini.WriteInteger(S,'OffsetY',Frame.ScrollBox.HorzScrollBar.Position);
@@ -618,7 +659,7 @@ begin
       for I := 0 to BoxNames.Count - 1 do
       begin
         Box := BoxNames.Objects[I] as TRtfdBox;
-        S := 'Box: ' + Package.FullName + ' - ' + Box.Entity.FullName;
+        S := 'Box: ' + xPackage.FullName + ' - ' + Box.Entity.FullName;
         if Ini.SectionExists(S) then
         begin
           Inc(Result);
@@ -638,7 +679,7 @@ begin
       end;
 
       //Diagram stuff
-      S := 'Diagram: ' + Package.FullName;
+      S := 'Diagram: ' + xPackage.FullName;
       if Ini.SectionExists(S) then
       begin
         Frame.ScrollBox.VertScrollBar.Position := Ini.ReadInteger(S,'OffsetX',Frame.ScrollBox.VertScrollBar.Position);
@@ -862,9 +903,9 @@ begin
   P := CurrentEntity;
   while Assigned(P) and (not (P is TAbstractPackage)) do
     P := P.Owner;
-  if Assigned(P) and (P<>Package) then
+  if Assigned(P) and (P<>xPackage) then
   begin
-    Package := P as TAbstractPackage;
+    xPackage := P as TAbstractPackage;
     InitFromModel
   end;
   if (CurrentEntity is TMdlClass) or (CurrentEntity is TMdlInterface) then

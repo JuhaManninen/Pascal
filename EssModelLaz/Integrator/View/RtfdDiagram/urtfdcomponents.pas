@@ -454,6 +454,7 @@ var
   NeedH,NeedW,I : integer;
   C: TMdlClass;
   Omi,Ami : TBaseModelIterator;
+  tempOmi,tempAmi : TBaseModelIterator;
   WasVisible : boolean;
 begin
   C := Entity as TMdlClass;
@@ -466,32 +467,37 @@ begin
   NeedH := (ClassShadowWidth * 2) + 4;
   Inc(NeedH, TRtfdClassName.Create(Self, Entity).Height);
 
+  tempOmi := C.GetOperations;
+  tempAmi := C.GetAttributes;
   //Get names in visibility order
   if FMinVisibility > Low(TVisibility) then
   begin
-    Omi := TModelIterator.Create(C.GetOperations, TMdlOperation, FMinVisibility, ioVisibility);
-    Ami := TModelIterator.Create(C.GetAttributes, TAttribute, FMinVisibility, ioVisibility);
+    Omi := TModelIterator.Create(tempOmi, TMdlOperation, FMinVisibility, ioVisibility);
+    Ami := TModelIterator.Create(tempAmi, TAttribute, FMinVisibility, ioVisibility);
   end
   else begin
-    Omi := TModelIterator.Create(C.GetOperations, ioVisibility);
-    Ami := TModelIterator.Create(C.GetAttributes, ioVisibility);
+    Omi := TModelIterator.Create(tempOmi, ioVisibility);
+    Ami := TModelIterator.Create(tempAmi, ioVisibility);
   end;
-
-  //Separator
-  if (Ami.Count>0) or (Omi.Count>0) then
-    Inc(NeedH, TRtfdSeparator.Create(Self).Height);
-
-  //Attributes
-  while Ami.HasNext do
-    Inc(NeedH, TRtfdAttribute.Create(Self,Ami.Next).Height);
-
-  //Separator
-  if (Ami.Count>0) and (Omi.Count>0) then
-    Inc(NeedH, TRtfdSeparator.Create(Self).Height);
-
-  //Operations
-  while Omi.HasNext do
-    Inc(NeedH, TRtfdOperation.Create(Self,Omi.Next).Height);
+  try
+    //Separator
+    if (Ami.Count>0) or (Omi.Count>0) then
+      Inc(NeedH, TRtfdSeparator.Create(Self).Height);
+    //Attributes
+    while Ami.HasNext do
+      Inc(NeedH, TRtfdAttribute.Create(Self,Ami.Next).Height);
+    //Separator
+    if (Ami.Count>0) and (Omi.Count>0) then
+      Inc(NeedH, TRtfdSeparator.Create(Self).Height);
+    //Operations
+    while Omi.HasNext do
+      Inc(NeedH, TRtfdOperation.Create(Self,Omi.Next).Height);
+  finally
+    Ami.Free;
+    Omi.Free;
+    tempAmi.Free;
+    tempOmi.Free;
+  end;
 
   for I := 0 to ControlCount-1 do
     if Controls[I] is TRtfdCustomLabel then
@@ -537,7 +543,8 @@ end;
 procedure TRtfdInterface.RefreshEntities;
 var
   NeedW,NeedH,I : integer;
-  OMi,AMi : TBaseModelIterator;
+  OMi, AMi : TBaseModelIterator;
+  tempOMi, tempAMi : TBaseModelIterator;
   WasVisible : boolean;
   Int : TMdlInterface;
 begin
@@ -553,39 +560,43 @@ begin
   Inc(NeedH, TRtfdStereotype.Create(Self, nil, 'interface').Height);
   Inc(NeedH, TRtfdInterfaceName.Create(Self, Entity).Height);
 
+  tempOmi := Int.GetOperations;
+  tempAmi := Int.GetAttributes;
   //Get names in visibility order
   if FMinVisibility > Low(TVisibility) then
   begin
-    Omi := TModelIterator.Create(Int.GetOperations, TMdlOperation, FMinVisibility, ioVisibility);
-    Ami := TModelIterator.Create(Int.GetAttributes, TAttribute, FMinVisibility, ioVisibility);
+    Omi := TModelIterator.Create(tempOMi, TMdlOperation, FMinVisibility, ioVisibility);
+    Ami := TModelIterator.Create(tempAMi, TAttribute, FMinVisibility, ioVisibility);
   end
   else begin
-    Omi := TModelIterator.Create(Int.GetOperations, ioVisibility);
-    Ami := TModelIterator.Create(Int.GetAttributes, ioVisibility);
+    Omi := TModelIterator.Create(tempOMi, ioVisibility);
+    Ami := TModelIterator.Create(tempAMi, ioVisibility);
   end;
-
-  //Separator
-  if (Ami.Count>0) or (Omi.Count>0) then
-    Inc(NeedH, TRtfdSeparator.Create(Self).Height);
-
-  //Attributes
-  while Ami.HasNext do
-    Inc(NeedH, TRtfdAttribute.Create(Self,Ami.Next).Height);
-
-  //Separator
-  if (Ami.Count>0) and (Omi.Count>0) then
-    Inc(NeedH, TRtfdSeparator.Create(Self).Height);
-
-  //Operations
-  while Omi.HasNext do
-    Inc(NeedH, TRtfdOperation.Create(Self,Omi.Next).Height);
-
+  try
+    //Separator
+    if (Ami.Count>0) or (Omi.Count>0) then
+      Inc(NeedH, TRtfdSeparator.Create(Self).Height);
+    //Attributes
+    while Ami.HasNext do
+      Inc(NeedH, TRtfdAttribute.Create(Self,Ami.Next).Height);
+    //Separator
+    if (Ami.Count>0) and (Omi.Count>0) then
+      Inc(NeedH, TRtfdSeparator.Create(Self).Height);
+    //Operations
+    while Omi.HasNext do
+      Inc(NeedH, TRtfdOperation.Create(Self,Omi.Next).Height);
+  finally
+    AMi.Free;
+    OMi.Free;
+    tempAMi.Free;
+    tempOMi.Free;
+  end;
   for I := 0 to ControlCount-1 do
     if Controls[I] is TRtfdCustomLabel then
-      NeedW := Max( TRtfdCustomLabel(Controls[I]).WidthNeeded,NeedW);
+      NeedW := Max( TRtfdCustomLabel(Controls[I]).WidthNeeded, NeedW);
   Width := Max(NeedW,cDefaultWidth);
 
-  Height := Max(NeedH,cDefaultHeight);
+  Height := Max(NeedH, cDefaultHeight);
   Visible := WasVisible;
 end;
 
@@ -803,13 +814,19 @@ var
 begin
   with FRtfdOwner do begin
     Mi := (Entity as TMdlClass).GetOperations;
-    while Mi.HasNext do
-      if (Mi.Next as TMdlOperation).IsAbstract then
+    try
+      while Mi.HasNext do
       begin
-        Font.Style := Font.Style + [fsItalic];
-        Break;
+        if (Mi.Next as TMdlOperation).IsAbstract then
+        begin
+          Font.Style := Font.Style + [fsItalic];
+          Break;
+        end;
       end;
-    if ((Owner as TRtfdBox).Frame as TDiagramFrame).Diagram.Package<>Entity.Owner then
+    finally
+      Mi.Free;
+    end;
+    if ((Owner as TRtfdBox).Frame as TDiagramFrame).Diagram.xPackage<>Entity.Owner then
       Caption := Entity.FullName
     else
       Caption := Entity.Name;
@@ -846,7 +863,7 @@ end;
 procedure TRtfdInterfaceNameListener.AfterEntityChange(Sender: TModelEntity);
 begin
   with FRtfdOwner do begin
-    if ((Owner as TRtfdBox).Frame as TDiagramFrame).Diagram.Package<>Entity.Owner then
+    if ((Owner as TRtfdBox).Frame as TDiagramFrame).Diagram.xPackage<>Entity.Owner then
       FRtfdOwner.Caption := Entity.FullName
     else
       FRtfdOwner.Caption := Entity.Name;

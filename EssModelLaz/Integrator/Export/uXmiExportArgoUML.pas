@@ -309,21 +309,25 @@ var
 
 
       Mio := O.GetParameters;
-      while Mio.HasNext do
-      begin
-        P := Mio.Next as TParameter;
-        WriteEntityHeader(P, headerCoreParameter);
-        if Assigned(P.TypeClassifier) then
+      try
+        while Mio.HasNext do
         begin
-          Write( '<' + Core + headerCoreParameter + '.kind xmi.value="in"/>');
-          Write( XmlOpen(Core + 'Parameter.behavioralFeature'));
-             Write( '<' + Core + 'BehavioralFeature xmi.idref="' + IdO +'"/>');
-          Write( XmlClose(Core + 'Parameter.behavioralFeature'));
-          Write( XmlOpen(Core + headerCoreParameter + '.type') );
-            Write( MakeTypeRef(P.TypeClassifier) );
-          Write( XmlClose(Core + headerCoreParameter + '.type') );
+          P := Mio.Next as TParameter;
+          WriteEntityHeader(P, headerCoreParameter);
+          if Assigned(P.TypeClassifier) then
+          begin
+            Write( '<' + Core + headerCoreParameter + '.kind xmi.value="in"/>');
+            Write( XmlOpen(Core + 'Parameter.behavioralFeature'));
+               Write( '<' + Core + 'BehavioralFeature xmi.idref="' + IdO +'"/>');
+            Write( XmlClose(Core + 'Parameter.behavioralFeature'));
+            Write( XmlOpen(Core + headerCoreParameter + '.type') );
+              Write( MakeTypeRef(P.TypeClassifier) );
+            Write( XmlClose(Core + headerCoreParameter + '.type') );
+          end;
+          Write( XmlClose(Core + headerCoreParameter) );
         end;
-        Write( XmlClose(Core + headerCoreParameter) );
+      finally
+        Mio.Free;
       end;
       Write( XmlClose(Core + 'BehavioralFeature.parameter') );
     Write( XmlClose(Core + headerCoreOperation) );
@@ -331,18 +335,22 @@ var
 
 begin
   Mi := C.GetFeatures;
-  if Mi.HasNext then
-  begin
-    Write( XmlOpen(Core + 'Classifier.feature') );
-    while Mi.HasNext do
+  try
+    if Mi.HasNext then
     begin
-      F := Mi.Next;
-      if F is TAttribute then
-        WriteAttribute(F as TAttribute, pId)
-      else if F is TMdlOperation then
-        WriteOperation(F as TMdlOperation, pId);
+      Write( XmlOpen(Core + 'Classifier.feature') );
+      while Mi.HasNext do
+      begin
+        F := Mi.Next;
+        if F is TAttribute then
+          WriteAttribute(F as TAttribute, pId)
+        else if F is TMdlOperation then
+          WriteOperation(F as TMdlOperation, pId);
+      end;
+      Write( XmlClose(Core + 'Classifier.feature') );
     end;
-    Write( XmlClose(Core + 'Classifier.feature') );
+  finally
+    Mi.Free;
   end;
 end;
 
@@ -436,8 +444,12 @@ var
   Mi : TBaseModelIterator;
 begin
   Mi := L.GetPackages;
-  while Mi.HasNext do
-    WritePackage( Mi.Next as TAbstractPackage,TC, IdPai);
+  try
+    while Mi.HasNext do
+      WritePackage( Mi.Next as TAbstractPackage,TC, IdPai);
+  finally
+    Mi.Free;
+  end;
 end;
 
 
@@ -456,17 +468,20 @@ begin
       if not Assigned(ex) then dataTypeVoid := U.AddDatatype(tName);
       tName := '';
     end;
-
   Mi := U.GetClassifiers;
-  while Mi.HasNext do
-  begin
-    C := Mi.Next;
-    if (C is TMdlClass) AND (TC in [tcAll,tcNotDataType]) then
-      WriteClass(C as TMdlClass,IdPai)
-    else if (C is TMdlInterface) AND (TC in [tcAll,tcNotDataType]) then
-      WriteInterface(C as TMdlInterface,IdPai)
-    else if (C is TDataType) AND (TC in [tcAll,tcDataType]) then
-      WriteDataType(C as TDataType,IdPai);
+  try
+    while Mi.HasNext do
+    begin
+      C := Mi.Next;
+      if (C is TMdlClass) AND (TC in [tcAll,tcNotDataType]) then
+        WriteClass(C as TMdlClass,IdPai)
+      else if (C is TMdlInterface) AND (TC in [tcAll,tcNotDataType]) then
+        WriteInterface(C as TMdlInterface,IdPai)
+      else if (C is TDataType) AND (TC in [tcAll,tcDataType]) then
+        WriteDataType(C as TDataType,IdPai);
+    end;
+  finally
+    Mi.Free;
   end;
 end;
 
@@ -527,14 +542,17 @@ begin
 
   //Implementing classes
   Mi := I.GetImplementingClasses;
-  if Mi.HasNext then
-  begin
-    Write( XmlOpen( CoreModelElement + 'supplierDependency') );
-    while Mi.HasNext do
-      MakeAbstract(Mi.Next as TClassifier,I);
-    Write( XmlClose( CoreModelElement + 'supplierDependency') );
+  try
+    if Mi.HasNext then
+    begin
+      Write( XmlOpen( CoreModelElement + 'supplierDependency') );
+      while Mi.HasNext do
+        MakeAbstract(Mi.Next as TClassifier,I);
+      Write( XmlClose( CoreModelElement + 'supplierDependency') );
+    end;
+  finally
+    Mi.Free;
   end;
-
   Write( XmlClose(Core + headerCoreInterface) );
 end;
 
