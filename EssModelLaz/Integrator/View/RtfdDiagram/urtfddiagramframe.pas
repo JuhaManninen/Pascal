@@ -58,7 +58,7 @@ uses uError;
 
 constructor TRtfdDiagramFrame.Create(Owner: TComponent; Diagram: TRtfdDiagram);
 begin
-  inherited Create(Owner,Diagram.Model);
+  inherited Create(Owner, Diagram.Model);
   Self.Diagram := Diagram;
   Diagram.OnUpdateToolbar := OnUpdateToolbar;
 end;

@@ -55,6 +55,7 @@ uses SysUtils;
 
 constructor TGuiFeedback.Create(P: TPanel);
 begin
+  inherited Create;
   Self.P := P;
   T := TTimer.Create(nil);
   T.OnTimer := OnTimer;

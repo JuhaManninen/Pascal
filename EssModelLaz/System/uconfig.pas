@@ -67,6 +67,7 @@ constructor TConfig.Create;
 var
   DC : integer;
 begin
+  inherited Create;
   IsTerminating := False;
   IsLimitedColors := False;
   DC := GetDC(0);

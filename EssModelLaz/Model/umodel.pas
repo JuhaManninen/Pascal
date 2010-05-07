@@ -305,6 +305,7 @@ var
 
 constructor TObjectModel.Create;
 begin
+  inherited Create;
   FListeners := TListenerList.Create(False);
   CreatePackages;
 end;

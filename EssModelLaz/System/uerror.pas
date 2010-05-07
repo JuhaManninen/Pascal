@@ -39,16 +39,16 @@ type
   TTraceMode = (trOff, trShowWindow);
 
   TErrorHandler = class
-  public
-    constructor Create;
-    procedure SetTraceMode(Mode: TTraceMode);
-    procedure Trace(const Msg: string);
   private
     {$IFNDEF Release}
     TraceMode: TTraceMode;
     TraceWindow: TForm;
     TraceMemo: TMemo;
     {$ENDIF}
+  public
+    constructor Create;
+    procedure SetTraceMode(Mode: TTraceMode);
+    procedure Trace(const Msg: string);
   end;
 
 
@@ -68,6 +68,7 @@ uses LCLIntf, LCLType, LMessages, Controls;
 
 constructor TErrorHandler.Create;
 begin
+  inherited Create;
   {$IFNDEF Release}
   SetTraceMode(trOff);
   {$ENDIF}

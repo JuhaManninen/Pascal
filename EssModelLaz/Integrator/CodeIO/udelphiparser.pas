@@ -148,7 +148,7 @@ uses uError;
 
 constructor TDelphiParser.Create;
 begin
-  inherited;
+  inherited Create;
   FLocalDefines := TStringList.Create;
   {$IFNDEF Release}
   DebugLog := TStringList.Create;

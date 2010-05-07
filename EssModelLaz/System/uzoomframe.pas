@@ -36,8 +36,7 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure FrameMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
-    procedure FrameMouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Integer);
+    procedure FrameMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure FrameResize(Sender: TObject);
   private
     { Private declarations }
@@ -60,8 +59,7 @@ implementation
 
 { TZoomFrame }
 
-constructor TZoomFrame.Create(AOwner: TComponent;
-  Diagram: TDiagramIntegrator);
+constructor TZoomFrame.Create(AOwner: TComponent; Diagram: TDiagramIntegrator);
 begin
   inherited Create(AOwner);
   Self.Diagram := Diagram;

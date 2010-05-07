@@ -302,6 +302,7 @@ end;
 
 constructor TClassFileHeader.Create(Input: TStream);
 begin
+  inherited Create;
   magic := readU4( Input );
   Assert(Magic=$CAFEBABE);
   minor_version := readU2( Input );
@@ -314,6 +315,7 @@ constructor TClassDeclSec.Create(Input: TStream; ConstPoolSec: TConstPool);
 var
   thisClassIx, superClassIx, interfaceCnt, ix, i : integer;
 begin
+  inherited Create;
   accessFlags := readU2( Input );
   thisClassIx := readU2( Input );
   superClassIx := readU2( Input );
@@ -351,6 +353,7 @@ var
   name_index,desc_index,attr_cnt,I : integer;
   obj : TConstBase;
 begin
+  inherited Create;
   access_flags := readU2( Input );
   name_index   := readU2( Input );
   desc_index   := readU2( Input );
@@ -378,6 +381,7 @@ constructor TClassFieldSec.Create(Input: TStream; constPoolSec: TConstPool);
 var
   field_cnt,i : integer;
 begin
+  inherited Create;
   field_cnt := readU2( Input );
   if (field_cnt > 0) then
     SetLength(classFields,field_cnt);
@@ -393,6 +397,7 @@ var
   name_index,desc_index,attr_cnt,I : integer;
   obj : TConstBase;
 begin
+  inherited Create;
   access_flags := readU2( Input );
   name_index   := readU2( Input );
   desc_index   := readU2( Input );
@@ -426,6 +431,7 @@ constructor TClassMethodSec.Create(Input: TStream; constPoolSec: TConstPool; cla
 var
   methodCnt,I : integer;
 begin
+  inherited Create;
   methodCnt := readU2(Input);
   if (methodCnt > 0) then
     SetLength(classMethods,methodCnt);
@@ -448,6 +454,7 @@ constructor TClassAttrSec.Create(Input: TStream; constPoolSec: TConstPool);
 var
   numAttr,I : integer;
 begin
+  inherited Create;
   numAttr := readU2( Input );
   if (numAttr > 0) then
   begin
@@ -461,6 +468,7 @@ end;
 
 constructor TClassFile.Create(Input: TStream);
 begin
+  inherited Create;
   try
     header := TClassFileHeader.Create( Input );
     classConstPool := TConstPool.Create( Input );
@@ -490,6 +498,7 @@ end;
 
 constructor TAttrInfo.Create(Name: string; Length: integer);
 begin
+  inherited Create;
   attrName := Name;
   len := length;
 end;
@@ -582,10 +591,9 @@ end;
 
 constructor TConstPool.Create(Input: TStream);
 begin
+  inherited Create;
   constPoolCnt := readU2(Input);
-
   SetLength(constPool,constPoolCnt);
-
   readConstPool(Input);
   resolveConstPool;
 end;
@@ -891,4 +899,4 @@ begin
   end;
 end;
 
-end.
+end.

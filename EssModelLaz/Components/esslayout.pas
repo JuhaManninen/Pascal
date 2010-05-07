@@ -52,6 +52,7 @@ type
 
 constructor TEssLayout.Create(Panel: TEssConnectPanel);
 begin
+  inherited Create;
   Self.Panel := Panel;
 end;
 

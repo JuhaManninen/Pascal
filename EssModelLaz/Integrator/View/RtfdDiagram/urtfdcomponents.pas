@@ -421,6 +421,7 @@ end;
 
 constructor TRtfdClassListener.Create(ARtfdOwner: TRtfdClass);
 begin
+  inherited Create;
   FRtfdOwner := ARtfdOwner;
 end;
 
@@ -513,6 +514,7 @@ end;
 
 constructor TRtfdInterfaceListener.Create(ARtfdOwner: TRtfdInterface);
 begin
+  inherited Create;
   FRtfdOwner := ARtfdOwner;
 end;
 
@@ -805,6 +807,7 @@ end;
 
 constructor TRtfdClassNameListener.Create(ARtfdOwner: TRtfdClassName);
 begin
+  inherited Create;
   FRtfdOwner := ARtfdOwner;
 end;
 
@@ -857,6 +860,7 @@ end;
 
 constructor TRtfdInterfaceNameListener.Create(ARtfdOwner: TRtfdInterfaceName);
 begin
+  inherited Create;
   FRtfdOwner := ARtfdOwner;
 end;
 
@@ -930,6 +934,7 @@ end;
 
 constructor TRtfdOperationListener.Create(ARtfdOwner: TRtfdOperation);
 begin
+  inherited Create;
   FRtfdOwner := ARtfdOwner;
 end;
 
@@ -973,6 +978,7 @@ end;
 
 constructor TRtfdAttributeListener.Create(ARtfdOwner: TRtfdAttribute);
 begin
+  inherited Create;
   FRtfdOwner := ARtfdOwner;
 end;
 
@@ -1011,6 +1017,7 @@ end;
 
 constructor TRtfdUnitPackageNameListener.Create(ARtfdOwner: TRtfdUnitPackageName);
 begin
+  inherited Create;
   FRtfdOwner := ARtfdOwner;
 end;
 
@@ -1045,6 +1052,7 @@ end;
 
 constructor TRtfdUnitPackageDiagramListener.Create(ARtfdOwner: TRtfdUnitPackageDiagram);
 begin
+  inherited Create;
   FRtfdOwner := ARtfdOwner;
 end;
 

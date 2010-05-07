@@ -1055,6 +1055,7 @@ end;
 
 constructor TEdge.Create(const FromNode, ToNode: TNode);
 begin
+  inherited Create;
   Self.FromNode := FromNode;
   Self.ToNode := ToNode;
 end;
@@ -1063,6 +1064,7 @@ end;
 
 constructor TNode.Create;
 begin
+  inherited Create;
   InEdges := TEdgeList.Create;
   OutEdges := TEdgeList.Create;
 end;

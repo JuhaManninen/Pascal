@@ -283,6 +283,7 @@ end;
 
 constructor TEntitySkipFilter.Create(SkipEntity: TModelEntity);
 begin
+  inherited Create;
   Self.SkipEntity := SkipEntity;
 end;
 

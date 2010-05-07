@@ -35,7 +35,7 @@ type
   private
     FModel: TObjectModel;
   public
-    constructor Create(om: TObjectModel); reintroduce;
+    constructor Create(om: TObjectModel);
     destructor Destroy; override;
 
     // THE objectmodel
@@ -90,11 +90,9 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    {
-     Should be called by all integrator implementations to register it with
+    { Should be called by all integrator implementations to register it with
      the masterlist of integrators.
-     eg. Integrators.Register( TEiffelIntegrator );
-    }
+     eg. Integrators.Register( TEiffelIntegrator );  }
     procedure Register(T: TIntegratorClass);
 
     // Retrieves a list of available integrators of a given kind
@@ -117,7 +115,7 @@ var
 
 constructor TIntegrator.Create(om: TObjectModel);
 begin
-//  inherited Create(nil);
+  inherited Create;
   FModel := om;
 end;
 
@@ -224,6 +222,7 @@ end;
 
 constructor TIntegrators.Create;
 begin
+  inherited Create;
   List := TClassList.Create;
 end;
 

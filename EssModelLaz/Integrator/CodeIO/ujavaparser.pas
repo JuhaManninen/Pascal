@@ -149,7 +149,7 @@ end;
 
 constructor TJavaParser.Create;
 begin
-  inherited;
+  inherited Create;
   ClassImports := TStringList.Create;
   FullImports := TStringList.Create;
   NameCache := TStringList.Create;

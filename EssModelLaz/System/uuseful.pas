@@ -37,15 +37,15 @@ uses
 type
 
   TEldeanProgress = class
-   public
-     constructor Create(Text : string; Max : integer);
-     destructor Destroy; override;
-     procedure Tick;
-   private
-     P : TProgressBar;
-     F : TForm;
-     AbortNext : boolean;
-   end;
+  private
+    P : TProgressBar;
+    F : TForm;
+    AbortNext : boolean;
+  public
+    constructor Create(Text : string; Max : integer);
+    destructor Destroy; override;
+    procedure Tick;
+  end;
 
   TBrowseForFolderDialog = class
   private
@@ -62,6 +62,7 @@ implementation
 
 constructor TEldeanProgress.Create(Text: string; Max: integer);
 begin
+  inherited Create;
   F := TForm.Create(nil);
 
   F.BorderIcons := [];

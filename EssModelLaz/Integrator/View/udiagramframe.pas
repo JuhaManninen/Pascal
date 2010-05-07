@@ -134,6 +134,7 @@ type
 
 constructor TDiagramFrameListener.Create(AFrameOwner: TDiagramFrame);
 begin
+  inherited Create;
   FFrameOwner := AFrameOwner;;
 end;
 
@@ -242,7 +243,7 @@ end;
 
 constructor TScrollBoxWithNotify.Create(AOwner: TComponent);
 begin
-  inherited;
+  inherited Create(AOwner);
   HorzScrollBar.Smooth := True;
   HorzScrollBar.Tracking := True;
   VertScrollBar.Smooth := True;

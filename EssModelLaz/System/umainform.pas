@@ -186,11 +186,11 @@ end;
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   Config.IsTerminating := True;
-  try
+{  try
     Config.WriteStr('RecentFiles',RecentFiles.CommaText);
   except
     ShowMessage('Failed writing RecentFiles to config settings. Why???');
-  end;
+  end; }
   {$if Defined(DRAG_SUPPORT)}
   if Assigned(Drop) then
     Drop.Unregister;
