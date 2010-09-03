@@ -24,4 +24,4 @@ The example application first builds a database of South Park episodes and then 
 
 I don't want to write more here because I would just copy data from the above sources.
 
-JuMa
+JuMa Manninen
