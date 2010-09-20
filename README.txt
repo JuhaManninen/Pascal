@@ -12,5 +12,9 @@ StrHashMap
 A fast string -> pointer hash map implementation. Explained in:
  http://wiki.lazarus.freepascal.org/StringHashMap
 
+IntList
+-------
+A list container for integers. Works like TStringList does for strings.
+
 
 Juha Manninen
