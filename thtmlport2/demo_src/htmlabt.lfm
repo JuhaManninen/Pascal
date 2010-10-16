@@ -1,0 +1,58 @@
+object AboutBox: TAboutBox
+  Left = 286
+  Height = 184
+  Top = 214
+  Width = 306
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'About'
+  ClientHeight = 184
+  ClientWidth = 306
+  Font.Height = -13
+  Position = poScreenCenter
+  LCLVersion = '0.9.29'
+  object BitBtn1: TBitBtn
+    Left = 114
+    Height = 30
+    Top = 146
+    Width = 77
+    Kind = bkOK
+    TabOrder = 0
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 137
+    Top = 0
+    Width = 306
+    Align = alTop
+    BevelInner = bvLowered
+    BevelOuter = bvNone
+    Caption = 'Panel1'
+    ClientHeight = 137
+    ClientWidth = 306
+    TabOrder = 1
+    object Viewer: THTMLViewer
+      Left = 1
+      Height = 135
+      Top = 1
+      Width = 304
+      ViewImages = False
+      Enabled = False
+      TabOrder = 0
+      Align = alClient
+      BorderStyle = htSingle
+      HistoryMaxCount = 0
+      DefFontName = 'Times New Roman'
+      DefPreFontName = 'Courier New'
+      NoSelect = True
+      ScrollBars = ssNone
+      CharSet = DEFAULT_CHARSET
+      PrintMarginLeft = 2
+      PrintMarginRight = 2
+      PrintMarginTop = 2
+      PrintMarginBottom = 2
+      PrintScale = 1
+      htOptions = []
+    end
+  end
+end

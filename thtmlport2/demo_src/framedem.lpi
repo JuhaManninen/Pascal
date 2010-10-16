@@ -1,0 +1,975 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="9"/>
+    <General>
+      <Flags>
+        <LRSInOutputDirectory Value="False"/>
+      </Flags>
+      <MainUnit Value="0"/>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <VersionInfo>
+      <Language Value=""/>
+      <CharSet Value=""/>
+      <StringTable ProductVersion=""/>
+    </VersionInfo>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IgnoreBinaries Value="False"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="2">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="htmlcomp"/>
+      </Item2>
+    </RequiredPackages>
+    <Units Count="104">
+      <Unit0>
+        <Filename Value="framedem.dpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="7" Y="3"/>
+        <UsageCount Value="111"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="fdemunit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="FDemUnit"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="844"/>
+        <CursorPos X="25" Y="851"/>
+        <UsageCount Value="61"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="imgform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ImageForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ImgForm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="54" Y="5"/>
+        <UsageCount Value="48"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="/usr/src/debug/glibc-2.12-26-g9a98163/nptl/sysdeps/unix/sysv/linux/raise.c"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="23"/>
+        <CursorPos X="1" Y="64"/>
+        <UsageCount Value="6"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/customform.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="636"/>
+        <CursorPos X="55" Y="676"/>
+        <UsageCount Value="14"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="../package/framview.pas"/>
+        <UnitName Value="FramView"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1523"/>
+        <CursorPos X="16" Y="1540"/>
+        <UsageCount Value="34"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../package/htmlview.pas"/>
+        <UnitName Value="Htmlview"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1675"/>
+        <CursorPos X="18" Y="1677"/>
+        <UsageCount Value="39"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/control.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3530"/>
+        <CursorPos X="43" Y="3557"/>
+        <UsageCount Value="11"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/wincontrol.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="6110"/>
+        <CursorPos X="3" Y="6117"/>
+        <UsageCount Value="14"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="/usr/src/debug/libX11-1.3.1/src/QuPntr.c"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="20"/>
+        <CursorPos X="1" Y="50"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/gtk2/interfaces.pas"/>
+        <UnitName Value="Interfaces"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="9"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/application.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1327"/>
+        <CursorPos X="19" Y="1336"/>
+        <UsageCount Value="11"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/interfacebase.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="13"/>
+        <CursorPos X="21" Y="22"/>
+        <UsageCount Value="11"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="../package/htmlmisc.pas"/>
+        <UnitName Value="HtmlMisc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="25"/>
+        <CursorPos X="24" Y="34"/>
+        <UsageCount Value="39"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="../package/readhtml.pas"/>
+        <UnitName Value="Readhtml"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="302"/>
+        <CursorPos X="80" Y="331"/>
+        <UsageCount Value="43"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="demounit.pas"/>
+        <HasResources Value="True"/>
+        <UnitName Value="demounit"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="17" Y="10"/>
+        <UsageCount Value="16"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="fontdlg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <UnitName Value="Fontdlg"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="20" Y="10"/>
+        <UsageCount Value="61"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="gopage.pas"/>
+        <UnitName Value="Gopage"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="21" Y="10"/>
+        <UsageCount Value="12"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="htmlabt.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AboutBox"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="HTMLAbt"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="61"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="previewform.pas"/>
+        <UnitName Value="PreviewForm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="314"/>
+        <CursorPos X="1" Y="323"/>
+        <UsageCount Value="14"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="printstatusform.pas"/>
+        <UnitName Value="PrintStatusForm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="41"/>
+        <CursorPos X="21" Y="51"/>
+        <UsageCount Value="13"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="submit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SubmitForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Submit"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="61"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="../package/htmlsubs.pas"/>
+        <UnitName Value="Htmlsubs"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2628"/>
+        <CursorPos X="12" Y="2657"/>
+        <UsageCount Value="34"/>
+        <Bookmarks Count="4">
+          <Item0 X="1" Y="3891" ID="5"/>
+          <Item1 X="1" Y="361" ID="1"/>
+          <Item2 X="1" Y="6388" ID="2"/>
+          <Item3 X="1" Y="431" ID="3"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="../package/htmlun2.pas"/>
+        <UnitName Value="HTMLUn2"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="4159"/>
+        <CursorPos X="20" Y="4159"/>
+        <UsageCount Value="40"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="../../../freepascal/fpc/rtl/objpas/classes/classesh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="276"/>
+        <CursorPos X="14" Y="303"/>
+        <UsageCount Value="11"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="../package/styleun.pas"/>
+        <UnitName Value="StyleUn"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="40"/>
+        <CursorPos X="3" Y="68"/>
+        <UsageCount Value="27"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="../package/frambrwz.pas"/>
+        <UnitName Value="FramBrwz"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="44"/>
+        <CursorPos X="23" Y="53"/>
+        <UsageCount Value="31"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/controls.pp"/>
+        <UnitName Value="Controls"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1915"/>
+        <CursorPos X="15" Y="1946"/>
+        <UsageCount Value="13"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="../package/htmlcompreg.pas"/>
+        <UnitName Value="HtmlCompReg"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="11" Y="20"/>
+        <UsageCount Value="23"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="../package/gdipl2a.pas"/>
+        <UnitName Value="GDIPL2A"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="298"/>
+        <CursorPos X="24" Y="307"/>
+        <UsageCount Value="22"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="../package/ditherunit.pas"/>
+        <UnitName Value="DitherUnit"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1451"/>
+        <CursorPos X="11" Y="1506"/>
+        <UsageCount Value="25"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="../package/htmlgif1.pas"/>
+        <UnitName Value="HtmlGif1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1858"/>
+        <CursorPos X="11" Y="1889"/>
+        <UsageCount Value="21"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="../package/stylepars.pas"/>
+        <UnitName Value="StylePars"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="557"/>
+        <CursorPos X="5" Y="588"/>
+        <UsageCount Value="26"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="../package/htmlcons.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="41" Y="5"/>
+        <UsageCount Value="16"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="../package/htmlsbs1.pas"/>
+        <UnitName Value="Htmlsbs1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="274"/>
+        <CursorPos X="23" Y="283"/>
+        <UsageCount Value="32"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/chart.pp"/>
+        <UnitName Value="Chart"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="252"/>
+        <CursorPos X="15" Y="282"/>
+        <UsageCount Value="8"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/winapih.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="106"/>
+        <CursorPos X="10" Y="128"/>
+        <UsageCount Value="13"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/lcltype.pp"/>
+        <UnitName Value="LCLType"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2735"/>
+        <CursorPos X="23" Y="2744"/>
+        <UsageCount Value="18"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="../../../freepascal/fpc/rtl/objpas/types.pp"/>
+        <UnitName Value="types"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="53"/>
+        <CursorPos X="9" Y="79"/>
+        <UsageCount Value="14"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="../../../freepascal/fpc/packages/winunits-jedi/src/jwawingdi.pas"/>
+        <UnitName Value="JwaWinGDI"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3890"/>
+        <CursorPos X="1" Y="3927"/>
+        <UsageCount Value="8"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="../../../freepascal/fpc/rtl/win/wininc/struct.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="4967"/>
+        <CursorPos X="29" Y="4997"/>
+        <UsageCount Value="8"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="../../../freepascal/fpc/rtl/win/wininc/unidef.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="157"/>
+        <CursorPos X="10" Y="187"/>
+        <UsageCount Value="8"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="../../../freepascal/fpc/tests/bench/shootout/src/message.pp"/>
+        <UnitName Value="message"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="11" Y="21"/>
+        <UsageCount Value="8"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="../../../lazarus_gitsvn/trunk/components/synedit/syneditexport.pas"/>
+        <UnitName Value="SynEditExport"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="281"/>
+        <CursorPos X="5" Y="322"/>
+        <UsageCount Value="9"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/screen.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="9"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/wince/wincewinapi.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1922"/>
+        <CursorPos X="31" Y="1960"/>
+        <UsageCount Value="8"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/winapi.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="856"/>
+        <CursorPos X="1" Y="881"/>
+        <UsageCount Value="13"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="../../../freepascal/fpc/rtl/objpas/sysutils/osutilsh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="4"/>
+        <CursorPos X="10" Y="33"/>
+        <UsageCount Value="8"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/win32/win32wsbuttons.pp"/>
+        <UnitName Value="Win32WSButtons"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="179"/>
+        <CursorPos X="21" Y="208"/>
+        <UsageCount Value="8"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="../package/htmlcomp.pas"/>
+        <UnitName Value="HtmlComp"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="67" Y="10"/>
+        <UsageCount Value="11"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="../package/htmlgif2.pas"/>
+        <UnitName Value="HTMLGif2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="410"/>
+        <CursorPos X="59" Y="421"/>
+        <UsageCount Value="28"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="../package/urlsubs.pas"/>
+        <UnitName Value="URLSubs"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="20" Y="10"/>
+        <UsageCount Value="11"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="../package/htmlcomp.lrs"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="1"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="../package/htmlun2.lrs"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="21" Y="10"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="../../../freepascal/fpc/rtl/unix/unix.pp"/>
+        <UnitName Value="Unix"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="61"/>
+        <CursorPos X="19" Y="70"/>
+        <UsageCount Value="10"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="../../../freepascal/fpc/rtl/inc/varianth.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="475"/>
+        <CursorPos X="10" Y="503"/>
+        <UsageCount Value="11"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="../../../freepascal/fpc/rtl/inc/dynlibs.pas"/>
+        <UnitName Value="dynlibs"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="27"/>
+        <CursorPos X="10" Y="36"/>
+        <UsageCount Value="12"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="../../../lazarus_gitsvn/trunk/ideintf/propedits.pp"/>
+        <UnitName Value="PropEdits"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="4350"/>
+        <CursorPos X="7" Y="4359"/>
+        <UsageCount Value="15"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="../../../freepascal/fpc/rtl/linux/sysosh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="3" Y="21"/>
+        <UsageCount Value="10"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/wince/winceproc.pp"/>
+        <UnitName Value="winceproc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="122"/>
+        <CursorPos X="21" Y="156"/>
+        <UsageCount Value="9"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/win32/win32proc.pp"/>
+        <UnitName Value="win32proc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1543"/>
+        <CursorPos X="35" Y="1561"/>
+        <UsageCount Value="9"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/lmessages.pp"/>
+        <UnitName Value="LMessages"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="409"/>
+        <CursorPos X="23" Y="418"/>
+        <UsageCount Value="13"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/clipbrd.pp"/>
+        <UnitName Value="Clipbrd"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="207"/>
+        <CursorPos X="14" Y="228"/>
+        <UsageCount Value="9"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/lclintf.pas"/>
+        <UnitName Value="LCLIntf"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="305"/>
+        <CursorPos X="20" Y="314"/>
+        <UsageCount Value="9"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="fdemunit.dfm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="29"/>
+        <CursorPos X="20" Y="38"/>
+        <UsageCount Value="12"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="demounit.lfm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="107"/>
+        <CursorPos X="7" Y="131"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="demounit.dfm"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="105"/>
+        <CursorPos X="7" Y="129"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="fdemunit.lfm"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="22"/>
+        <CursorPos X="23" Y="38"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="../../../freepascal/fpc/rtl/inc/systemh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="798"/>
+        <CursorPos X="11" Y="825"/>
+        <UsageCount Value="15"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="../../../freepascal/fpc/rtl/objpas/objpas.pp"/>
+        <UnitName Value="objpas"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="24" Y="10"/>
+        <UsageCount Value="15"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="../../../freepascal/fpc/rtl/inc/ustringh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="13"/>
+        <CursorPos X="10" Y="22"/>
+        <UsageCount Value="10"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="../../../freepascal/fpc/rtl/inc/ustrings.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1377"/>
+        <CursorPos X="19" Y="1386"/>
+        <UsageCount Value="10"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="/usr/src/debug/glibc-2.12.1-4-gfdae809/nptl/sysdeps/unix/sysv/linux/raise.c"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="25"/>
+        <CursorPos X="32" Y="53"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/qt/qtwinapi.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="709"/>
+        <CursorPos X="23" Y="718"/>
+        <UsageCount Value="19"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/qt/qt45.pas"/>
+        <UnitName Value="qt4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="5516"/>
+        <CursorPos X="18" Y="5525"/>
+        <UsageCount Value="11"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/intfbasewinapi.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="965"/>
+        <CursorPos X="3" Y="969"/>
+        <UsageCount Value="12"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="../../../freepascal/fpc/rtl/objpas/sysutils/sysstrh.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="99"/>
+        <CursorPos X="10" Y="125"/>
+        <UsageCount Value="10"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="../../../lazarus_gitsvn/trunk/components/turbopower_ipro/iphtml.pas"/>
+        <UnitName Value="IpHtml"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="9242"/>
+        <CursorPos X="18" Y="9260"/>
+        <UsageCount Value="18"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/gtk2/gtk2winapi.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1654"/>
+        <CursorPos X="19" Y="1663"/>
+        <UsageCount Value="11"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="../../../freepascal/fpc/packages/gtk2/src/gtk+/gdk/gdktypes.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="4" Y="11"/>
+        <UsageCount Value="11"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/utrace.pp"/>
+        <UnitName Value="UTrace"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="24"/>
+        <CursorPos X="1" Y="64"/>
+        <UsageCount Value="10"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/qt/qtobjects.pas"/>
+        <UnitName Value="qtobjects"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1545"/>
+        <CursorPos X="19" Y="1554"/>
+        <UsageCount Value="10"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="../../../freepascal/fpc/rtl/objpas/math.pp"/>
+        <UnitName Value="math"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="75"/>
+        <CursorPos X="29" Y="101"/>
+        <UsageCount Value="10"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="../../../lazarus_gitsvn/trunk/designer/jitforms.pp"/>
+        <UnitName Value="JITForms"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1413"/>
+        <CursorPos X="4" Y="1439"/>
+        <UsageCount Value="10"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="../../../freepascal/fpc/rtl/inc/objpash.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="255"/>
+        <CursorPos X="8" Y="282"/>
+        <UsageCount Value="13"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="../../../lazarus_gitsvn/trunk/components/printers/printersdlgs.pp"/>
+        <UnitName Value="PrintersDlgs"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="52" Y="3"/>
+        <UsageCount Value="10"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="../../../lazarus_gitsvn/trunk/components/printers/osprinters.pas"/>
+        <UnitName Value="OSPrinters"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="21" Y="10"/>
+        <UsageCount Value="10"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/qt/qtobject.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="683"/>
+        <CursorPos X="1" Y="708"/>
+        <UsageCount Value="10"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/icon.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="210"/>
+        <CursorPos X="1" Y="234"/>
+        <UsageCount Value="10"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/lclmessageglue.pas"/>
+        <UnitName Value="LCLMessageGlue"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="95"/>
+        <CursorPos X="1" Y="121"/>
+        <UsageCount Value="10"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/gtk2/gtk2proc.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="6418"/>
+        <CursorPos X="19" Y="6427"/>
+        <UsageCount Value="11"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/gtk2/gtk2callback.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2050"/>
+        <CursorPos X="49" Y="2073"/>
+        <UsageCount Value="11"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="../../../lazarus_gitsvn/trunk/converter/convertsettings.pas"/>
+        <UnitName Value="ConvertSettings"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="351"/>
+        <CursorPos X="51" Y="375"/>
+        <UsageCount Value="10"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="../../../lazarus_gitsvn/trunk/converter/convcodetool.pas"/>
+        <UnitName Value="ConvCodeTool"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="327"/>
+        <CursorPos X="42" Y="354"/>
+        <UsageCount Value="10"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="../../../lazarus_gitsvn/trunk/converter/convertdelphi.pas"/>
+        <UnitName Value="ConvertDelphi"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="654"/>
+        <CursorPos X="16" Y="675"/>
+        <UsageCount Value="10"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/wince/winceint.pp"/>
+        <UnitName Value="WinCEInt"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="124"/>
+        <CursorPos X="27" Y="146"/>
+        <UsageCount Value="10"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="../../../freepascal/fpc/packages/fcl-base/src/contnrs.pp"/>
+        <UnitName Value="contnrs"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="63"/>
+        <CursorPos X="14" Y="91"/>
+        <UsageCount Value="15"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/extctrls.pp"/>
+        <UnitName Value="ExtCtrls"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1161"/>
+        <CursorPos X="3" Y="1192"/>
+        <UsageCount Value="13"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/forms.pp"/>
+        <UnitName Value="Forms"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1716"/>
+        <CursorPos X="23" Y="1725"/>
+        <UsageCount Value="10"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="../../../laz_test_buildprof/lcl/extctrls.pp"/>
+        <UnitName Value="ExtCtrls"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1165"/>
+        <CursorPos X="3" Y="1192"/>
+        <UsageCount Value="11"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="../../../laz_test_buildprof/lcl/include/winapih.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="186"/>
+        <CursorPos X="24" Y="195"/>
+        <UsageCount Value="10"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="../../../freepascal/fpc/rtl/inc/heaph.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="47"/>
+        <CursorPos X="10" Y="91"/>
+        <UsageCount Value="10"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="../../../laz_test_buildprof/lcl/include/control.inc"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3580"/>
+        <CursorPos X="1" Y="3607"/>
+        <UsageCount Value="10"/>
+      </Unit102>
+      <Unit103>
+        <Filename Value="../../../LazTest/thtmlport/package/htmlsubs.pas"/>
+        <UnitName Value="Htmlsubs"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="2628"/>
+        <CursorPos X="12" Y="2656"/>
+        <UsageCount Value="10"/>
+      </Unit103>
+    </Units>
+    <JumpHistory Count="4" HistoryIndex="3">
+      <Position1>
+        <Filename Value="../package/htmlsubs.pas"/>
+        <Caret Line="2382" Column="8" TopLine="2382"/>
+      </Position1>
+      <Position2>
+        <Filename Value="../package/htmlsubs.pas"/>
+        <Caret Line="2656" Column="13" TopLine="2628"/>
+      </Position2>
+      <Position3>
+        <Filename Value="../package/htmlun2.pas"/>
+        <Caret Line="62" Column="3" TopLine="34"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../package/htmlcompreg.pas"/>
+        <Caret Line="5" Column="1" TopLine="1"/>
+      </Position4>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="9"/>
+    <SearchPaths>
+      <OtherUnitFiles Value="$(LazarusDir)/components/printers/lib/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <CStyleOperator Value="False"/>
+        <IncludeAssertionCode Value="True"/>
+        <AllowLabel Value="False"/>
+        <CPPInline Value="False"/>
+        <UseAnsiStrings Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <Checks>
+        <IOChecks Value="True"/>
+        <RangeChecks Value="True"/>
+        <OverflowChecks Value="True"/>
+        <StackChecks Value="True"/>
+      </Checks>
+      <VerifyObjMethodCallValidity Value="True"/>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDwarf Value="True"/>
+        <UseHeaptrc Value="True"/>
+      </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerMessages>
+        <UseMsgFile Value="True"/>
+      </CompilerMessages>
+      <CustomOptions Value="-dDebugIt
+"/>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Source Value="../package/htmlsubs.pas"/>
+        <Line Value="3996"/>
+      </Item1>
+    </BreakPoints>
+    <Exceptions Count="2">
+      <Item1>
+        <Name Value="ECodetoolError"/>
+      </Item1>
+      <Item2>
+        <Name Value="EFOpenError"/>
+      </Item2>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

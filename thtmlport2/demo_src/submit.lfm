@@ -1,0 +1,74 @@
+object SubmitForm: TSubmitForm
+  Left = 200
+  Height = 273
+  Top = 99
+  Width = 427
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Submit Results'
+  ClientHeight = 273
+  ClientWidth = 427
+  Font.Height = -13
+  LCLVersion = '0.9.29'
+  object Label1: TLabel
+    Left = 16
+    Height = 18
+    Top = 19
+    Width = 46
+    Caption = 'Action:'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 9
+    Height = 18
+    Top = 43
+    Width = 53
+    Caption = 'Method:'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 18
+    Height = 18
+    Top = 71
+    Width = 47
+    Caption = 'Results'
+    ParentColor = False
+  end
+  object ActionText: TEdit
+    Left = 67
+    Height = 27
+    Top = 14
+    Width = 342
+    ReadOnly = True
+    TabStop = False
+    TabOrder = 0
+  end
+  object MethodText: TEdit
+    Left = 68
+    Height = 27
+    Top = 41
+    Width = 342
+    ReadOnly = True
+    TabStop = False
+    TabOrder = 1
+  end
+  object ResultBox: TListBox
+    Left = 17
+    Height = 145
+    Top = 90
+    Width = 392
+    ItemHeight = 0
+    TabOrder = 2
+    TabStop = False
+  end
+  object Button1: TButton
+    Left = 172
+    Height = 28
+    Top = 242
+    Width = 73
+    Caption = '&Close'
+    Default = True
+    OnClick = Button1Click
+    TabOrder = 3
+  end
+end

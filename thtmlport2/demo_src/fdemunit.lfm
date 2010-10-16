@@ -1,0 +1,252 @@
+object Form1: TForm1
+  Left = 226
+  Height = 252
+  Top = 482
+  Width = 494
+  ActiveControl = Panel1
+  Caption = 'Frame Demo'
+  ClientHeight = 227
+  ClientWidth = 494
+  Font.Height = -13
+  Menu = MainMenu1
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  Position = poDesktopCenter
+  LCLVersion = '0.9.29'
+  object Panel2: TPanel
+    Left = 0
+    Height = 23
+    Top = 204
+    Width = 494
+    Align = alBottom
+    Alignment = taLeftJustify
+    BevelInner = bvLowered
+    ClientHeight = 23
+    ClientWidth = 494
+    TabOrder = 0
+    object ProgressBar: TProgressBar
+      Left = 342
+      Height = 19
+      Top = 2
+      Width = 150
+      Align = alRight
+      TabOrder = 0
+      Visible = False
+    end
+  end
+  object FrameViewer: TFrameViewer
+    Left = 0
+    Height = 179
+    Top = 25
+    Width = 494
+    OnHotSpotTargetCovered = HotspotTargetChange
+    OnHotSpotTargetClick = HotSpotTargetClick
+    ImageCacheCount = 6
+    OnHistoryChange = HistoryChange
+    NoSelect = False
+    OnBlankWindowRequest = WindowRequest
+    OnObjectClick = FrameViewerObjectClick
+    OnRightClick = FrameViewerRightClick
+    OnInclude = FrameViewerInclude
+    OnSoundRequest = SoundRequest
+    PrintMarginLeft = 2
+    PrintMarginRight = 2
+    PrintMarginTop = 2
+    PrintMarginBottom = 3
+    PrintScale = 1
+    OnPrintHTMLHeader = ViewerPrintHTMLHeader
+    OnPrintHTMLFooter = ViewerPrintHTMLFooter
+    DefBackground = clWindow
+    DefFontName = 'Times New Roman'
+    DefPreFontName = 'Courier New'
+    DefHotSpotColor = clNavy
+    HistoryMaxCount = 6
+    CharSet = DEFAULT_CHARSET
+    OnProcessing = ProcessingHandler
+    Align = alClient
+    TabOrder = 1
+    OnMouseMove = FrameViewerMouseMove
+    OnFormSubmit = SubmitEvent
+    fvOptions = [fvMetaRefresh, fvOverLinksActive, fvPrintMonochromeBlack, fvPrintTableBackground, fvShowVScroll]
+    OnProgress = FrameViewerProgress
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 25
+    Top = 0
+    Width = 494
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 25
+    ClientWidth = 494
+    TabOrder = 2
+    object ReloadButton: TButton
+      Left = 8
+      Height = 25
+      Top = 0
+      Width = 65
+      Caption = '&Reload'
+      Enabled = False
+      OnClick = ReloadClick
+      TabOrder = 0
+    end
+    object FwdButton: TButton
+      Left = 72
+      Height = 25
+      Top = 0
+      Width = 65
+      Caption = '&Fwd'
+      Enabled = False
+      OnClick = FwdButtonClick
+      TabOrder = 1
+    end
+    object BackButton: TButton
+      Left = 136
+      Height = 25
+      Top = 0
+      Width = 65
+      Caption = '&Back'
+      Enabled = False
+      OnClick = BackButtonClick
+      TabOrder = 2
+    end
+    object Edit2: TEdit
+      Left = 208
+      Height = 27
+      Top = 0
+      Width = 337
+      TabOrder = 3
+    end
+  end
+  object MainMenu1: TMainMenu
+    left = 136
+    top = 48
+    object File1: TMenuItem
+      Caption = '&File'
+      OnClick = File1Click
+      object Open1: TMenuItem
+        Caption = '&Open'
+        ShortCut = 114
+        OnClick = Open1Click
+      end
+      object SetPrintScale: TMenuItem
+        Caption = 'Set PrintScale'
+        OnClick = SetPrintScaleClick
+      end
+      object PrinterSetup: TMenuItem
+        Caption = 'Printer Setup...'
+        OnClick = PrinterSetupClick
+      end
+      object PrintPreview1: TMenuItem
+        Caption = 'Print Pre&view'
+        Enabled = False
+        OnClick = PrintPreview1Click
+      end
+      object Print1: TMenuItem
+        Caption = '&Print...'
+        OnClick = Print1Click
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object Exit1: TMenuItem
+        Caption = '&Exit'
+        OnClick = Exit1Click
+      end
+    end
+    object Edit1: TMenuItem
+      Caption = '&Edit'
+      OnClick = Edit1Click
+      object Find1: TMenuItem
+        Caption = '&Find'
+        ShortCut = 16454
+        OnClick = Find1Click
+      end
+      object Copy1: TMenuItem
+        Caption = '&Copy'
+        ShortCut = 16451
+        OnClick = Copy1Click
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object SelectAll1: TMenuItem
+        Caption = '&Select All'
+        OnClick = SelectAll1Click
+      end
+    end
+    object Options1: TMenuItem
+      Caption = '&Options'
+      object Showimages: TMenuItem
+        Caption = '&Show images'
+        Checked = True
+        OnClick = ShowimagesClick
+      end
+      object Fonts: TMenuItem
+        Caption = 'Default &Font/Colors'
+        OnClick = FontsClick
+      end
+    end
+    object HistoryMenuItem: TMenuItem
+      Caption = '&History'
+      Visible = False
+    end
+    object About1: TMenuItem
+      Caption = '&About'
+      OnClick = About1Click
+    end
+  end
+  object OpenDialog: TOpenDialog
+    DefaultExt = '.htm'
+    Filter = 'html files|*.htm;*.html|all files|*.*'
+    Options = [ofHideReadOnly, ofPathMustExist, ofFileMustExist]
+    left = 124
+    top = 112
+  end
+  object FindDialog: TFindDialog
+    Options = [frDown, frHideWholeWord, frDisableWholeWord]
+    OnFind = FindDialogFind
+    left = 212
+    top = 112
+  end
+  object PrintDialog: TPrintDialog
+    FromPage = 1
+    MinPage = 1
+    MaxPage = -1
+    Options = [poPageNums]
+    ToPage = 1
+    left = 40
+    top = 112
+  end
+  object PopupMenu1: TPopupMenu
+    left = 40
+    top = 48
+    object ViewImage: TMenuItem
+      Caption = '&View Image'
+      OnClick = ViewImageClick
+    end
+    object CopyImagetoclipboard: TMenuItem
+      Caption = '&Copy image to clipboard'
+      OnClick = CopyImagetoclipboardClick
+    end
+    object N3: TMenuItem
+      Caption = '-'
+    end
+    object OpenInNewWindow: TMenuItem
+      Caption = '&Open in new window'
+      OnClick = OpenInNewWindowClick
+    end
+  end
+  object Timer1: TTimer
+    Enabled = False
+    Interval = 200
+    OnTimer = Timer1Timer
+    left = 236
+    top = 48
+  end
+  object PrinterSetupDialog: TPrinterSetupDialog
+    left = 312
+    top = 112
+  end
+end
