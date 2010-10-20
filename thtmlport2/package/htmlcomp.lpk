@@ -7,6 +7,7 @@
     <CompilerOptions>
       <Version Value="9"/>
       <SearchPaths>
+        <OtherUnitFiles Value="/home/juha/SW/Pascal/"/>
         <UnitOutputDirectory Value="units/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Parsing>
@@ -21,7 +22,8 @@
       </Parsing>
       <Other>
         <WriteFPCLogo Value="False"/>
-        <CustomOptions Value="-dDebugIt"/>
+        <CustomOptions Value="-dDebugIt
+"/>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
@@ -36,7 +38,7 @@
       </Item1>
       <Item2>
         <Filename Value="ditherunit.pas"/>
-        <UnitName Value="ditherunit"/>
+        <UnitName Value="DitherUnit"/>
       </Item2>
       <Item3>
         <Filename Value="frambrwz.pas"/>

@@ -440,7 +440,8 @@ begin
   FreeAndNil(fDataStream);         // temp encoded data
 
   // temp list of image extensions
-  if (fExtension <> nil) then FreeExtensionList(fExtension);
+  if (fExtension <> nil) then
+    FreeExtensionList(fExtension);
   fExtension := nil;
 
   // signature record stays, but is cleared
@@ -448,39 +449,45 @@ begin
   fSignature^.rSignature := '------';
 
   // ditto the screen descriptor
-  if (fScreenDescriptor = nil) then new(fScreenDescriptor);
+  if (fScreenDescriptor = nil) then
+    new(fScreenDescriptor);
   fillchar(fScreenDescriptor^, sizeof(TGifScreenDescriptor), 0);
 
   // delete all items from image list, but leave the list
-  if (fImageDescriptorList = nil) then fImageDescriptorList := TList.Create;
+  if (fImageDescriptorList = nil) then
+    fImageDescriptorList := TList.Create;
   for i := 0 to (fImageDescriptorList.Count - 1) do
-      begin
-      id := fImageDescriptorList.Items[i];
-      if (id <> nil) then
-          begin
-          if (id^.rExtensionList <> nil) then FreeExtensionList(id^.rExtensionList);
-          if (id^.rPixelList     <> nil) then freemem(id^.rPixelList);
-          if (id^.rBitmap        <> nil) then id^.rBitmap.Free;
-          dispose(id);
-          end;
-      end;
+  begin
+    id := fImageDescriptorList.Items[i];
+    if (id <> nil) then
+    begin
+      if (id^.rExtensionList <> nil) then FreeExtensionList(id^.rExtensionList);
+      if (id^.rPixelList     <> nil) then freemem(id^.rPixelList);
+      if (id^.rBitmap        <> nil) then id^.rBitmap.Free;
+      dispose(id);
+    end;
+  end;
   fImageDescriptorList.Clear;
 
   // release color tables, but keep the list
-  if (fColorTableList = nil) then fColorTableList := TList.Create;
+  if (fColorTableList = nil) then
+    fColorTableList := TList.Create;
   for i := 0 to (fColorTableList.Count - 1) do
-      begin
-      ct := fColorTableList.Items[i];
-      if (ct <> nil) then dispose(ct);
-      end;
+  begin
+    ct := fColorTableList.Items[i];
+    if (ct <> nil) then
+      dispose(ct);
+  end;
   fColorTableList.Clear;
 
   // once again, keep the palette list object, but not the data
-  if (fPaletteList = nil) then fPaletteList := TList.Create;
+  if (fPaletteList = nil) then
+    fPaletteList := TList.Create;
   fPaletteList.Clear;
 
   // don't need the zip/unzip data block
-  if (fZipData <> nil) then dispose(fZipData);
+  if (fZipData <> nil) then
+    dispose(fZipData);
   fZipData := nil;
 end;
 
@@ -853,11 +860,13 @@ var
   eb: PGifExtension;
 begin
   // make a list exists
-  if (fExtension = nil) then fExtension := TList.Create;
+  if (fExtension = nil) then
+    fExtension := TList.Create;
 
   // make a new extension record and add it to temp holding list
   new(eb);
-  if (eb = nil) then OutOfMemoryError;
+  if (eb = nil) then
+    OutOfMemoryError;
   fillchar(eb^, sizeof(TGifExtension), 0);
   fExtension.Add(eb);
 
@@ -943,8 +952,8 @@ end;
 
 procedure TGif.ReadSourceInteger(size: integer; var value: integer);
 var
-    b:  byte;
-    w:  word;
+  b:  byte;
+  w:  word;
 begin
   if (size = 1) then
   begin
@@ -956,9 +965,8 @@ begin
     fIOStream.Read(w, 2);
     value := w;
   end
-  else begin
+  else
     GIF_Error(8);
-  end;
 end;
 
 { ---------------------------------------------------------------------------- }
@@ -1558,7 +1566,8 @@ begin
     for i := 0 to (list.Count - 1) do
     begin
       db := list.Items[i];
-      if (db <> nil) then dispose(db);
+      if (db <> nil) then
+        dispose(db);
     end;
     list.Free;
   end;

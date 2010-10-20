@@ -274,9 +274,9 @@ type
     procedure SetScrollBars(Value: TScrollStyle);
     procedure SetProcessing(Value: boolean);
     procedure SetCharset(Value: TFontCharset);
-    function GetFormControlList: TList;
+    function GetFormControlList: TFormControlObjList;
     function GetNameList: TStringList;
-    function GetLinkList: TList;
+    function GetLinkList: TFontList;
     procedure SetServerRoot(Value: string);
     procedure SetOnFileBrowse(Handler: TFileBrowseEvent);   
     procedure SetOnObjectClick(Handler: TObjectClickEvent);
@@ -432,9 +432,9 @@ type
     property Palette: HPalette read GetOurPalette write SetOurPalette;
     property Dither: boolean read FDither write SetDither default True;
     property CaretPos: integer read FCaretPos write SetCaretPos;
-    property FormControlList: TList read GetFormControlList;
+    property FormControlList: TFormControlObjList read GetFormControlList;
     property NameList: TStringList read GetNameList;
-    property LinkList: TList read GetLinkList;
+    property LinkList: TFontList read GetLinkList;
     property SectionList: TSectionList read FSectionList;
     property OnPageEvent: TPageEvent read FOnPageEvent write FOnPageEvent;
     property OnExpandName: TExpandNameEvent read FOnExpandName write SetOnExpandName;
@@ -556,6 +556,17 @@ type
     property OnObjectTag: TObjectTagEvent read FOnObjectTag write FOnObjectTag;
     property Cursor: TCursor read GetCursor write SetCursor default crIBeam; 
     end;
+
+  { ThtmlViewerList }
+
+  ThtmlViewerList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): ThtmlViewer;
+    procedure SetItems(AIndex: integer; const AValue: ThtmlViewer);
+  public
+    property Items[AIndex: integer]: ThtmlViewer read GetItems write SetItems; default;
+  end;
+
 
 implementation
 
@@ -1376,7 +1387,7 @@ begin
   else if I < 0 then
   begin
     for J := 0 to SectionList.LinkList.Count-1 do
-      with TFontObj(SectionList.LinkList[J]) do
+      with SectionList.LinkList[J] do
       begin
         UrlTmp := Url;
         if Length(UrlTmp) > 0 then
@@ -1408,7 +1419,7 @@ begin
   begin
     S := Visited[I];
     for J := 0 to SectionList.LinkList.Count-1 do
-      with TFontObj(SectionList.LinkList[J]) do
+      with SectionList.LinkList[J] do
       begin
         if (Url <> '') and (Url[1] = '#') then
           S1 := FCurrentFile+Url
@@ -1450,10 +1461,11 @@ begin
   else if (Button = mbLeft) then
   begin
     LeftButtonDown := True;
+    Dummy := Nil;
     if not (htNoLinkHilite in FOptions)
          or not (guUrl in GetURL(X, Y, Dummy, DummyFC, DummyTitle)) then
       HiLiting := True;
-//    Dummy.Free;
+    Dummy.Free;
     with FSectionList do
     begin
       Sel1 := FindCursor(PaintPanel.Canvas, X, Y+YOff, XR, YR, CaretHt, InText);
@@ -1520,7 +1532,7 @@ begin
       begin
         Dummy := Nil;
         GetURL(X+Left, Y+Top, Dummy, DummyFC, FTitleAttr);
-//        Dummy.Free;
+        Dummy.Free;
       end;
       Inherited MouseMove(Shift,X,Y);
     end;
@@ -1588,7 +1600,7 @@ begin
     FLinkAttributes.Text := UrlTarget.Attr;
     FLinkText := GetTextByIndices(UrlTarget.Start, UrlTarget.Last);
   end;
-//  UrlTarget.Free;
+  UrlTarget.Free;
   if guControl in guResult then
     NextCursor := HandCursor;
   if (Assigned(FOnImageClick) or Assigned(FOnImageOver)) and
@@ -1674,7 +1686,7 @@ begin
           Parameters.URL := UrlTarget.Url;
           Parameters.Target := UrlTarget.Target;
         end;
-//        UrlTarget.Free;
+        UrlTarget.Free;
         if GetWordAtCursor(X, Y, St, En, AWord) then
           Parameters.ClickWord := AWord;
         HTMLTimer.Enabled := False;
@@ -1707,7 +1719,7 @@ begin
         FLinkText := GetTextByIndices(UrlTarget.Start, UrlTarget.Last);
         ThisID := UrlTarget.ID;
         for I := 0 to LinkList.Count-1 do
-          with TFontObj(LinkList.Items[I]) do
+          with LinkList.Items[I] do
             if (ThisID = UrlTarget.ID) and Assigned(TabControl) then
             begin
               ParentForm := GetParentForm(TabControl);
@@ -1726,7 +1738,7 @@ begin
         URLAction;
         {Note:  Self pointer may not be valid after URLAction call (TFrameViewer, HistoryMaxCount=0)}
       end;
-//      UrlTarget.Free;
+      UrlTarget.Free;
     end;
   end;
 end;
@@ -2405,7 +2417,7 @@ begin
   FCharset := Value;
 end;
 
-function ThtmlViewer.GetFormControlList: TList;
+function ThtmlViewer.GetFormControlList: TFormControlObjList;
 begin
   Result := FSectionList.FormControlList;
 end;
@@ -2415,7 +2427,7 @@ begin
   Result := FNameList;
 end;
 
-function ThtmlViewer.GetLinkList: TList;
+function ThtmlViewer.GetLinkList: TFontList;
 begin
   Result := FSectionList.LinkList;
 end;
@@ -2450,7 +2462,7 @@ begin
     begin
       Visited.Clear;
       for I := 0 to SectionList.LinkList.Count-1 do
-        TFontObj(LinkList[I]).Visited := False;
+        LinkList[I].Visited := False;
       Invalidate;
     end
     else
@@ -4786,7 +4798,7 @@ var
   I: integer;
 begin
   for I := 0 to FormControlList.count-1 do
-    with TFormControlObj(FormControlList.Items[I]) do
+    with FormControlList.Items[I] do
       if Assigned(TheControl) then
         TheControl.Hide;
   BorderPanel.BorderStyle := bsNone;
@@ -4887,7 +4899,8 @@ begin
       begin
         if (Obj is THiddenFormControlObj) then
           Result := Obj
-        else Result := TFormControlObj(Obj).TheControl;
+        else
+          Result := TFormControlObj(Obj).TheControl;
       end
       else if (Obj is TImageObj) then
         Result := Obj;
@@ -4964,7 +4977,20 @@ begin
     FOnProgress(Self, psEnding, 100);
 end;
 
-{----------------TPaintPanel.CreateIt}
+{ ThtmlViewerList }
+
+function ThtmlViewerList.GetItems(AIndex: integer): ThtmlViewer;
+begin
+  Result := inherited Items[AIndex] as ThtmlViewer;
+end;
+
+procedure ThtmlViewerList.SetItems(AIndex: integer; const AValue: ThtmlViewer);
+begin
+  inherited Items[AIndex] := AValue;
+end;
+
+{ TPaintPanel }
+
 constructor TPaintPanel.CreateIt(AOwner: TComponent; Viewer: ThtmlViewer);
 
 begin

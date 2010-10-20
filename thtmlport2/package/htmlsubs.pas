@@ -240,7 +240,34 @@ type
     procedure DrawLogic(SectionList: TSectionList; Canvas: TCanvas;
                   FO: TFontObj; AvailableWidth, AvailableHeight: integer);  virtual; abstract;
     procedure ProcessProperties(Prop: TProperties);  
-    property Alt: string read FAlt;    
+
+    property Alt: string read FAlt;
+  end;
+
+  TImageObj = class;
+
+  { TFloatingObjList }
+
+  TFloatingObjList = class(TObjectList) //  {a list of TFloatingObjs (TImageObj and TPanelObj)}
+  private
+    function GetItems(AIndex: integer): TFloatingObj;
+    procedure SetItems(AIndex: integer; const AValue: TFloatingObj);
+  public
+    constructor CreateCopy(AMasterList: TSectionList; T: TFloatingObjList);
+    function FindImage(Posn: integer): TFloatingObj;
+    function GetHeightAt(Posn: integer; var AAlign: AlignmentType;
+         var FlObj: TFloatingObj) : Integer;
+    function GetWidthAt(Posn: integer; var AAlign: AlignmentType;
+           var HSpcL, HSpcR: integer; var FlObj: TFloatingObj) : integer;
+    function GetImageCountAt(Posn: integer): integer;
+    function PtInImage(X: integer; Y: integer; var IX, IY, Posn: integer;
+                var AMap, UMap: boolean; var MapItem: TMapItem;
+                var ImageObj: TImageObj): boolean;
+    function PtInObject(X : integer; Y: integer; var Obj: TObject;
+         var IX, IY: integer): boolean;
+    procedure Decrement(N: integer);
+  public
+    property Items[AIndex: integer]: TFloatingObj read GetItems write SetItems; default;
   end;
 
   { TPanelObj }
@@ -266,7 +293,17 @@ type
     procedure Draw(ACanvas: TCanvas; X1, Y1: integer);
   end;
 
-  HoverType = (hvOff, hvOverUp, hvOverDown);   
+  { TPanelObjList }
+
+  TPanelObjList = class(TObjectList) //  {a list of TPanelObjs}
+  private
+    function GetItems(AIndex: integer): TPanelObj;
+    procedure SetItems(AIndex: integer; const AValue: TPanelObj);
+  public
+    property Items[AIndex: integer]: TPanelObj read GetItems write SetItems; default;
+  end;
+
+  HoverType = (hvOff, hvOverUp, hvOverDown);
 
   { TImageObj }
   TImageObj = class(TFloatingObj)   {inline image info}
@@ -309,24 +346,10 @@ type
   end;
 
   { TImageObjList }
-
+{
   TImageObjList = class(TObjectList)  {a list of TImageObj's and TPanelObj's}
-  Public
-    constructor CreateCopy(AMasterList: TSectionList; T: TImageObjList);
-    function FindImage(Posn: integer): TFloatingObj;
-    function GetHeightAt(Posn: integer; var AAlign: AlignmentType;
-         var FlObj: TFloatingObj) : Integer;
-    function GetWidthAt(Posn: integer; var AAlign: AlignmentType;
-           var HSpcL, HSpcR: integer; var FlObj: TFloatingObj) : integer;
-    function GetImageCountAt(Posn: integer): integer;
-    function PtInImage(X: integer; Y: integer; var IX, IY, Posn: integer;
-                var AMap, UMap: boolean; var MapItem: TMapItem;
-                var ImageObj: TImageObj): boolean;
-    function PtInObject(X : integer; Y: integer; var Obj: TObject;
-         var IX, IY: integer): boolean;
-    procedure Decrement(N: integer);
   end;
-
+}
   IndentManager = class(IndentManagerBasic)
     procedure Update(Y: integer; Img: TFloatingObj);
     procedure UpdateBlock(Y: integer; IW: integer; IH: integer; AJustify: AlignmentType);
@@ -433,6 +456,12 @@ type
   private
     function GetItems(AIndex: integer): TFormControlObj;
     procedure SetItems(AIndex: integer; const AValue: TFormControlObj);
+  public
+    function FindControl(Posn: integer): TFormControlObj;
+    function GetHeightAt(Posn: integer; var FormAlign: AlignmentType) : Integer;
+    function GetWidthAt(Posn: integer; var HSpcL, HSpcR: integer) : integer;
+    function GetControlCountAt(Posn: integer): integer;
+    procedure Decrement(N: integer);
   public
     property Items[AIndex: integer]: TFormControlObj read GetItems write SetItems; default;
   end;
@@ -958,8 +987,8 @@ type
     XP: XArray;
     BuffSize: integer;       {buffer may be larger}
     Fonts : TFontList;       {List of FontObj's in this section}
-    Images: TImageObjList;   {list of TImageObj's, the images in section}
-    FormControls: TList;     {list of TFormControls in section}
+    Images: TFloatingObjList; {list of TImageObj's, the images in section}
+    FormControls: TFormControlObjList;   {list of TFormControls in section}
     SIndexList: TObjectList;   {list of Source index changes}
     Lines : TObjectList;       {List of LineRecs,  info on all the lines in section}
     Justify: JustifyType;    {Left, Centered, Right}
@@ -990,14 +1019,13 @@ type
     function CreatePanel(L: TAttributeList;
                      ACell: TCellBasic): TPanelObj;    
     function AddFormControl(Which: Symb; AMasterList: TSectionList;
-         L: TAttributeList; ACell: TCellBasic; Index: integer;
-         Prop: TProperties): TFormControlObj;  
+         L: TAttributeList; ACell: TCellBasic; Index: integer; Prop: TProperties): TFormControlObj;
     procedure ChangeFont(Prop: TProperties);
     procedure HRef(Sy: Symb; List: TSectionList; AnURL: TUrlTarget;
               Attributes: TAttributeList; Prop: TProperties);
     function FindCountThatFits(Canvas: TCanvas; Width: integer; Start: PWideChar; Max: integer): integer;
     function FindCountThatFits1(Canvas: TCanvas; Start: PWideChar; Max: integer; X, Y: integer; IMgr: IndentManager;
-                    var ImgHt: integer; NxImages: TList) : integer;
+                                var ImgHt: integer; NxImages: TFloatingObjList) : integer;
     function FindTextWidth(Canvas: TCanvas; Start: PWideChar; N: integer; RemoveSpaces: boolean): integer;
     function FindTextWidthA(Canvas: TCanvas; Start: PWideChar; N: integer): integer;
     function DrawLogic(Canvas : TCanvas; X, Y, XRef, YRef, AWidth, AHeight, BlHt: integer; IMgr: IndentManager;
@@ -1017,8 +1045,8 @@ type
     function FindStringR(From: integer; const ToFind: WideString; MatchCase: boolean): integer; override;
     function FindSourcePos(DocPos: integer): integer; override;
     function FindDocPos(SourcePos: integer; Prev: boolean): integer; override;
-    function CursorToXY(Canvas: TCanvas; Cursor: integer; var X: integer;
-             var Y: integer): boolean; override;
+    function CursorToXY(Canvas: TCanvas; Cursor: integer;
+                        var X: integer; var Y: integer): boolean; override;
     function GetChAtPos(APos: integer; var ACh: WideChar; var AObj: TObject): boolean; override;
     procedure MinMaxWidth(Canvas: TCanvas; var Min, Max: integer); override;
     end;
@@ -1065,8 +1093,8 @@ type
     function FindStringR(From: integer; const ToFind: WideString; MatchCase: boolean): integer;
     function FindSourcePos(DocPos: integer): integer;
     function FindDocPos(SourcePos: integer; Prev: boolean): integer;
-    function CursorToXY(Canvas: TCanvas; Cursor: integer; var X: integer;
-             var Y: integer): boolean;
+    function CursorToXY(Canvas: TCanvas; Cursor: integer;
+                        var X: integer; var Y: integer): boolean;
     function GetChAtPos(APos: integer; var ACh: WideChar; var AObj: TObject): boolean;
     procedure AddSectionsToList;
     procedure FormTree(Indent: string; var Tree: string);
@@ -1145,7 +1173,7 @@ type
     BitmapName: String;      {name of background bitmap}
     BitmapLoaded: boolean;   {if background bitmap is loaded}
     htmlFormList: THtmlFormList;
-    AGifList: TList;      {list of all animated Gifs}
+    AGifList: TGIFImageList;      {list of all animated Gifs}
     SubmitForm: TFormSubmitEvent;
     ScriptEvent: TScriptEvent;
     PanelCreateEvent: TPanelCreateEvent;
@@ -1156,8 +1184,8 @@ type
     PageShortened: boolean;
     MapList: TObjectList;    {holds list of client maps, TMapItems}
     Timer: TTimer;      {for animated GIFs}
-    FormControlList:  TList;   {List of all TFormControlObj's in this SectionList}
-    PanelList: TList;    {List of all TPanelObj's in this SectionList}
+    FormControlList: TFormControlObjList;   {List of all TFormControlObj's in this SectionList}
+    PanelList: TPanelObjList;    {List of all TPanelObj's in this SectionList}
     MissingImages: TStringList;  {images to be supplied later}
     ControlEnterEvent: TNotifyEvent;
     LinkList: TFontList;    {List of links (TFontObj's)}
@@ -1222,8 +1250,8 @@ type
     function GetFormcontrolData: TObjectList;
     procedure SetFormcontrolData(T: TObjectList);
     function FindDocPos(SourcePos: integer; Prev: boolean): integer;
-    function CursorToXY(Canvas: TCanvas; Cursor: integer; var X: integer;
-             var Y: integer): boolean;
+    function CursorToXY(Canvas: TCanvas; Cursor: integer;
+                        var X: integer; var Y: integer): boolean;
     procedure ProcessInlines(SIndex: integer; Prop: TProperties; Start: boolean);  
   end;
 
@@ -1440,7 +1468,7 @@ destructor TFontObj.Destroy;
 begin
   FIArray.Free;
   TheFont.Free;
-//  UrlTarget.Free;
+  UrlTarget.Free;
   TabControl.Free;
   inherited Destroy;
 end;
@@ -2006,6 +2034,178 @@ begin
   end;
 end;
 
+{ TFloatingObjList }
+
+constructor TFloatingObjList.CreateCopy(AMasterList: TSectionList; T: TFloatingObjList);
+var
+  I: integer;
+begin
+  inherited create;
+  for I := 0 to T.Count-1 do
+  begin
+    if T[I] is TImageObj then
+      Add(TImageObj.CreateCopy(AMasterList, TImageObj(T[I])))
+    else
+      Add(TPanelObj.CreateCopy(AMasterList, TPanelObj(T[I])));
+  end;
+end;
+
+function TFloatingObjList.FindImage(Posn: integer): TFloatingObj;
+{find the image at a given character position}
+var
+  I: integer;
+begin
+  for I := 0 to Count-1 do
+    if Items[I].ThePos = Posn then
+    begin
+      Result := Items[I];
+      Exit;
+    end;
+  Result := Nil;
+end;
+
+function TFloatingObjList.GetHeightAt(Posn: integer; var AAlign: AlignmentType;
+         var FlObj: TFloatingObj) : Integer;
+begin
+  FLObj := FindImage(Posn);
+  if Assigned(FLObj) then
+  begin
+    Result := FLObj.ImageHeight+FLObj.VSpaceT+FLObj.VSpaceB;
+    AAlign := FLObj.ObjAlign;
+  end
+  else Result := -1;
+end;
+
+function TFloatingObjList.GetWidthAt(Posn: integer; var AAlign: AlignmentType;
+                var HSpcL, HSpcR: integer; var FlObj: TFloatingObj) : integer;
+begin
+  FLObj := FindImage(Posn);
+  if Assigned(FLObj) then
+  begin
+    Result := FLObj.ImageWidth;
+    AAlign := FLObj.ObjAlign;
+    HSpcL := FLObj.HSpaceL;
+    HSpcR := FLObj.HSpaceR;
+  end
+  else Result := -1;
+end;
+
+function TFloatingObjList.GetImageCountAt(Posn: integer): integer;
+{Return count of chars before the next image.  0 if at the image, 99999999 if no
+ images after Posn}
+var
+  I: integer;
+begin
+  if Count = 0 then
+  begin
+    Result := 99999999;
+    Exit;
+  end;
+  I := 0;
+  while I < count do
+  begin
+    if Items[I].ThePos >= Posn then break;
+    Inc(I);
+  end;
+  if I = Count then
+    Result := 99999999
+  else
+    Result := Items[I].ThePos - Posn;
+end;
+
+procedure TFloatingObjList.Decrement(N: integer);
+{called when a character is removed to change the Position figure}
+var
+  I: integer;
+begin
+  for I := 0 to Count-1 do
+    if Items[I].ThePos > N then
+      Dec(Items[I].ThePos);
+end;
+
+function TFloatingObjList.PtInImage(X: integer; Y: integer; var IX, IY, Posn: integer;
+                var AMap, UMap: boolean; var MapItem: TMapItem;
+                var ImageObj: TImageObj): boolean;
+var
+  I, J, LimX, LimY: integer;
+  LIY: integer;
+  Obj: TObject;
+begin
+  Result := False;
+  for I := 0 to Count-1 do
+  begin
+    Obj := TObject(Items[I]);
+    if Obj is TImageObj then
+      with TImageObj(Obj) do
+      begin
+        IX := X-DrawXX;    {these are actual image, box if any is outside}
+        LIY := Y - DrawYY;
+        LimX := ImageWidth-2*BorderSize;
+        LimY:= ImageHeight-2*BorderSize;
+        if (IX >= 0) and (IX < LimX) and (LIY >= 0) and (LIY < LimY) then
+        begin
+          IY := LIY;
+          Result := True;
+          AMap := IsMap;
+          Posn := ThePos;
+          UMap := False;
+          ImageObj := TImageObj(Obj);
+          if UseMap then
+            with ParentSectionList.MapList do
+              for J := 0 to Count-1 do
+              begin
+                MapItem := TMapItem(Items[J]);
+                if MapItem.MapName = MapName then
+                begin
+                  UMap := True;
+                  Exit;
+                end;
+              end;
+          Exit;
+        end;
+      end;
+  end;
+end;
+
+function TFloatingObjList.PtInObject(X : integer; Y: integer; var Obj: TObject;
+                                  var IX, IY: integer): boolean;
+var
+  I, LimX, LimY: integer;
+  LIY: integer;
+  Item: TObject;
+begin
+  Result := False;
+  for I := 0 to Count-1 do
+  begin
+    Item := TObject(Items[I]);
+    if Item is TImageObj then
+      with TImageObj(Item) do
+      begin
+        IX := X-DrawXX;    {these are actual image, box if any is outside}
+        LIY := Y - DrawYY;
+        LimX := ImageWidth-2*BorderSize;
+        LimY:= ImageHeight-2*BorderSize;
+        if (IX >= 0) and (IX < LimX) and (LIY >= 0) and (LIY < LimY) then
+        begin
+          IY := LIY;
+          Result := True;
+          Obj := Item;
+          Exit;
+        end;
+      end;
+  end;
+end;
+
+function TFloatingObjList.GetItems(AIndex: integer): TFloatingObj;
+begin
+  Result := inherited Items[AIndex] as TFloatingObj;
+end;
+
+procedure TFloatingObjList.SetItems(AIndex: integer; const AValue: TFloatingObj);
+begin
+  inherited Items[AIndex] := AValue;
+end;
+
 { TImageObj }
 
 constructor TImageObj.CreateCopy(AMasterList: TSectionList; T: TImageObj);
@@ -2078,30 +2278,28 @@ end;
 procedure TImageObj.SetHover(Value: HoverType);    
 begin
   if (Value <> FHover) and FHoverImage and (Image is TGifImage) then
-    with TGifImage(Image) do
-    begin
-      if Value <> hvOff then
-        case NumFrames of
-          2: CurrentFrame := 2;
-          3: if Value = hvOverDown then
-              CurrentFrame := 3
-             else CurrentFrame := 2;
-        else
-        begin
-          Animate := True;
-          ParentSectionList.AGifList.Add(Image);
-        end;
-      end
-      else begin
-        Animate := False;
-        if NumFrames <= 3 then
-          CurrentFrame := 1;
-        ParentSectionList.AGifList.Remove(Image);
+    if Value <> hvOff then
+      case TGifImage(Image).NumFrames of
+        2: TGifImage(Image).CurrentFrame := 2;
+        3: if Value = hvOverDown then
+             TGifImage(Image).CurrentFrame := 3
+           else
+             TGifImage(Image).CurrentFrame := 2;
+      else
+      begin
+        TGifImage(Image).Animate := True;
+        ParentSectionList.AGifList.Add(Image);
       end;
-      FHover := Value;
-      ParentSectionList.PPanel.Invalidate;
+    end
+    else begin
+      TGifImage(Image).Animate := False;
+      if TGifImage(Image).NumFrames <= 3 then
+        TGifImage(Image).CurrentFrame := 1;
+      ParentSectionList.AGifList.Remove(Image);
     end;
-end;    
+    FHover := Value;
+    ParentSectionList.PPanel.Invalidate;
+end;
 
 {----------------TImageObj.ReplaceImage}
 procedure TImageObj.ReplaceImage(NewImage: TStream);   
@@ -2157,9 +2355,7 @@ begin
     end
     else begin    {swapped already}
       if (Image is TGifImage) then
-      begin
         ParentSectionList.AGifList.Remove(Image);
-      end;
       Image.Free;
       FreeAndNil(Mask);
     end;
@@ -2299,7 +2495,8 @@ begin
       OrigImage := Image;
       if not FHoverImage then
         ParentSectionList.AGifList.Add(Image)
-      else TGifImage(Image).Animate := False;
+      else
+        TGifImage(Image).Animate := False;
     end
     else begin
       Image := TmpImage; //TBitmap(TmpImage);
@@ -2645,171 +2842,6 @@ begin
   end;
 end;
 
-{----------------TImageObjList.CreateCopy}
-constructor TImageObjList.CreateCopy(AMasterList: TSectionList; T: TImageObjList);
-var
-  I: integer;
-begin
-  inherited create;
-  for I := 0 to T.Count-1 do
-  begin
-    if T[I] is TImageObj then
-      Add(TImageObj.CreateCopy(AMasterList, TImageObj(T[I])))
-    else
-      Add(TPanelObj.CreateCopy(AMasterList, TPanelObj(T[I])));
-  end;
-end;
-
-function TImageObjList.FindImage(Posn: integer): TFloatingObj;  
-{find the image at a given character position}
-var
-  I: integer;
-begin
-  for I := 0 to Count-1 do
-    if TFloatingObj(Items[I]).ThePos = Posn then
-    begin
-      Result := TFloatingObj(Items[I]);
-      Exit;
-    end;
-  Result := Nil;
-end;
-
-function TImageObjList.GetHeightAt(Posn: integer; var AAlign: AlignmentType;
-         var FlObj: TFloatingObj) : Integer;
-begin
-  FLObj := FindImage(Posn);
-  if Assigned(FLObj) then
-  begin
-    Result := FLObj.ImageHeight+FLObj.VSpaceT+FLObj.VSpaceB;
-    AAlign := FLObj.ObjAlign;
-  end
-  else Result := -1;
-end;
-
-function TImageObjList.GetWidthAt(Posn: integer; var AAlign: AlignmentType;
-                var HSpcL, HSpcR: integer; var FlObj: TFloatingObj) : integer;
-begin
-  FLObj := FindImage(Posn);
-  if Assigned(FLObj) then
-  begin
-    Result := FLObj.ImageWidth;
-    AAlign := FLObj.ObjAlign;
-    HSpcL := FLObj.HSpaceL;
-    HSpcR := FLObj.HSpaceR;
-  end
-  else Result := -1;
-end;
-
-function TImageObjList.GetImageCountAt(Posn: integer): integer;
-{Return count of chars before the next image.  0 if at the image, 99999999 if no
- images after Posn}
-var
-  I, PosX: integer;
-begin
-  if Count = 0 then
-  begin
-    Result := 99999999;
-    Exit;
-  end;
-  I := 0;
-  while I < count do
-  begin
-    PosX := TFloatingObj(Items[I]).ThePos;
-    if PosX >= Posn then break;
-    Inc(I);
-  end;
-  if I = Count then
-    Result := 99999999
-  else
-    Result := TFloatingObj(Items[I]).ThePos - Posn;
-end;
-
-{----------------TImageObjList.Decrement}
-procedure TImageObjList.Decrement(N: integer);
-{called when a character is removed to change the Position figure}
-var
-  I: integer;
-begin
-  for I := 0 to Count-1 do
-    with TImageObj(Items[I]) do
-      if ThePos > N then
-        Dec(ThePos);
-end;
-
-{----------------TImageObjList.PtInImage}
-function TImageObjList.PtInImage(X: integer; Y: integer; var IX, IY, Posn: integer;
-                var AMap, UMap: boolean; var MapItem: TMapItem;
-                var ImageObj: TImageObj): boolean;
-var
-  I, J, LimX, LimY: integer;
-  LIY: integer;
-  Obj: TObject;   
-begin
-  Result := False;
-  for I := 0 to Count-1 do
-  begin
-    Obj := TObject(Items[I]);
-    if Obj is TImageObj then
-      with TImageObj(Obj) do
-      begin
-        IX := X-DrawXX;    {these are actual image, box if any is outside}
-        LIY := Y - DrawYY;
-        LimX := ImageWidth-2*BorderSize;
-        LimY:= ImageHeight-2*BorderSize;
-        if (IX >= 0) and (IX < LimX) and (LIY >= 0) and (LIY < LimY) then
-        begin
-          IY := LIY;
-          Result := True;
-          AMap := IsMap;
-          Posn := ThePos;
-          UMap := False;
-          ImageObj := TImageObj(Obj);
-          if UseMap then
-            with ParentSectionList.MapList do
-              for J := 0 to Count-1 do
-              begin
-                MapItem := TMapItem(Items[J]);
-                if MapItem.MapName = MapName then
-                begin
-                  UMap := True;
-                  Exit;
-                end;
-              end;
-          Exit;
-        end;
-      end;
-  end;
-end;
-
-function TImageObjList.PtInObject(X : integer; Y: integer; var Obj: TObject;
-                                  var IX, IY: integer): boolean;
-var
-  I, LimX, LimY: integer;
-  LIY: integer;
-  Item: TObject;   
-begin
-  Result := False;
-  for I := 0 to Count-1 do
-  begin
-    Item := TObject(Items[I]);
-    if Item is TImageObj then
-      with TImageObj(Item) do
-      begin
-        IX := X-DrawXX;    {these are actual image, box if any is outside}
-        LIY := Y - DrawYY;
-        LimX := ImageWidth-2*BorderSize;
-        LimY:= ImageHeight-2*BorderSize;
-        if (IX >= 0) and (IX < LimX) and (LIY >= 0) and (LIY < LimY) then
-        begin
-          IY := LIY;
-          Result := True;
-          Obj := Item;
-          Exit;
-        end;
-      end;
-  end;
-end;
-
 {----------------ThtmlForm.Create}
 constructor ThtmlForm.Create(AMasterList: TSectionList; L : TAttributeList);
 var
@@ -3150,7 +3182,7 @@ begin
   with MasterList.FormControlList do
   begin
     for I := 0 to Count-1 do
-      with  TFormControlObj(Items[I]) do
+      with Items[I] do
         if not ShowIt and Assigned(FControl) then
         begin
           FControl.Show;   {makes it tab active}
@@ -3226,6 +3258,84 @@ begin
 end;
 
 { TFormControlObjList }
+
+function TFormControlObjList.FindControl(Posn: integer): TFormControlObj;
+{find the control at a given character position}
+var
+  I: integer;
+begin
+  for I := 0 to Count-1 do
+    if Items[I].ThePos = Posn then
+    begin
+      Result := Items[I];
+      Exit;
+    end;
+  Result := Nil;
+end;
+
+function TFormControlObjList.GetHeightAt(Posn: integer;
+              var FormAlign: AlignmentType) : Integer;
+var
+  Ctrl: TFormControlObj;
+begin
+  Ctrl := FindControl(Posn);
+  if Assigned(Ctrl) then
+  begin
+    Result := Ctrl.FControl.Height;
+    FormAlign := Ctrl.FormAlign;
+  end
+  else
+    Result := -1;
+end;
+
+function TFormControlObjList.GetWidthAt(Posn: integer; var HSpcL, HSpcR: integer) : integer;
+var
+  Ctrl: TFormControlObj;
+begin
+  Ctrl := FindControl(Posn);
+  if Assigned(Ctrl) then
+  Begin
+    Result := Ctrl.FControl.Width;
+    HSpcL := Ctrl.HSpaceL;
+    HSpcR := Ctrl.HSpaceR;
+  end
+  else
+    Result := -1;
+end;
+
+function TFormControlObjList.GetControlCountAt(Posn: integer): integer;
+{Return count of chars before the next form control.  0 if at the control,
+ 9999 if no controls after Posn}
+var
+  I, PosX: integer;
+begin
+  if Count = 0 then
+  begin
+    Result := 9999;
+    Exit;
+  end;
+  I := 0;
+  while I < count do
+  begin
+    PosX := Items[I].ThePos;
+    if PosX >= Posn then break;
+    Inc(I);
+  end;
+  if I = Count then
+    Result := 9999
+  else
+    Result := Items[I].ThePos - Posn;
+end;
+
+procedure TFormControlObjList.Decrement(N: integer);
+{called when a character is removed to change the Position figure}
+var
+  I: integer;
+begin
+  for I := 0 to Count-1 do
+    if Items[I].ThePos > N then
+      Dec(Items[I].ThePos);
+end;
 
 function TFormControlObjList.GetItems(AIndex: integer): TFormControlObj;
 begin
@@ -3928,18 +4038,22 @@ end;
 
 {----------------TCellBasic.Add}
 procedure TCellBasic.Add(Item: TSectionBase; TagIndex: integer);   
+var
+  Sect: TSection;
 begin
   if Assigned(Item) then
   begin
-    if (Item is TSection) and (Length(TSection(Item).XP)>0) then {XP not assigned if printing}
-    begin
-      TSection(Item).ProcessText(TagIndex);
-      if not (Item is TPreFormated) and (TSection(Item).Len = 0)
-           and not TSection(Item).AnchorName and (TSection(Item).ClearAttr = clrNone) then
-      begin
-        TSection(Item).CheckFree;
-        Item.Free;  {discard empty TSections that aren't anchors}
-        Exit;
+    if Item is TSection then begin
+      Sect := TSection(Item);
+      if Length(Sect.XP) > 0 then begin {XP not assigned if printing}
+        Sect.ProcessText(TagIndex);
+        if not (Item is TPreFormated) and (Sect.Len = 0)
+             and not Sect.AnchorName and (Sect.ClearAttr = clrNone) then
+        begin
+          Sect.CheckFree;
+          Sect.Free;  {discard empty TSections that aren't anchors}
+          Exit;
+        end;
       end;
     end;
     inherited Add(Item);
@@ -3969,7 +4083,7 @@ begin
   if I >= 0 then
   begin
     SB := Items[I];
-    if (SB is TBlock) then
+    if SB is TBlock then
       with TBlock(SB) do
         if BottomAuto then
         begin
@@ -4002,7 +4116,9 @@ begin
     begin
       Result := SB.GetURL(Canvas, X, Y, UrlTarg, FormControl, ATitle);
       if Result <> [] then
-        Exit;
+        Exit
+      else if Assigned(UrlTarg) then
+        raise Exception.Create('Assigned UrlTarg in TCellBasic.GetURL.');
     end;
   end;
 end;
@@ -4138,8 +4254,8 @@ begin
 end;
 
 {----------------TCellBasic.CursorToXY}
-function TCellBasic.CursorToXY(Canvas: TCanvas; Cursor: integer; var X: integer;
-             var Y: integer): boolean;
+function TCellBasic.CursorToXY(Canvas: TCanvas; Cursor: integer;
+                               var X: integer; var Y: integer): boolean;
 var
   I: integer;
 begin
@@ -4562,8 +4678,8 @@ begin
     Result := MyCell.GetChAtPos(APos, ACh, AObj);
 end;
 
-function TBlock.CursorToXY(ACanvas: TCanvas; Cursor: integer; var X: integer;
-             var Y: integer): boolean;
+function TBlock.CursorToXY(ACanvas: TCanvas; Cursor: integer;
+                           var X: integer; var Y: integer): boolean;
 begin
   if DisplayNone then
     Result := False
@@ -6230,14 +6346,14 @@ begin
   PPanel := APaintPanel;
   IDNameList := TIDNameList.Create(Self);
   htmlFormList := ThtmlFormList.Create;
-  AGifList := TList.Create;
+  AGifList := TGIFImageList.Create(False);
   MapList := TObjectList.Create;
-  FormControlList := TList.Create;
+  FormControlList := TFormControlObjList.Create(False);
   MissingImages := TStringList.Create;
   MissingImages.Sorted := False;
   LinkList := TFontList.Create;
   LinkList.OwnsObjects:=False;
-  PanelList := TList.Create;
+  PanelList := TPanelObjList.Create(False);
   Styles := TStyleList.Create(Self);
   DrawList := TDrawList.Create;
   PositionList := TSectionBaseList.Create;
@@ -6267,11 +6383,11 @@ begin
   BackgroundAniGif := Nil;
   BitmapLoaded := False;
   htmlFormList := ThtmlFormList.Create;    {no copy of list made}
-  AGifList := TList.Create;
+  AGifList := TGIFImageList.Create(False);
   Timer := Nil;
   MapList := TObjectList.Create;
   MissingImages := TStringList.Create;
-  PanelList := TList.Create;
+  PanelList := TPanelObjList.Create(False);
   DrawList := TDrawList.Create;
   ScaleX := 1.0;
   ScaleY:= 1.0;
@@ -6369,9 +6485,8 @@ begin
   if Assigned(BackgroundAniGif) then
     Frame := BackgroundAniGif.CurrentFrame;
   for I := 0 to AGifList.Count-1 do
-    with TGifImage(AGifList.Items[I]) do
-      if ShowIt then
-        CheckTime(PPanel);
+    if AGifList[I].ShowIt then
+      AGifList[I].CheckTime(PPanel);
   if Assigned(BackgroundAniGif) and (Frame <> BackgroundAniGif.CurrentFrame) then
     PPanel.Invalidate;
   Timer.Interval := 40;
@@ -6383,11 +6498,11 @@ var
 begin
   {After next Draw, hide all formcontrols that aren't to be shown}
   for I := 0 to htmlFormList.Count-1 do
-    with htmlFormList.Items[I] do
+    with htmlFormList[I] do
       for J := 0 to ControlList.Count-1 do
         ControlList[J].ShowIt := False;
   for I := 0 to PanelList.Count-1 do
-    TPanelObj(PanelList[I]).ShowIt := False;   {same for panels}
+    PanelList[I].ShowIt := False;   {same for panels}
 end;
 
 procedure TSectionList.SetYOffset(Y: integer);
@@ -6589,55 +6704,51 @@ var
   Control: TControl;  
   Showing: boolean;
 
-  {$ifndef FastRadio}
+{$ifndef FastRadio}
   function ActiveInList: boolean; {see if active control is a form control}
   var
     Control: TWinControl;
     I: integer;
   begin
-    with FormControlList do
-    begin
-      Result := False;
-      Control := Screen.ActiveControl;
-      for I := 0 to Count-1 do
-        with  TFormControlObj(Items[I]) do
-          if FControl = Control then
-          begin
-            Result := True;
-            Break;
-          end;
-    end;
+    Result := False;
+    Control := Screen.ActiveControl;
+    for I := 0 to FormControlList.Count-1 do
+      with FormControlList.Items[I] do
+        if FControl = Control then
+        begin
+          Result := True;
+          Break;
+        end;
   end;
-  {$endif}
+{$endif}
 
 begin
   if IsCopy or (FormControlList.Count = 0) then Exit;
-  with FormControlList do
-    {$ifndef FastRadio}
-    if not ActiveInList then
-    begin  {if none of the formcontrols are active, turn off tabs for those off screen}
-      for I := 0 to Count-1 do
-        with  TFormControlObj(Items[I]) do
+{$ifndef FastRadio}
+  if not ActiveInList then
+  begin  {if none of the formcontrols are active, turn off tabs for those off screen}
+    for I := 0 to FormControlList.Count-1 do
+      with FormControlList.Items[I] do
+        if not ShowIt and Assigned(FControl) then
+          FControl.Hide;   {hides and turns off tabs}
+  end
+  else
+{$endif}
+  begin
+    Control := TheOwner;   {ThtmlViewer}
+    repeat
+      Showing := Control.Visible;
+      Control := Control.Parent;
+    until not Showing or not Assigned(Control);
+    if Showing then
+      for I := 0 to FormControlList.Count-1 do
+        with FormControlList.Items[I] do
           if not ShowIt and Assigned(FControl) then
-            FControl.Hide;   {hides and turns off tabs}
-    end
-    else
-    {$endif}
-    begin
-      Control := TheOwner;   {ThtmlViewer}
-      repeat
-        Showing := Control.Visible;
-        Control := Control.Parent;
-      until not Showing or not Assigned(Control);
-      if Showing then
-        for I := 0 to Count-1 do
-          with  TFormControlObj(Items[I]) do
-            if not ShowIt and Assigned(FControl) then
-            begin
-              FControl.Show;   {turns on tabs}
-              FControl.Left := -4000;  {but it still can't be seen}
-            end;
-    end;  
+          begin
+            FControl.Show;   {turns on tabs}
+            FControl.Left := -4000;  {but it still can't be seen}
+          end;
+  end;
 end;
 
 {----------------TSectionList.Draw}
@@ -6678,9 +6789,8 @@ begin
     AdjustFormControls;
     {Hide all TPanelObj's that aren't displayed}
     for I := 0 to PanelList.Count-1 do
-      with TPanelObj(PanelList[I]) do
-        if not ShowIt then
-          Panel.Hide;
+      if not PanelList[I].ShowIt then
+        PanelList[I].Panel.Hide;
     YOffChange := False;
   end;
   if Assigned(Timer) then
@@ -7059,8 +7169,8 @@ begin
 end;
 
 {----------------TSectionList.CursorToXY}
-function TSectionList.CursorToXY(Canvas: TCanvas; Cursor: integer; var X: integer; 
-             var Y: integer): boolean;
+function TSectionList.CursorToXY(Canvas: TCanvas; Cursor: integer;
+                                 var X: integer; var Y: integer): boolean;
 var
   Beyond: boolean;
 begin
@@ -7655,8 +7765,8 @@ begin
   Result := -1;
 end;
 
-function TSectionBase.CursorToXY(Canvas: TCanvas; Cursor: integer; var X: integer;
-             var Y: integer): boolean;
+function TSectionBase.CursorToXY(Canvas: TCanvas; Cursor: integer;
+                                 var X: integer; var Y: integer): boolean;
 begin
   Result := False;
 end;
@@ -9598,8 +9708,8 @@ begin
       FLPercent := IntMin(FirstLineIndent, 90);
   end;
 
-  Images := TImageObjList.Create;
-  FormControls := TFormControlList.Create;
+  Images := TFloatingObjList.Create;
+  FormControls := TFormControlObjList.Create(False);
 
   if Assigned(L) then
   begin
@@ -9642,8 +9752,8 @@ begin
   Buff := PWideChar(BuffS);
   Brk := TT.Brk;
   Fonts := TFontList.CreateCopy(Self, TT.Fonts);
-  Images := TImageObjList.CreateCopy(AMasterList, TT.Images);
-  FormControls := TFormControlList.Create;
+  Images := TFloatingObjList.CreateCopy(AMasterList, TT.Images);
+  FormControls := TFormControlObjList.Create(False);
   for I := 0 to TT.FormControls.Count-1 do
     FormControls.Add(TT.FormControls[I]);
   Lines := TObjectList.Create;
@@ -9808,7 +9918,7 @@ var
 
     System.Delete(BuffS, Ind, 1);
     System.Delete(Brk, Ind, 1);
-    TFormControlList(FormControls).Decrement(Ind-1);
+    FormControls.Decrement(Ind-1);
     Fonts.Decrement(Ind-1, ParentSectionList);
     Images.Decrement(Ind-1);
   end;
@@ -10138,7 +10248,7 @@ begin
     Fonts.GetFontAt(Start-Buff, OHang).AssignToCanvas(Canvas);
     J1 := Fonts.GetFontCountAt(Start-Buff, Len);
     J2 := Images.GetImageCountAt(Start-Buff);
-    J3 := TFormControlList(FormControls).GetControlCountAt(Start-Buff);
+    J3 := FormControls.GetControlCountAt(Start-Buff);
     if J2 = 0 then
     begin
       Tmp:= Images.GetWidthAt(Start-Buff, Align, HSpcL, HSpcR, FlObj);
@@ -10150,7 +10260,7 @@ begin
     end
     else if J3 = 0 then
     begin
-      XX := XX + TFormControlList(FormControls).GetWidthAt(Start-Buff, HSpcL, HSpcR);
+      XX := XX + FormControls.GetWidthAt(Start-Buff, HSpcL, HSpcR);
       XX := XX + HSpcL + HSpcR;
       I := 1;  J := 1;
       Picture := True;
@@ -10185,7 +10295,7 @@ end;
 
 {----------------TSection.FindCountThatFits1}
 function TSection.FindCountThatFits1(Canvas: TCanvas; Start: PWideChar; Max: integer; X, Y: integer; IMgr: IndentManager;
-                var ImgHt: integer; NxImages: TList) : integer;
+                var ImgHt: integer; NxImages: TFloatingObjList) : integer;
 {Given a width, find the count of chars (<= Max) which will fit allowing for
  font changes.  Line wrapping will be done later}
 var
@@ -10248,7 +10358,7 @@ begin
     LastFont := Font;
     J1 := IntMin(Fonts.GetFontCountAt(Start-Buff, Len), Max-Cnt);
     J2 := Images.GetImageCountAt(Start-Buff);
-    J3 := TFormControlList(FormControls).GetControlCountAt(Start-Buff);
+    J3 := FormControls.GetControlCountAt(Start-Buff);
     if J2 = 0 then
     begin   {next is an image}
       I := 1;  J := 1;
@@ -10290,7 +10400,7 @@ begin
     end
     else if J3 = 0 then
     begin
-      XX := XX + TFormControlList(FormControls).GetWidthAt(Start-Buff, HSpcL, HSpcR);
+      XX := XX + FormControls.GetWidthAt(Start-Buff, HSpcL, HSpcR);
       XX := XX + HSpcL + HSpcR;
       I := 1;  J := 1;
       Picture := True;
@@ -10343,7 +10453,7 @@ procedure TSection.MinMaxWidth(Canvas: TCanvas; var Min, Max: integer);
 var
   I, Indx, FloatMin: integer;
   P, P1: PWideChar;
-  Obj: TObject;
+//  Obj: TObject;
   SoftHyphen: Boolean;   
 
   function FindTextWidthB(Canvas: TCanvas; Start: PWideChar; N: integer; RemoveSpaces: boolean): integer;
@@ -10371,9 +10481,7 @@ begin
 
   for I := 0 to Images.Count-1 do     {call drawlogic for all the images}
   begin
-    Obj := TObject(Images[I]);
-    with TFloatingObj(Obj) do
-    begin
+    with Images[I] do begin
       DrawLogic(Self.ParentSectionList, Canvas, Fonts.GetFontObjAt(ThePos, Indx), 0, 0);
       if not PercentWidth then
         if ObjAlign in [ALeft, ARight] then
@@ -10381,18 +10489,20 @@ begin
           Max := Max + ImageWidth + HSpaceL + HSpaceR;
           Brk[ThePos+1] := 'y';    {allow break after floating image}
         end
-        else Min := IntMax(Min, ImageWidth);
+        else
+          Min := IntMax(Min, ImageWidth);
     end;
   end;
   FloatMin := Max;
 
   for I := 0 to FormControls.Count-1 do     {get Min for form controls}
   begin
-    Obj := TObject(FormControls[I]);
+{    Obj := TObject(FormControls[I]);
     if Obj is TFormControlObj then
-      with TFormControlObj(Obj) do
-        if not PercentWidth then
-          Min := IntMax(Min, FControl.Width + HSpaceL + HSpaceR);
+      with TFormControlObj(Obj) do  }
+    with FormControls[I] do
+      if not PercentWidth then
+        Min := IntMax(Min, FControl.Width + HSpaceL + HSpaceR);
     end;
 
   Max := 0;
@@ -10471,7 +10581,7 @@ begin
   while N > 0 do
   begin
     J := Images.GetImageCountAt(Start-Buff);
-    J1 := TFormControlList(FormControls).GetControlCountAt(Start-Buff);
+    J1 := FormControls.GetControlCountAt(Start-Buff);
     if J = 0 then  {it's and image}
     begin
       Wid := Images.GetWidthAt(Start-Buff, Align, HSpcL, HSpcR, FlObj);
@@ -10486,7 +10596,7 @@ begin
     end
     else if J1 = 0 then
     begin
-      Result := Result + TFormControlList(FormControls).GetWidthAt(Start-Buff, HSpcL, HSpcR);
+      Result := Result + FormControls.GetWidthAt(Start-Buff, HSpcL, HSpcR);
       Result := Result + HSpcL + HSpcR;
       Dec(N);   {control counts as one char}
       Inc(Start);
@@ -10518,7 +10628,7 @@ begin
   while N > 0 do
   begin
     J := Images.GetImageCountAt(Start-Buff);
-    J1 := TFormControlList(FormControls).GetControlCountAt(Start-Buff);
+    J1 := FormControls.GetControlCountAt(Start-Buff);
     if J = 0 then  {it's an image}
     begin
       Wid := Images.GetWidthAt(Start-Buff, Align, HSpcL, HSpcR, FlObj);
@@ -10533,7 +10643,7 @@ begin
     end
     else if J1 = 0 then
     begin
-      Result := Result + TFormControlList(FormControls).GetWidthAt(Start-Buff, HSpcL, HSpcR);
+      Result := Result + FormControls.GetWidthAt(Start-Buff, HSpcL, HSpcR);
       Result := Result + HSpcL + HSpcR;
       Dec(N);   {control counts as one char}
       Inc(Start);
@@ -10562,7 +10672,7 @@ var
   Max, N, NN, Width, I, Indx, ImgHt: integer;
   Finished: boolean;
   LR : LineRec;
-  NxImages: TList;
+  NxImages: TFloatingObjList;
   Tmp, Tmp1: integer;
   Obj: TFloatingObj;
   TopY, AccumImgBot, HtRef: integer;   
@@ -10675,11 +10785,11 @@ var
 
     Cnt := 0;   {now check on form controls}
     repeat
-      Cnt := Cnt + TFormControlList(FormControls).GetControlCountAt(PStart-Buff+Cnt);
+      Cnt := Cnt + FormControls.GetControlCountAt(PStart-Buff+Cnt);
       if Cnt < NN then
       begin
-        FCO := TFormControlList(FormControls).FindControl(PStart-Buff+Cnt);
-        H := TFormControlList(FormControls).GetHeightAt(PStart-Buff+Cnt, FormAlign);
+        FCO := FormControls.FindControl(PStart-Buff+Cnt);
+        H := FormControls.GetHeightAt(PStart-Buff+Cnt, FormAlign);
         case FormAlign of
           ATop:
             SA := IntMax(SA, H+FCO.VSpaceB+FCO.VSpaceT-Dht);
@@ -10757,9 +10867,9 @@ var
     LR.LineImgHt := IntMax(Tmp, ImgHt);
     for I := 0 to NxImages.Count-1 do
     begin
-      IMgr.Update(Y, TFloatingObj(NxImages[I]));  {update Image manager and Image}
+      IMgr.Update(Y, NxImages[I]);  {update Image manager and Image}
       {include images in Line height}
-      with TFloatingObj(NxImages[I]) do
+      with NxImages[I] do
         Tmp1 := ImageHeight + VSpaceT + VSpaceB;
       LR.LineImgHt := IntMax(LR.LineImgHt, Tmp+Tmp1);
       AccumImgBot := IntMax(AccumImgBot, Y + Tmp1);
@@ -10805,14 +10915,14 @@ begin         {TSection.DrawLogic}
     MaxWidth := IntMax(MaxWidth, Obj.ImageWidth);  {HScrollBar for wide images}
   end;
   for I := 0 to FormControls.Count-1 do
-    with TFormControlObj(FormControls[I]) do
+    with FormControls[I] do
       if Assigned(FControl) then
       begin
         if PercentWidth then
           FControl.Width := IntMax(10, IntMin(MulDiv(FWidth, Width, 100), Width-HSpaceL-HSpaceR));
         MaxWidth := IntMax(MaxWidth, FControl.Width);
       end;
-  NxImages := TList.Create;
+  NxImages := TFloatingObjList.Create(False);
   while not Finished do
   begin
     Max := Last - PStart + 1;
@@ -11107,7 +11217,7 @@ var
       I := 1;
       J1 := Fonts.GetFontCountAt(Start-Buff, Len)-1;
       J2 := Images.GetImageCountAt(Start-Buff)-1;
-      J4 := TFormControlList(FormControls).GetControlCountAt(Start-Buff)-1;
+      J4 := FormControls.GetControlCountAt(Start-Buff)-1;
       FO := Fonts.GetFontObjAt(Start-Buff, Index);
 
       {if an inline border, find it's boundaries}
@@ -11293,7 +11403,7 @@ var
       end
       else if J4 = -1 then
       begin  {it's a form control}
-        Ctrl := TFormControlList(FormControls).FindControl(Start-Buff);
+        Ctrl := FormControls.FindControl(Start-Buff);
         if Assigned(Ctrl.FControl) then
           with Ctrl, FControl do
           begin
@@ -11632,7 +11742,7 @@ end;
 
 {----------------TSection.PtInObject}
 function TSection.PtInObject(X : integer; Y: integer; var Obj: TObject;
-         var IX, IY: integer): boolean;
+                             var IX, IY: integer): boolean;
 {Y is distance from start of section}
 begin
   Result := (Images.Count > 0) and Images.PtInObject(X, Y, Obj, IX, IY);
@@ -11640,8 +11750,8 @@ end;
 
 {----------------TSection.GetURL}
 function TSection.GetURL(Canvas: TCanvas; X: integer; Y: integer;
-          var UrlTarg: TUrlTarget; var FormControl: TImageFormControlObj;
-          var ATitle: string): guResultType;
+                         var UrlTarg: TUrlTarget; var FormControl: TImageFormControlObj;
+                         var ATitle: string): guResultType;
  {Y is absolute}
 var
   I, L, Index, Width, IX, IY, Posn: integer;
@@ -11654,8 +11764,8 @@ var
 
   function MakeCopy(UrlTarget: TUrlTarget): TUrlTarget;
   begin
-  Result := TUrlTarget.Create;
-  Result.Copy(UrlTarget);
+    Result := TUrlTarget.Create;
+    Result.Copy(UrlTarget);
   end;
 
 begin
@@ -11694,8 +11804,7 @@ begin
         end;
       end;
     end
-    else
-    begin
+    else begin
       FO := Fonts.GetFontObjAt(Posn, Index);
       if (FO.UrlTarget.Url <> '') then
       begin   {found an URL}
@@ -11707,8 +11816,7 @@ begin
       end;
     end;
   end
-  else
-  begin
+  else begin
     I := 0;
     LR := Nil;
     with Lines do
@@ -11722,8 +11830,7 @@ begin
       end;
       if I >= Count then Exit;
     end;
-    with LR do
-    begin
+    with LR do begin
       if X < DrawXX then Exit;
       Width := X - DrawXX;
       if Spaces > 0 then
@@ -11979,8 +12086,8 @@ begin
 end;
 
 {----------------TSection.CursorToXY}
-function TSection.CursorToXY(Canvas: TCanvas; Cursor: integer; var X: integer;
-             var Y: integer): boolean;
+function TSection.CursorToXY(Canvas: TCanvas; Cursor: integer;
+                             var X: integer; var Y: integer): boolean;
 var
   I, Curs: integer;
   LR: LineRec;
@@ -12029,7 +12136,8 @@ begin
   Result := True;
 end;
 
-{----------------TPanelObj.Create}
+{ TPanelObj }
+
 constructor TPanelObj.Create(AMasterList: TSectionList; Position: integer;
                L: TAttributeList; ACell: TCellBasic; ObjectTag: boolean);
 var
@@ -12274,7 +12382,20 @@ begin
       end;
 end;
 
-{----------------TFloatingObj.CreateCopy}
+{ TPanelObjList }
+
+function TPanelObjList.GetItems(AIndex: integer): TPanelObj;
+begin
+  Result := inherited Items[AIndex] as TPanelObj;
+end;
+
+procedure TPanelObjList.SetItems(AIndex: integer; const AValue: TPanelObj);
+begin
+  inherited Items[AIndex] := AValue;
+end;
+
+{ TFloatingObj }
+
 constructor TFloatingObj.CreateCopy(T: TFloatingObj);
 begin
   inherited Create;
@@ -12392,6 +12513,8 @@ begin
     end;
     if (not (guUrl in Result)) and (Url <> '') then
     begin
+      if Assigned(UrlTarg) then
+        raise Exception.Create('Assigned UrlTarg in TCellObjCell.GetURL');
       UrlTarg := TUrlTarget.Create;
       UrlTarg.URL := Url;
       UrlTarg.Target := Target;

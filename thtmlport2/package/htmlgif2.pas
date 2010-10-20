@@ -32,7 +32,7 @@ unit HTMLGif2;
 interface
 
 uses
-  LclIntf, LMessages, Types, LclType, HtmlMisc,
+  LclIntf, LMessages, Types, LclType, contnrs, HtmlMisc,
   SysUtils, Classes, Graphics, Controls, ExtCtrls, htmlUN2, htmlgif1;
 
 type
@@ -87,7 +87,7 @@ type
   public
     {note: Frames is 1 based, goes from [1..Count]}
     property Frames[I: integer]: TgfFrame read GetFrame; default;
-    end;
+  end;
 
   TGIFImage = class(TPersistent)
   private
@@ -149,6 +149,17 @@ type
     property CurrentFrame: Integer read FCurrentFrame write SetCurrentFrame;
     property Visible: Boolean read FVisible write FVisible;
   end;
+
+  { TGIFImageList }
+
+  TGIFImageList = class(TObjectList) //  {a list of TGIFImages}
+  private
+    function GetItems(AIndex: integer): TGIFImage;
+    procedure SetItems(AIndex: integer; const AValue: TGIFImage);
+  public
+    property Items[AIndex: integer]: TGIFImage read GetItems write SetItems; default;
+  end;
+
 
 function CreateAGifFromStream(var NonAnimated: boolean;
               Stream: TStream): TGifImage;
@@ -443,10 +454,23 @@ begin
   WasDisposal := Frames[OldFrame].frDisposalMethod;
 end;
 
-{----------------TgfFrameList.GetFrame}
+{ TGIFImageList }
+
+function TGIFImageList.GetItems(AIndex: integer): TGIFImage;
+begin
+  Result := inherited Items[AIndex] as TGIFImage;
+end;
+
+procedure TGIFImageList.SetItems(AIndex: integer; const AValue: TGIFImage);
+begin
+  inherited Items[AIndex] := AValue;
+end;
+
+{ TgfFrameList }
+
 function TgfFrameList.GetFrame(I: integer): TgfFrame;
 begin
-  Assert((I <= Count) and (I >= 1   ), 'Frame index out of range');
+  Assert((I <= Count) and (I >= 1), 'Frame index out of range');
   Result := TgfFrame(Items[I-1]);
 end;
 
@@ -574,5 +598,4 @@ begin
 end;
 
 end.
-
 

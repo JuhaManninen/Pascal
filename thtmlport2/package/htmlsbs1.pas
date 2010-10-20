@@ -63,7 +63,7 @@ Type
          IMgr: IndentManager; X, XRef, YRef : integer) : integer;  override;
     end;
 
-   TPreFormated = class(TSection)
+  TPreFormated = class(TSection)
   {section for preformated, <pre>}
   public
     procedure ProcessText(TagIndex: integer); override; 
@@ -170,14 +170,6 @@ Type
     procedure SetData(Index: integer; const V: String); override;
   end;
 
-  TFormControlList = class(TList)  {a list of TFormControlObj's}  {not T FreeList}
-  Public
-    function FindControl(Posn: integer): TFormControlObj;
-    function GetHeightAt(Posn: integer; var FormAlign: AlignmentType) : Integer;
-    function GetWidthAt(Posn: integer; var HSpcL, HSpcR: integer) : integer;
-    function GetControlCountAt(Posn: integer): integer;
-    procedure Decrement(N: integer);
-  end;
 
 Implementation
 
@@ -1023,8 +1015,7 @@ begin
   end;
 end;
 
-function TTextAreaFormControlObj.GetSubmission(Index: integer;
-              var S: string): boolean;
+function TTextAreaFormControlObj.GetSubmission(Index: integer; var S: string): boolean;
 var
   I: integer;
 begin
@@ -1074,82 +1065,6 @@ begin
       MasterList.ObjectChange(MasterList.TheOwner, Self, OnChangeMessage);
 end;
 
-function TFormControlList.FindControl(Posn: integer): TFormControlObj;
-{find the control at a given character position}
-var
-  I: integer;
-begin
-  for I := 0 to Count-1 do
-    if TFormControlObj(Items[I]).ThePos = Posn then
-    begin
-      Result := TFormControlObj(Items[I]);
-      Exit;
-    end;
-  Result := Nil;
-end;
-
-function TFormControlList.GetHeightAt(Posn: integer;
-              var FormAlign: AlignmentType) : Integer;
-var
-  Ctrl: TFormControlObj;
-begin
-  Ctrl := FindControl(Posn);
-  if Assigned(Ctrl) then
-  begin
-    Result := Ctrl.FControl.Height;
-    FormAlign := Ctrl.FormAlign;
-  end
-  else
-    Result := -1;
-end;
-
-function TFormControlList.GetWidthAt(Posn: integer; var HSpcL, HSpcR: integer) : integer;
-var
-  Ctrl: TFormControlObj;
-begin
-  Ctrl := FindControl(Posn);
-  if Assigned(Ctrl) then
-  Begin
-    Result := Ctrl.FControl.Width;
-    HSpcL := Ctrl.HSpaceL;
-    HSpcR := Ctrl.HSpaceR;
-  end
-  else
-    Result := -1;
-end;
-
-function TFormControlList.GetControlCountAt(Posn: integer): integer;
-{Return count of chars before the next form control.  0 if at the control,
- 9999 if no controls after Posn}
-var
-  I, PosX: integer;
-begin
-  if Count = 0 then
-  begin
-    Result := 9999;
-    Exit;
-  end;
-  I := 0;
-  while I < count do
-  begin
-    PosX := TFormControlObj(Items[I]).ThePos;
-    if PosX >= Posn then break;
-    Inc(I);
-  end;
-  if I = Count then Result := 9999
-  else
-    Result := TFormControlObj(Items[I]).ThePos - Posn;
-end;
-
-procedure TFormControlList.Decrement(N: integer);   
-{called when a character is removed to change the Position figure}
-var
-  I: integer;
-begin
-  for I := 0 to Count-1 do
-    with TFormControlObj(Items[I]) do
-      if ThePos > N then
-        Dec(ThePos);
-end;
 
 end.
+

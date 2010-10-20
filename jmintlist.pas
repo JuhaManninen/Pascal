@@ -9,7 +9,7 @@
   Abstract:
     A list container for integers. Does for integers what TStringList does for strings.
 }
-unit IntList;
+unit JmIntList;
 
 interface
 

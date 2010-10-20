@@ -37,7 +37,7 @@ interface
 uses
   LclIntf, LMessages, Types, LclType, FPimage, HtmlMisc, SysUtils, Classes, Graphics,
   Controls, Forms, Dialogs, StdCtrls, ExtCtrls, Menus, contnrs,
-  htmlsubs, htmlview, htmlun2, readHTML;
+  htmlsubs, htmlview, htmlun2, readHTML, JmIntList;
 
 type
   {common to TFrameViewer and TFrameBrowser}
@@ -82,7 +82,11 @@ type
   end;
 
   {common base class for TFrameViewer and TFrameBrowser}
+
+  { TFVBase }
+
   TFVBase = class(TFrameViewerBase)  {TFrameViewerBase is in ReadHTML.pas}
+  private
   protected
     FURL: string;
     FTarget: string;
@@ -145,6 +149,8 @@ type
     FOnParseEnd: TNotifyEvent;
     FPrintScale: double;
     FOnObjectTag: TObjectTagEvent;  
+    FPosition: TIntList;
+    FHistoryIndex: integer;
 
     function GetCurViewerCount: integer; virtual; abstract;
     function GetCurViewer(I: integer): ThtmlViewer; virtual; abstract;
@@ -213,14 +219,16 @@ type
     procedure SetOnParseEnd(Handler: TNotifyEvent);
     procedure SetOnObjectTag(Handler: TObjectTagEvent);  
 
-    function GetActiveViewer: ThtmlViewer;  virtual; abstract;
-    function GetViewers: TStrings;  virtual; abstract; 
+    function GetActiveViewer: ThtmlViewer; virtual; abstract;
+    function GetViewersByName: TStrings; virtual; abstract;
 
     property CurViewer[I: integer]: ThtmlViewer read GetCurViewer;
     property OnBitmapRequest: TGetBitmapEvent read FOnBitmapRequest
              write SetOnBitmapRequest;
     property ServerRoot: string read FServerRoot write SetServerRoot;
   public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     procedure ClearHistory; virtual; abstract;
     procedure SetFocus; override;
     function InsertImage(Viewer: ThtmlViewer; const Src: string; Stream: TMemoryStream): boolean;
@@ -244,7 +252,7 @@ type
     procedure SelectAll;
     function FindEx(const S: WideString; MatchCase, Reverse: boolean): boolean;  
     function Find(const S: WideString; MatchCase: boolean): boolean;
-    property Viewers: TStrings read GetViewers;
+    property ViewersByName: TStrings read GetViewersByName;
     property LinkText: string read FLinkText;   
     property LinkAttributes: TStringList read FLinkAttributes;  
 
@@ -346,6 +354,8 @@ type
   TFrameSet = class;
   TSubFrameSet = class;
 
+  { TFrameBase }
+
   TFrameBase = class(TCustomPanel)   {base class for other classes}
   private
     UnLoaded: boolean;
@@ -420,6 +430,18 @@ type
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;  
   end;
 
+  { TfvFrameList }
+
+  TfvFrameList = class(TObjectList) //  {a list of TfvFrames}
+  private
+    function GetItems(AIndex: integer): TfvFrame;
+    procedure SetItems(AIndex: integer; const AValue: TfvFrame);
+  public
+    property Items[AIndex: integer]: TfvFrame read GetItems write SetItems; default;
+  end;
+
+  { TSubFrameSet }
+
   TSubFrameSet = class(TFrameBase)  {can contain one or more TFrames and/or TSubFrameSets}
   Protected
     FBase: string;
@@ -484,8 +506,8 @@ type
     FTitle: string;
     FCurrentFile: string;
     FrameNames: TStringList; {FrameList of Window names and their TFrames}
-    Viewers: TList;   {FrameList of all ThtmlViewer pointers}
-    Frames: TList;    {FrameList of all the Frames contained herein}
+    Viewers: ThtmlViewerList;   {FrameList of all ThtmlViewer pointers}
+    Frames: TfvFrameList;    {FrameList of all the Frames contained herein}
     HotSet: TFrameBase;     {owner of line we're moving}
     OldWidth, OldHeight: integer;
     NestLevel: integer;
@@ -516,8 +538,6 @@ type
 
   TFrameViewer = class(TFVBase)
   protected
-    FPosition: TList;
-    FHistoryIndex: integer;
     FOnFormSubmit: TFormSubmitEvent;
     FOptions: TFrameViewerOptions;
     UrlRequestStream: TMemoryStream;  
@@ -552,7 +572,7 @@ type
       State: TDragState; var Accept: Boolean);
     procedure SetDragDrop(const Value: TDragDropEvent);
     procedure SetDragOver(const Value: TDragOverEvent);
-    function GetViewers: TStrings;  override;
+    function GetViewersByName: TStrings; override;
     procedure SetOnProgress(Handler: ThtProgressEvent);   
 
   protected
@@ -629,7 +649,7 @@ implementation
 const
   Sequence: integer = 10;
 
-function ImageFile(Const S: string): boolean;
+function IsImageFile(Const S: string): boolean;
 var
   Ext: string[5];
 begin
@@ -638,7 +658,7 @@ begin
          or (Ext = '.png');
 end;
 
-function TexFile(Const S: string): boolean;
+function IsTexFile(Const S: string): boolean;
 var
   Ext: string[5];
 begin
@@ -1001,8 +1021,8 @@ var
 begin
   if ((Source <> '') or Assigned(PEV)) and (MasterSet.NestLevel < 4) then
   begin
-    Image := ImageFile(Source) and not MasterSet.RequestEvent;
-    Tex := TexFile(Source) and not MasterSet.RequestEvent;
+    Image := IsImageFile(Source) and not MasterSet.RequestEvent;
+    Tex := IsTexFile(Source) and not MasterSet.RequestEvent;
     EV.LStyle := lsFile;
     if Image or Tex then
       EV.NewName := MasterSet.FrameViewer.HTMLExpandFilename(Source)
@@ -1067,10 +1087,7 @@ begin
       if not Assigned(Viewer) then
         CreateViewer;
       if Assigned(FrameSet) then
-      begin
-        FrameSet.Free;
-        FrameSet := Nil;
-      end;
+        FreeAndNil(FrameSet);
       Msg := '<p><img src="qw%&.bmp" alt="Error"> Can''t load '+EV.NewName;
       Viewer.LoadFromBuffer(@Msg[1], Length(Msg), '');  {load an error message}
     end;
@@ -1116,11 +1133,11 @@ begin
     else if Assigned(Viewer) then
     begin
       Viewer.Base := MasterSet.FBase;
-      if ImageFile(Source) then
+      if IsImageFile(Source) then
         try
           Viewer.LoadImageFile(Source)
         except end   {leave blank on error}
-      else if TexFile(Source) then
+      else if IsTexFile(Source) then
         try
           Viewer.LoadTextFile(Source)
         except end
@@ -1135,10 +1152,10 @@ begin
               Viewer.LoadFromFile(Source);
           if APosition < 0 then
             Viewer.Position := ViewerPosition
-          else Viewer.Position := APosition;    {its History Position}
+          else
+            Viewer.Position := APosition;    {its History Position}
           Viewer.FormData := ViewerFormData;
-          ViewerFormData.Free;
-          ViewerFormData := Nil;
+          FreeAndNil(ViewerFormData);
         except
           DoError;
         end;
@@ -1204,8 +1221,8 @@ begin
   HS := EV.NewName;
   SameName := CompareText(EV.NewName, OldName)= 0;
   {if SameName, will not have to reload anything}
-  Img := ImageFile(EV.NewName) and not MasterSet.RequestEvent;
-  Tex := TexFile(EV.NewName) and not MasterSet.RequestEvent;
+  Img := IsImageFile(EV.NewName) and not MasterSet.RequestEvent;
+  Tex := IsTexFile(EV.NewName) and not MasterSet.RequestEvent;
   EV.LStyle := lsFile;
   if not Img and not Tex and not SameName then
     MasterSet.TriggerEvent(EV.NewName, @EV);
@@ -1281,9 +1298,11 @@ begin
           if Bump then
              {Viewer to Viewer}
             frBumpHistory(HS, Viewer.Position, OldPos, OldFormData)
-          else OldFormData.Free;
+          else
+            OldFormData.Free;
         end
-      else OldFormData.Free;
+      else
+        OldFormData.Free;
       except
         OldFormData.Free;
         Raise;
@@ -1413,7 +1432,8 @@ begin
       frPositionHistory[frHistoryIndex].Pos := OldPos;
       if frHistory[frHistoryIndex] <> NewName then
         frPositionHistory[frHistoryIndex].PosFormData := OldFormData
-      else OldFormData.Free;
+      else
+        OldFormData.Free;
     end
     else
       OldFormData.Free;
@@ -1489,8 +1509,7 @@ begin
             MasterSet.Viewers.Remove(Viewer);
           if MasterSet.FActive = Viewer then
             MasterSet.FActive := Nil;
-          Viewer.Free;
-          Viewer := Nil;
+          FreeAndNil(Viewer);
           end;
       end
       else begin
@@ -1499,12 +1518,11 @@ begin
         with frPositionHistory[Value] do
         begin
           if (Source <> Strings[Value]) then
-            begin
+          begin
             frLoadFromFile(Strings[Value], '', False, False);
             Viewer.FormData := PosFormData;
-            PosFormData.Free;
-            PosFormData := Nil;
-            end;
+            FreeAndNil(PosFormData);
+          end;
           Viewer.Position := Pos;
         end;
       end;
@@ -1526,7 +1544,20 @@ begin
     FrameSet.UpdateFrameList;
 end;
 
-{----------------TSubFrameSet.CreateIt}
+{ TfvFrameList }
+
+function TfvFrameList.GetItems(AIndex: integer): TfvFrame;
+begin
+  Result := inherited Items[AIndex] as TfvFrame;
+end;
+
+procedure TfvFrameList.SetItems(AIndex: integer; const AValue: TfvFrame);
+begin
+  inherited Items[AIndex] := AValue;
+end;
+
+{ TSubFrameSet }
+
 constructor TSubFrameSet.CreateIt(AOwner: TComponent; Master: TFrameSet);
 begin
   inherited Create(AOwner);
@@ -1587,8 +1618,7 @@ end;
 {----------------TSubFrameSet.Destroy}
 destructor TSubFrameSet.Destroy;
 begin
-  FrameList.Free;
-  FrameList := Nil;
+  FreeAndNil(FrameList);
   RefreshTimer.Free;
   inherited Destroy;
 end;
@@ -2039,9 +2069,9 @@ begin
   for I := FrameList.Count-1 downto 0 do
   begin
     X := TFrameBase(FrameList.Items[I]);
-    FrameList.Delete(I);
     RemoveControl(X);
-    X.Free;
+    FrameList.Delete(I);
+//!!!    X.Free;
   end;
   DimCount := 0;
   First := True;
@@ -2097,7 +2127,6 @@ begin
       FOnMeta(Sender, HttpEq, AName, Content);
     if not (fvMetaRefresh in FOptions) then Exit;
   end;
-
   if CompareText(Lowercase(HttpEq), 'refresh') = 0 then
   begin
     I := Pos(';', Content);
@@ -2160,20 +2189,17 @@ begin
   FCurrentFile:= '';
   FrameNames := TStringList.Create;
   FrameNames.Sorted := True;
-  Viewers := TList.Create;
-  Frames := TList.Create;
+  Viewers := ThtmlViewerList.Create(False);
+  Frames := TfvFrameList.Create(False);
   OnResize := @CalcSizes;
 end;
 
 {----------------TFrameSet.Destroy}
 destructor TFrameSet.Destroy;
 begin
-  FrameNames.Free;
-  FrameNames := Nil;   {is tested later}
-  Viewers.Free;
-  Viewers := Nil;
-  Frames.Free;
-  Frames := Nil;
+  FreeAndNil(FrameNames);
+  FreeAndNil(Viewers);
+  FreeAndNil(Frames);
   inherited Destroy;
 end;
 
@@ -2192,13 +2218,13 @@ begin
   FActive := Nil;
 end;
 
-procedure TFrameSet.RePaint;     
+procedure TFrameSet.Repaint;
 var
   I: integer;
 begin
   if Assigned(Frames) then
     for I := 0 to Frames.Count-1 do
-      TCustomControl(Frames[I]).RePaint;
+      Frames[I].Repaint;
   inherited;
 end;
 
@@ -2320,7 +2346,7 @@ end;
 function TFrameSet.GetActive: ThtmlViewer;
 begin
   if Viewers.Count = 1 then
-    Result := ThtmlViewer(Viewers[0])
+    Result := Viewers[0]
   else
     try
       if FActive is ThtmlViewer then Result := FActive
@@ -2355,19 +2381,19 @@ begin
   Clear;
   NestLevel := 0;
   EV.LStyle := lsFile;
-  Img := ImageFile(FName) and not RequestEvent;
-  Tex := TexFile(FName) and not RequestEvent;
+  Img := IsImageFile(FName) and not RequestEvent;
+  Tex := IsTexFile(FName) and not RequestEvent;
   if Img or Tex or not TriggerEvent(FName, @EV) then
   begin
     EV.NewName := ExpandFileName(FName);
     FCurrentFile := EV.NewName;
   end
-  else begin  {triggerevent}
+  else   {triggerevent}
     FCurrentFile := FName;
-  end;
+
   FRefreshDelay := 0;
   if not Img and not Tex
-         and IsFrameString(EV.LStyle, EV.NewName, EV.AString, MasterSet.FrameViewer) then
+       and IsFrameString(EV.LStyle, EV.NewName, EV.AString, MasterSet.FrameViewer) then
   begin    {it's a Frameset html file}
     FrameParseString(MasterSet.FrameViewer, Self, EV.LStyle, EV.NewName, EV.AString,
                      @HandleMeta);
@@ -2413,15 +2439,13 @@ procedure TFrameSet.ClearForwards;
 {clear all the forward items in the history lists}
 var
   I, J: integer;
-  Frame: TfvFrame;
-  AList: TList;
+  AList: TObjectList;
   Obj: TObject;
 begin
-  AList := TList.Create;
+  AList := TObjectList.Create(False);
   for J := 0 to Frames.Count-1 do
   begin
-    Frame := TfvFrame(Frames[J]);
-    with Frame do
+    with Frames[J] do
     begin
       for I := 0 to frHistoryIndex-1 do
       begin
@@ -2436,8 +2460,7 @@ begin
   end;
   for J := 0 to Frames.Count-1 do {now see which Objects are no longer used}
   begin
-    Frame := TfvFrame(Frames[J]);
-    with Frame do
+    with Frames[J] do
     begin
       for I := 0 to frHistory.Count-1 do
       begin
@@ -2448,7 +2471,7 @@ begin
     end;
   end;
   for I := 0 to AList.Count-1 do   {destroy what's left}
-    TObject(AList[I]).Free;
+    AList[I].Free;
   AList.Free;
 end;
 
@@ -2472,7 +2495,6 @@ begin
   FBitmapList := TStringBitmapList.Create;
   FImageCacheCount := 5;
   FHistory := TStringList.Create;
-  FPosition := TList.Create;
   FTitleHistory := TStringList.Create;
   FBackground := clBtnFace;
   FFontColor := clBtnText;
@@ -2522,7 +2544,6 @@ begin
   ProcessList.Free;
   FLinkAttributes.Free;
   FHistory.Free;
-  FPosition.Free;
   FTitleHistory.Free;
   Visited.Free;
   FViewerList.Free;
@@ -2589,16 +2610,16 @@ var
   OldPos: integer;
   Tmp: TObject;
   SameName: boolean;
-  {$ifdef Windows}
+{$ifdef Windows}
   Dummy: integer;
-  {$endif}
+{$endif}
 begin
   FProcessing := True;
   if Assigned(FOnProcessing) then
     FOnProcessing(Self, True);
-  {$ifdef windows}
+{$ifdef windows}
   Dummy :=
-  {$endif}
+{$endif}
   IOResult;     {remove any pending file errors}
   SplitURL(FName, S, Dest);
   try
@@ -2627,9 +2648,10 @@ begin
       OldPos := 0;
       if (OldFrameSet.Viewers.Count = 1) then
       begin
-        Tmp := TObject(OldFrameSet.Viewers[0]);
+        OldPos:=OldFrameSet.Viewers[0].Position;
+{        Tmp := TObject(OldFrameSet.Viewers[0]);
         if Tmp is ThtmlViewer then
-          OldPos := ThtmlViewer(Tmp).Position;
+          OldPos := ThtmlViewer(Tmp).Position;  }
       end;
       OldFrameSet.UnloadFiles;
       CurFrameSet.Visible := True;
@@ -2651,9 +2673,10 @@ begin
       OldPos := 0;
       if (CurFrameSet.Viewers.Count = 1) then
       begin
-        Tmp := TObject(CurFrameSet.Viewers[0]);
+        OldPos := CurFrameSet.Viewers[0].Position;
+{        Tmp := TObject(CurFrameSet.Viewers[0]);
         if Tmp is ThtmlViewer then
-          OldPos := ThtmlViewer(Tmp).Position;
+          OldPos := ThtmlViewer(Tmp).Position;  }
       end;
       SendMessage(Handle, wm_SetRedraw, 0, 0);
       try
@@ -2699,22 +2722,17 @@ begin
     LoadFromFileInternal(Aname);
     Exit;
   end
-  else
-  begin  {_blank or unknown target}
+  else begin  {_blank or unknown target}
     if Assigned(FOnBlankWindowRequest) then
       FOnBlankWindowRequest(Self, ATarget, AName);
     Exit;
   end;
-
   SplitURL(AName, S, Dest);
-
   if not FileExists(S) and not Assigned(OnStreamRequest) then
     Raise(EfvLoadError.Create('Can''t locate file: '+S));
-
   FProcessing := True;
   if Assigned(FOnProcessing) then
     FOnProcessing(Self, True);
-
   try
     if FrameTarget is TfvFrame then
       TfvFrame(FrameTarget).frLoadFromFile(S, Dest, True, False)
@@ -2730,7 +2748,7 @@ end;
 {----------------TFrameViewer.LoadImageFile}
 procedure TFrameViewer.LoadImageFile(const FName: string);
 begin
-  if ImageFile(FName) then
+  if IsImageFile(FName) then
     LoadFromFile(FName);
 end;
 
@@ -2883,7 +2901,6 @@ begin
   if not Handled then
   begin
     Handled := True;
-
     S := AnURL;
     I := Pos('#', S);
     if I >= 1 then
@@ -2893,7 +2910,6 @@ begin
     end
     else
       Dest := '';    {no local destination}
-
     I := Pos('?', S);      {remove any query string}
     if I >= 1 then
     begin
@@ -2901,10 +2917,8 @@ begin
       S := System.Copy(S, 1, I-1);     {the file name}
     end
     else Query := '';
-
     if (S <> '') and not CurFrameSet.RequestEvent then
       S := Viewer.HTMLExpandFileName(S);
-
     if (FTarget = '') or (CompareText(FTarget, '_self') = 0) then  {no target or _self target}
     begin
       FrameTarget := Viewer.FrameOwner as TfvFrame;
@@ -2964,7 +2978,7 @@ end;
 
 function TFrameViewer.GetCurViewer(I: integer): ThtmlViewer;
 begin
-   Result := ThtmlViewer(CurFrameSet.Viewers[I]);
+   Result := CurFrameSet.Viewers[I];
 end;
 
 {----------------TFrameViewer.HotSpotCovered}
@@ -3097,7 +3111,6 @@ procedure TFrameViewer.BumpHistory(OldFrameSet: TFrameSet; OldPos: integer);
 var
   I: integer;
   Obj: TObject;
-  pi: PtrInt;
 begin
   if (FHistoryMaxCount > 0) and (CurFrameSet.FCurrentFile <> '') then
     with FHistory do
@@ -3107,11 +3120,11 @@ begin
       Strings[FHistoryIndex] := OldFrameSet.FCurrentFile;
       Objects[FHistoryIndex] := OldFrameSet;
       FTitleHistory[FHistoryIndex] := OldFrameSet.FTitle;
-      pi := OldPos;
-      FPosition[FHistoryIndex] := Pointer(pi);
+      FPosition[FHistoryIndex] := OldPos;
       OldFrameSet.ClearForwards;
     end
-    else OldFrameSet.Free;
+    else
+      OldFrameSet.Free;
     for I := 0 to FHistoryIndex-1 do
     begin
       Obj := Objects[0];
@@ -3124,7 +3137,7 @@ begin
     Insert(0, CurFrameSet.FCurrentFile);
     Objects[0] := CurFrameSet;
     FTitleHistory.Insert(0, CurFrameSet.FTitle);
-    FPosition.Insert(0, Nil);
+    FPosition.Insert(0, -1);
     if Count > FHistoryMaxCount then
     begin
       Obj := Objects[FHistoryMaxCount];
@@ -3147,7 +3160,6 @@ procedure TFrameViewer.BumpHistory1(const FileName, Title: string;
 var
   I: integer;
   Obj: TObject;
-  pi: PtrInt;
 begin
   if (FHistoryMaxCount > 0) and (Filename <> '') then
     with FHistory do
@@ -3157,8 +3169,7 @@ begin
         Strings[FHistoryIndex] := Filename;
         Objects[FHistoryIndex] := CurFrameSet;
         FTitleHistory[FHistoryIndex] := Title;
-        pi := OldPos;
-        FPosition[FHistoryIndex] := Pointer(pi);
+        FPosition[FHistoryIndex] := OldPos;
       end;
       for I := 0 to FHistoryIndex-1 do
       begin
@@ -3172,7 +3183,7 @@ begin
       Insert(0, CurFrameSet.FCurrentFile);
       Objects[0] := CurFrameSet;
       FTitleHistory.Insert(0, CurFrameSet.FTitle);
-      FPosition.Insert(0, Nil);
+      FPosition.Insert(0, -1);
       if Count > FHistoryMaxCount then
       begin
         Obj := Objects[FHistoryMaxCount];
@@ -3191,7 +3202,6 @@ procedure TFrameViewer.BumpHistory2(OldPos: integer);
 var
   I: integer;
   Obj: TObject;
-  pi: PtrInt;
 begin
   if (FHistoryMaxCount > 0) and (CurFrameSet.FCurrentFile <> '') then
     with FHistory do
@@ -3201,8 +3211,7 @@ begin
         Strings[FHistoryIndex] := CurFrameSet.FCurrentFile;
         Objects[FHistoryIndex] := CurFrameSet;
         FTitleHistory[FHistoryIndex] := CurFrameSet.FTitle;
-        pi := OldPos;
-        FPosition[FHistoryIndex] := Pointer(pi);
+        FPosition[FHistoryIndex] := OldPos;
       end;
       for I := 0 to FHistoryIndex-1 do
       begin
@@ -3216,7 +3225,7 @@ begin
       Insert(0, CurFrameSet.FCurrentFile);
       Objects[0] := CurFrameSet;
       FTitleHistory.Insert(0, CurFrameSet.FTitle);
-      FPosition.Insert(0, Nil);
+      FPosition.Insert(0, -1);
       if Count > FHistoryMaxCount then
       begin
         Obj := Objects[FHistoryMaxCount];
@@ -3233,26 +3242,23 @@ end;
 procedure TFrameViewer.SetHistoryIndex(Value: integer);
 var
   FrameSet, FrameSet1: TFrameSet;  
-  Tmp: TObject;
-  pi: PtrInt;
+  Tmp: ThtmlViewer;
 begin
   with CurFrameSet, FHistory do
     if (Value <> FHistoryIndex) and (Value >= 0) and (Value < Count) and not Processing then
     begin
       if CurFrameSet.Viewers.Count > 0 then
-        Tmp := TObject(CurFrameSet.Viewers[0])
+        Tmp := CurFrameSet.Viewers[0]
       else
         Tmp := Nil;
       if FCurrentFile <> '' then
       begin
         {Objects[FHistoryIndex] should have CurFrameSet here}
         FTitleHistory[FHistoryIndex] := CurFrameSet.FTitle;
-        if (Tmp is ThtmlViewer) then begin
-          pi := (Tmp as ThtmlViewer).Position;
-          FPosition[FHistoryIndex] := Pointer(pi);
-        end
+        if Assigned(Tmp) then
+          FPosition[FHistoryIndex] := Tmp.Position
         else
-          FPosition[FHistoryIndex] := Nil;
+          FPosition[FHistoryIndex] := -1;
       end;
       FrameSet := Objects[Value] as TFrameSet;
       if FrameSet <> CurFrameSet then
@@ -3263,7 +3269,7 @@ begin
         CurFrameSet.Visible := False;
         Self.InsertControl(CurFrameSet);
         if CurFrameSet.Viewers.Count = 1 then
-          CurFrameSet.ReloadFiles(integer(FPosition[Value]))
+          CurFrameSet.ReloadFiles(FPosition[Value])
         else
           CurFrameSet.ReloadFiles(-1);
         SendMessage(Self.handle, wm_SetRedraw, 0, 0);
@@ -3273,12 +3279,8 @@ begin
         FrameSet1.Unloadfiles;
         Self.RemoveControl(FrameSet1);
       end
-      else begin
-        if  (Tmp is ThtmlViewer) then
-          TfvFrame(ThtmlViewer(Tmp).FrameOwner).ReloadFile(FHistory[Value],
-                            integer(FPosition[Value]));
-      end;
-
+      else if Assigned(Tmp) then
+        TfvFrame(Tmp.FrameOwner).ReloadFile(FHistory[Value], FPosition[Value]);
       FHistoryIndex := Value;
       if Assigned(FOnHistoryChange) then
         FOnHistoryChange(Self);
@@ -3336,8 +3338,7 @@ begin
   FOnFormSubmit := Handler;
   with CurFrameSet do
     for I := 0 to Viewers.Count-1 do
-      with ThtmlViewer(Viewers[I]) do
-        OnFormSubmit := Handler;
+      Viewers[I].OnFormSubmit := Handler;
 end;
 
 procedure TFrameViewer.SetOnProgress(Handler: ThtProgressEvent);   
@@ -3347,8 +3348,7 @@ begin
   FOnProgress := Handler;
   with CurFrameSet do
     for I := 0 to Viewers.Count-1 do
-      with ThtmlViewer(Viewers[I]) do
-        OnProgress := Handler;
+      Viewers[I].OnProgress := Handler;
 end;
 
 procedure TFrameViewer.SetDragDrop(const Value: TDragDropEvent);
@@ -3405,8 +3405,7 @@ begin
   FOnImageRequest := Handler;
   with CurFrameSet do
     for I := 0 to Viewers.Count-1 do
-      with ThtmlViewer(Viewers[I]) do
-        OnImageRequest := Handler;
+      Viewers[I].OnImageRequest := Handler;
 end;
 
 function TFrameViewer.ViewerFromTarget(const ATarget: string): ThtmlViewer;
@@ -3446,7 +3445,7 @@ begin
       CurFrameSet.BorderSize := 2;
     end;
   for I := 0 to CurFrameSet.Viewers.Count-1 do
-    with ThtmlViewer(CurFrameSet.Viewers[I]) do
+    with CurFrameSet.Viewers[I] do
     begin
       if (fvOverLinksActive in Value) then
         htOptions := htOptions + [htOverLinksActive]
@@ -3547,7 +3546,7 @@ begin
   RequestEvent := CurFrameSet.RequestEvent;
   for K := 0 to CurFrameSet.Viewers.Count-1 do
   begin
-    Viewer := ThtmlViewer(CurFrameSet.Viewers[K]);
+    Viewer := CurFrameSet.Viewers[K];
     if RequestEvent then
       Src := TfvFrame(Viewer.FrameOwner).Source;
     for I := 0 to Visited.Count-1 do
@@ -3601,7 +3600,7 @@ begin
 end;
 
 {----------------TFrameViewer.GetViewers:}
-function TFrameViewer.GetViewers: TStrings;   
+function TFrameViewer.GetViewersByName: TStrings;
 var
   I: integer;
   S: string;
@@ -3611,10 +3610,11 @@ var
 begin
   if not Assigned(FViewerList) then
     FViewerList := TStringList.Create
-  else FViewerList.Clear;
+  else
+    FViewerList.Clear;
   for I := 0 to CurFrameSet.Viewers.Count-1 do
   begin
-    Viewer := ThtmlViewer(CurFrameSet.Viewers[I]);
+    Viewer := CurFrameSet.Viewers[I];
     if Viewer.SectionList.Count > 0  then
     begin
       S := '';
@@ -3635,6 +3635,20 @@ begin
     end;
   end;
   Result := FViewerList;
+end;
+
+{ TFVBase }
+
+constructor TFVBase.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  FPosition := TIntList.Create;
+end;
+
+destructor TFVBase.Destroy;
+begin
+  FPosition.Free;
+  inherited Destroy;
 end;
 
 {----------------TFVBase.GetFURL} {base class for TFrameViewer and TFrameBrowser}

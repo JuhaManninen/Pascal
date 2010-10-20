@@ -293,11 +293,10 @@ procedure TForm1.Open1Click(Sender: TObject);
 begin
   if FrameViewer.CurrentFile <> '' then
     OpenDialog.InitialDir := ExtractFilePath(FrameViewer.CurrentFile)
-{$IFNDEF LCLCarbon}
   else
+{$IFNDEF LCLCarbon}
     OpenDialog.InitialDir := ExtractFilePath(ParamStr(0));
 {$ELSE}  //Don't default to within app bundle.
-  else
     OpenDialog.InitialDir := ExtractFilePath(ParamStr(0)) + '../../../';
 {$ENDIF}
   OpenDialog.FilterIndex := 1;
@@ -348,13 +347,10 @@ end;
 procedure TForm1.ReloadClick(Sender: TObject);
 {the Reload button was clicked}
 begin
-  with FrameViewer do
-  begin
-    ReloadButton.Enabled := False;
-    Reload;   {load again}
-    ReloadButton.Enabled := CurrentFile <> '';
-    FrameViewer.SetFocus;
-  end;
+  ReloadButton.Enabled := False;
+  FrameViewer.Reload;   {load again}
+  ReloadButton.Enabled := FrameViewer.CurrentFile <> '';
+  FrameViewer.SetFocus;
 end;
 
 procedure TForm1.Copy1Click(Sender: TObject);
@@ -364,12 +360,10 @@ end;
 
 procedure TForm1.Edit1Click(Sender: TObject);
 begin
-  with FrameViewer do
-  begin
-    Copy1.Enabled := SelLength <> 0;
-    SelectAll1.Enabled := (ActiveViewer <> Nil) and (ActiveViewer.CurrentFile <> '');
-    Find1.Enabled := SelectAll1.Enabled;
-  end;
+  Copy1.Enabled := FrameViewer.SelLength <> 0;
+  SelectAll1.Enabled := (FrameViewer.ActiveViewer <> Nil)
+                    and (FrameViewer.ActiveViewer.CurrentFile <> '');
+  Find1.Enabled := SelectAll1.Enabled;
 end;
 
 procedure TForm1.SelectAll1Click(Sender: TObject);
@@ -386,11 +380,8 @@ end;
 
 procedure TForm1.ShowimagesClick(Sender: TObject);
 begin
-  With FrameViewer do
-  begin
-    ViewImages := not ViewImages;
-    ShowImages.Checked := ViewImages;
-  end;
+  FrameViewer.ViewImages := not FrameViewer.ViewImages;
+  ShowImages.Checked := FrameViewer.ViewImages;
 end;
 
 procedure TForm1.HistoryChange(Sender: TObject);
@@ -535,8 +526,7 @@ begin
   FrameViewer.GoBack;
 end;
 
-procedure TForm1.WindowRequest(Sender: TObject; const Target,
-  URL: string);
+procedure TForm1.WindowRequest(Sender: TObject; const Target, URL: string);
 var
   S, Dest: string[255];
   I: integer;
@@ -592,12 +582,9 @@ var
   AForm: TImageForm;
 begin
   AForm := TImageForm.Create(Self);
-  with AForm do
-  begin
-    ImageFormBitmap := FoundObject.Bitmap;
-    Caption := '';
-    Show;
-  end;
+  AForm.ImageFormBitmap := FoundObject.Bitmap;
+  AForm.Caption := '';
+  AForm.Show;
 end;
 
 procedure TForm1.MediaPlayerNotify(Sender: TObject);
@@ -640,13 +627,17 @@ begin
     begin
       if Sender is ThtmlViewer then
         Filename := ThtmlViewer(Sender).HTMLExpandFilename(SRC)
-      else Filename := (Sender as TFrameViewer).HTMLExpandFilename(SRC);
+      else
+        Filename := (Sender as TFrameViewer).HTMLExpandFilename(SRC);
       Notify := True;
       Open;
       ThePlayer := Sender;
-      if Loop < 0 then MediaCount := 9999
-        else if Loop = 0 then MediaCount := 1
-        else MediaCount := Loop;
+      if Loop < 0 then
+        MediaCount := 9999
+      else if Loop = 0 then
+        MediaCount := 1
+      else
+        MediaCount := Loop;
     end;
   except
   end;
@@ -892,7 +883,6 @@ begin
       HintVisible := False;
       Exit;
     end;
-
     if TimerCount > EndCount then
       CloseAll
     else if (TimerCount >= StartCount) and not HintVisible then
@@ -946,18 +936,16 @@ const
           '</table></body></html>';
 
 function ReplaceStr(Const S, FromStr, ToStr: string): string;
-{replace FromStr with ToStr in string S.
- for Delphi 6, 7, AnsiReplaceStr may be used instead.}
-var
-  I: integer;
+{replace FromStr with ToStr in string S.}
 begin
-  I := Pos(FromStr, S);
+  Result := StringReplace(S, FromStr, ToStr, []); // rfReplaceAll
+{  I := Pos(FromStr, S);
   if I > 0 then
   begin
     Result := S;
     Delete(Result, I, Length(FromStr));
     Insert(ToStr, Result, I);
-  end;
+  end; }
 end;
 
 procedure TForm1.ViewerPrintHTMLHeader(Sender: TObject;

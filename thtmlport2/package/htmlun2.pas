@@ -132,23 +132,23 @@ type
   end;
 
   TAttributeList = class(TObjectList)  {a list of tag attributes,(TAttributes)}
-    private
-      Prop: TProperties;
-      SaveID: string;
-      function GetClass: string;
-      function GetID: string;
-      function GetTitle: string;  
-      function GetStyle: TProperties;
-    public
-      destructor Destroy; override;
-      procedure Clear;
-      function Find(Sy: Symb; var T: TAttribute): boolean;
-      function CreateStringList: TStringList;   
-      property TheClass: string read GetClass;
-      property TheID: string read GetID;
-      property TheTitle: string read GetTitle;    
-      property TheStyle: TProperties read GetStyle;
-    end;
+  private
+    Prop: TProperties;
+    SaveID: string;
+    function GetClass: string;
+    function GetID: string;
+    function GetTitle: string;
+    function GetStyle: TProperties;
+  public
+    destructor Destroy; override;
+    procedure Clear;
+    function Find(Sy: Symb; var T: TAttribute): boolean;
+    function CreateStringList: TStringList;
+    property TheClass: string read GetClass;
+    property TheID: string read GetID;
+    property TheTitle: string read GetTitle;
+    property TheStyle: TProperties read GetStyle;
+  end;
 
   TBitmapItem = class(TObject)
   public
@@ -209,10 +209,10 @@ type
     Last: integer;
   end;
 }
-  // Inherit from TInterfacedObject to prevent some mystical memory issues.
-  // TUrlTarget objects are now reference counted and don't need to be freed explicitly.
+  // Should use IUnknown interface to prevent some mystical memory issues.
+  // Interfaced objects are reference counted and don't need to be freed explicitly.
   // JuMa 16.10.2010.
-  TUrlTarget = Class(TInterfacedObject)
+  TUrlTarget = Class
   private
     function GetStart: integer;
     function GetLast: integer;
@@ -247,30 +247,29 @@ type
     end;
 
   TDib = class(TObject)
-    private
-      Info  : PBitmapInfoHeader;
-      InfoSize: integer;
-      Image: Pointer;
-      ImageSize : integer;
-      FHandle: THandle;
-      procedure InitializeBitmapInfoHeader(Bitmap: HBITMAP);
-      procedure GetDIBX(DC: HDC; Bitmap: HBITMAP; Palette: HPALETTE);
-      procedure Allocate(Size: integer);
-      procedure DeAllocate;
-    public
-      constructor CreateDIB(DC: HDC; Bitmap: TBitmap);
-      destructor Destroy; override;
-      function CreateDIBmp: hBitmap;
-      procedure DrawDIB(DC: HDC; X: Integer; Y: integer; W, H: integer;
-                ROP: DWord);
-    end;
+  private
+    Info  : PBitmapInfoHeader;
+    InfoSize: integer;
+    Image: Pointer;
+    ImageSize : integer;
+    FHandle: THandle;
+    procedure InitializeBitmapInfoHeader(Bitmap: HBITMAP);
+    procedure GetDIBX(DC: HDC; Bitmap: HBITMAP; Palette: HPALETTE);
+    procedure Allocate(Size: integer);
+    procedure DeAllocate;
+  public
+    constructor CreateDIB(DC: HDC; Bitmap: TBitmap);
+    destructor Destroy; override;
+    function CreateDIBmp: hBitmap;
+    procedure DrawDIB(DC: HDC; X: Integer; Y: integer; W, H: integer; ROP: DWord);
+  end;
 
   IndentRec = Class(TObject)
     X: integer;       {indent for this record}
     YT, YB: integer;  {top and bottom Y values for this record}
     ID: TObject;      {level inicator for this record, 0 for not applicable}
     Float: boolean;   {set if Floating block boundary}
-    end;
+  end;
 
   IndentManagerBasic = class(TObject)
     Width, ClipWidth: Integer;
@@ -292,13 +291,13 @@ type
     function SetRightIndent(XRight, Y: integer): integer;
     procedure FreeLeftIndentRec(I: integer);   
     procedure FreeRightIndentRec(I: integer);   
-    end;
+  end;
 
   AllocRec = Class(TObject)
     Ptr: Pointer;
     ASize: integer;
     AHandle: THandle;
-    end;
+  end;
 
 //  IndexArray = array[1..TokenLeng] of integer;
   IndexArray = array {[1..30000]} of integer;  // LCL port: To avoid range-check error in TCharCollection.Add.
@@ -347,7 +346,7 @@ type
     procedure Replace(N: integer; Ch: WideChar);
 
     property S: WideString read GetString;
-    end;
+  end;
 
   TIDObject = class(TObject)
   protected
@@ -355,7 +354,7 @@ type
   public
     property YPosition: integer read GetYPosition;
     destructor Destroy; override;
-    end;
+  end;
 
   TChPosObj = class (TIDObject)
   private
@@ -363,7 +362,7 @@ type
     List: TList;
   protected
     function GetYPosition: integer; override;
-    end;
+  end;
 
   TIDNameList = class(TStringList)
   private
@@ -374,7 +373,7 @@ type
     procedure Clear; override;
     function AddObject(const S: string; AObject: TObject): Integer; override;
     procedure AddChPosObject(const S: string; Pos: integer);
-    end;
+  end;
 
 {$ifndef NoMetafile}
   ThtMetaFile = class(TMetaFile)
@@ -390,7 +389,7 @@ type
     property Bitmap: TBitmap read GetBitmap;
     property Mask: TBitmap read GetMask;
     property WhiteBGBitmap: TBitmap read GetWhiteBGBitmap;   
-    end;
+  end;
 {$endif}
 
   ImageType = (NoImage, Bmp, Gif, Gif89, Png, Jpg);
@@ -2391,10 +2390,8 @@ begin
       { delete the memory DCs}
       DeleteDC (hdcInvMask);
       DeleteDC (hdcMask);
-    end
-    else begin
-      DeleteObject(bmAndBack);
     end;
+    DeleteObject(bmAndBack);
     DeleteObject(bmSave);
     DeleteDC (hdcImage);
   finally
@@ -2517,8 +2514,7 @@ begin
   end;
 end;
 
-procedure TDib.DrawDIB(DC: HDC; X: Integer; Y: integer; W, H: integer;
-          ROP: DWord);
+procedure TDib.DrawDIB(DC: HDC; X: Integer; Y: integer; W, H: integer; ROP: DWord);
 var
   bmInfo: PBitmapInfo;
 begin
@@ -2557,8 +2553,8 @@ end;
 
 destructor IndentManagerBasic.Destroy;
 begin
-  R.Free;
   L.Free;
+  R.Free;
   inherited Destroy;
 end;
 
@@ -2584,7 +2580,7 @@ var
   IR: IndentRec;
 begin
   IR := IndentRec.Create;
-  if (Justify = Left) then
+  if Justify = Left then
   begin
     with IR do
     begin
@@ -2594,7 +2590,7 @@ begin
       L.Add(IR);
     end;
   end
-  else if (Justify = Right) then
+  else if Justify = Right then
   begin
     with IR do
     begin
