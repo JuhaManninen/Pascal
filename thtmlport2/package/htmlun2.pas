@@ -48,7 +48,7 @@ const
   UpOnlyCursor = 10104;
   DownOnlyCursor = 10105;  
   Tokenleng = 300;  
-  TopLim = -200;   {drawing limits}
+  TopLim = 0; //!!!-200;   {drawing limits}
   BotLim = 5000;   
   FmCtl = WideChar(#2);
   ImgPan = WideChar(#4);
@@ -435,8 +435,8 @@ function HTMLServerToDos(FName, Root: string): string;
 
 procedure WrapTextW(Canvas: TCanvas; X1, Y1, X2, Y2: integer; S: WideString); 
 
-procedure FinishTransparentBitmap (ahdc: HDC;
-            InImage, Mask: TBitmap; xStart, yStart, W, H: integer);  
+procedure FinishTransparentBitmap (ahdc: HDC; InImage, Mask: TBitmap; xStart, yStart, W, H: integer;
+                                   Transu: Transparency);
 function GetImageMask(Image: TBitmap; ColorValid: boolean; AColor: TColor): TBitmap;
 function TransparentGIF(const FName: string; var Color: TColor): boolean;
 function Allocate(Size: integer): AllocRec;
@@ -471,8 +471,7 @@ procedure StretchDrawGpImage(Handle: THandle; Image: TGpImage; DestX, DestY, Des
 procedure PrintGpImageDirect(Handle: THandle; Image: TGpImage; DestX, DestY: integer;
               ScaleX, ScaleY: single);
 procedure StretchPrintGpImageDirect(Handle: THandle; Image: TGpImage;
-              DestX, DestY, DestW, DestH: integer;
-              ScaleX, ScaleY: single);
+              DestX, DestY, DestW, DestH: integer; ScaleX, ScaleY: single);
 procedure StretchPrintGpImageOnColor(Canvas: TCanvas; Image: TGpImage;
               DestX, DestY, DestW, DestH: integer; Color: TColor = clWhite);
 function htStyles(P0, P1, P2, P3: BorderStyleType): htBorderStyleArray;
@@ -1211,7 +1210,7 @@ var
   I: integer;
 begin
   for I := 0 to Count-1 do
-    (Objects[I] as TBitmapItem).Free;
+    Objects[I].Free;
   CheckExitGDIPlus;
   inherited Destroy;
 end;
@@ -1251,7 +1250,7 @@ var
   I: integer;
 begin
   for I := Count-1 downto 0 do
-    with (Objects[I] as TBitmapItem)do
+    with (Objects[I] as TBitmapItem) do
     begin
       if (AccessCount > N) and (UsageCount <= 0) then
       begin
@@ -1279,15 +1278,12 @@ var
 begin
   for I := Count-1 downto 0 do
   begin
-    Tmp := (Objects[I] as TBitmapItem);
-    with Tmp do
+    Tmp := Objects[I] as TBitmapItem;
+    Inc(Tmp.AccessCount);
+    if (Tmp.AccessCount > MaxCache) and (Tmp.UsageCount <= 0) then
     begin
-      Inc(AccessCount);
-      if (AccessCount > MaxCache) and (UsageCount <= 0) then
-      begin
-        Delete(I);
-        Free;          {the TBitmapItem}
-      end;
+      Delete(I);
+      Tmp.Free;          {the TBitmapItem}
     end;
   end;
 end;
@@ -1295,18 +1291,13 @@ end;
 procedure TStringBitmapList.PurgeCache;
 var
   I: integer;
-  Tmp: TBitmapItem;
 begin
   for I := Count-1 downto 0 do
   begin
-    Tmp := (Objects[I] as TBitmapItem);
-    with Tmp do
+    if (Objects[I] as TBitmapItem).UsageCount <= 0 then
     begin
-      if (UsageCount <= 0) then
-      begin
-        Delete(I);
-        Free;          {the TBitmapItem}
-      end;
+      Delete(I);
+      Objects[I].Free;          {the TBitmapItem}
     end;
   end;
 end;
@@ -1316,7 +1307,7 @@ var
   I: integer;
 begin
   for I := 0 to Count-1 do
-    (Objects[I] as TBitmapItem).Free;
+    Objects[I].Free;
   inherited Clear;
 end;
 
@@ -1510,7 +1501,7 @@ var
   fls: TFontList;
 begin
   utTextLast := ALast;
-  fls:=AFontList as TFontList;
+  fls := AFontList as TFontList;
   for I := fls.Count-1 downto 0 do
     if ID = fls[I].UrlTarget.ID then
       fls[I].UrlTarget.utTextLast := ALast
@@ -1625,7 +1616,7 @@ var
   I: integer;
 begin
   for I := 0 to Areas.Count-1 do
-    DeleteObject(PtrInt(Areas.Objects[I]));
+    DeleteObject(HGDIOBJ(Areas.Objects[I]));
   Areas.Free;
   AreaTargets.Free;
   AreaTitles.Free;
@@ -1639,7 +1630,7 @@ begin
   Result := False;
   with Areas do
     for I := 0 to Count-1 do
-      if PtInRegion(PtrInt(Objects[I]), X, Y) then
+      if PtInRegion(HRGN(Objects[I]), X, Y) then
       begin
         if Strings[I] <> '' then  {could be NoHRef}
         begin
@@ -1806,8 +1797,7 @@ end;
 {$A-} {record field alignment off for this routine}
 
 function IsTransparent(Stream: TStream; var Color: TColor): boolean;
-{Makes some simplifying assumptions that seem to be generally true for single
- images.}
+{Makes some simplifying assumptions that seem to be generally true for single images.}
 Type
   RGB = record
     Red, Green, Blue: byte;
@@ -2104,8 +2094,7 @@ begin
         jpImage.PixelFormat := jf8bit;
         if not jpImage.GrayScale and (ColorBits = 8) then
           jpImage.Palette := CopyPalette(ThePalette);
-      end
-      else
+      end else
         jpImage.PixelFormat := jf24bit;
       Result.Assign(jpImage.Bitmap);
 }
@@ -2113,8 +2102,8 @@ begin
         jpImage.Free;
       end;
     end
-{$ifndef NoOldPng}
     else if IT = Png then
+{$ifndef NoOldPng}
     begin
       if IsTransparentPNG(Stream, Color) then  {check for transparent PNG}
         Transparent := TPng;
@@ -2128,22 +2117,19 @@ begin
       end;
     end
 {$else}
-    else if IT = Png then
-      Result := Nil
+      FreeAndNil(Result) // Result := Nil
 {$endif}
-    else begin
+    else
       Result.LoadFromStream(Stream);   {Bitmap}
-    end;
-    if Transparent = LLCorner then
-      AMask := GetImageMask(Result, False, 0)
-{$ifdef NoOldPng}
-       ;
-{$else}
+    if Transparent = LLCorner then begin
+      AMask := GetImageMask(Result, False, 0);
+    end
+{$ifndef NoOldPng}
     else if Transparent = TPng then
     begin
       AMask := GetImageMask(Result, True, Color);
-      {Replace the background color with black.  This is needed if the Png is a
-       background image.}
+      // Replace the background color with black.
+      // This is needed if the Png is a background image.
       Tmp := Result;
       Result := TBitmap.Create;
       Result.Width := Tmp.Width;
@@ -2161,10 +2147,10 @@ begin
       Tmp.Free;
     end;
 {$endif}
+    ;
     Result := ConvertImage(Result);
   except
-    Result.Free;
-    Result := Nil;
+    FreeAndNil(Result);
   end;
 end;
 
@@ -2308,86 +2294,64 @@ begin
 end;
 
 {----------------FinishTransparentBitmap }
-procedure FinishTransparentBitmap (ahdc: HDC;
-              InImage, Mask: TBitmap; xStart, yStart, W, H: integer);
+procedure FinishTransparentBitmap (ahdc: HDC; InImage, Mask: TBitmap;
+                                   xStart, yStart, W, H: integer; Transu: Transparency);
 var
-  bmAndBack,
-  bmSave,
-  bmBackOld,
-  bmObjectOld : HBitmap;
-  hdcInvMask,
-  hdcMask,
-  hdcImage: HDC;
+  bmAndBack, bmObjectOld, bmSave, bmBackOld : HBITMAP;
+  hdcInvMask, hdcMask, hdcImage: HDC;
   DestSize, SrcSize : TPoint;
   OldBack, OldFore: TColor;
   BM: BITMAP;
   Image: TBitmap;
-
 begin
-  Image := TBitmap.Create;  {protect original image}
+//STRETCHBLT  X=104, Y=299, WIDTH=16, HEIGHT=16
+//  if (xStart=104) and (yStart=299) and (W=16) and (H=16) then begin
+{  Image := TBitmap.Create;  // protect original image
   try
     Image.Assign(InImage);
-
-    hdcImage := CreateCompatibleDC (ahdc);
-    SelectObject (hdcImage, Image.Handle); { select the bitmap }
-
-    { convert bitmap dimensions from device to logical points}
+    hdcImage := CreateCompatibleDC(ahdc);
+    SelectObject(hdcImage, Image.Handle); // select the bitmap
+    // convert bitmap dimensions from device to logical points
     SrcSize.x := Image.Width;
     SrcSize.y := Image.Height;
     DPtoLP(hdcImage, SrcSize, 1);
-
     DestSize.x := W;
     DestSize.y := H;
-    DPtoLP (hdcImage, DestSize, 1);
-
-    { create a bitmap for each DC}
-    { monochrome DC}
-    bmAndBack := CreateBitmap (SrcSize.x, SrcSize.y, 1, 1, nil);
-
+    DPtoLP(hdcImage, DestSize, 1);
+    // create a bitmap for each DC,  monochrome DC
+    bmAndBack := CreateBitmap(SrcSize.x, SrcSize.y, 1, 1, nil);
     bmSave := CreateCompatibleBitmap (ahdc, DestSize.x, DestSize.y);
     GetObject(bmSave, SizeOf(BM), @BM);
     if (BM.bmBitsPixel > 1) or (BM.bmPlanes > 1) then
     begin
-      { create some DCs to hold temporary data}
-      hdcInvMask   := CreateCompatibleDC(ahdc);
+      // create some DCs to hold temporary data
+      hdcInvMask := CreateCompatibleDC(ahdc);
       hdcMask := CreateCompatibleDC(ahdc);
-
-      { each DC must select a bitmap object to store pixel data}
-      bmBackOld   := SelectObject (hdcInvMask, bmAndBack);
-
-      { set proper mapping mode}
+      // each DC must select a bitmap object to store pixel data
+      bmBackOld := SelectObject (hdcInvMask, bmAndBack);
+      // set proper mapping mode
       SetMapMode(hdcImage, GetMapMode(ahdc));
-
       bmObjectOld := SelectObject(hdcMask, Mask.Handle);
-
-      { create the inverse of the object mask}
+      // create the inverse of the object mask
       BitBlt (hdcInvMask, 0, 0, SrcSize.x, SrcSize.y, hdcMask, 0, 0, NOTSRCCOPY);
-
-      {set the background color of the source DC to the color contained in the
-       parts of the bitmap that should be transparent, the foreground to the parts that
-       will show}
-      OldBack := SetBkColor(ahDC, clWhite);
-      OldFore := SetTextColor(ahDC, clBlack);
-
-      { Punch out a black hole in the background where the image will go}
-      SetStretchBltMode(ahDC, WhiteOnBlack);
-      StretchBlt (ahDC, XStart, YStart, DestSize.x, DestSize.y, hdcMask, 0, 0, SrcSize.x, SrcSize.y, SRCAND);
-
-      { mask out the transparent colored pixels on the bitmap}
-      BitBlt (hdcImage, 0, 0, SrcSize.x, SrcSize.y, hdcInvMask, 0, 0, SRCAND);
-
-      { XOR the bitmap with the background on the destination DC}
-      SetStretchBltMode(ahDC, ColorOnColor);
-      StretchBlt(ahDC, XStart, YStart, W, H, hdcImage, 0, 0, Image.Width, Image.Height, SRCPAINT);
-
-      SetBkColor(ahDC, OldBack);
-      SetTextColor(ahDC, OldFore);
-
-      { delete the memory bitmaps}
-      DeleteObject (SelectObject (hdcInvMask, bmBackOld));
+      // set the background color of the source DC to the color contained in the parts
+      // of the bitmap that should be transparent, the foreground to the parts that will show
+      OldBack := SetBkColor(ahdc, clWhite);
+      OldFore := SetTextColor(ahdc, clBlack);
+      // Punch out a black hole in the background where the image will go
+      SetStretchBltMode(ahdc, WHITEONBLACK);
+      StretchBlt(ahdc, XStart, YStart, DestSize.x, DestSize.y, hdcMask, 0, 0, SrcSize.x, SrcSize.y, SRCAND);
+      // mask out the transparent colored pixels on the bitmap
+      BitBlt(hdcImage, 0, 0, SrcSize.x, SrcSize.y, hdcInvMask, 0, 0, SRCAND);
+      // XOR the bitmap with the background on the destination DC
+      SetStretchBltMode(ahdc, COLORONCOLOR);
+      StretchBlt(ahdc, XStart, YStart, W, H, hdcImage, 0, 0, Image.Width, Image.Height, SRCPAINT);
+      SetBkColor(ahdc, OldBack);
+      SetTextColor(ahdc, OldFore);
+      // delete the memory bitmaps
+      SelectObject (hdcInvMask, bmBackOld); // was: DeleteObject (
       SelectObject (hdcMask, bmObjectOld);
-
-      { delete the memory DCs}
+      // delete the memory DCs
       DeleteDC (hdcInvMask);
       DeleteDC (hdcMask);
     end;
@@ -2397,6 +2361,7 @@ begin
   finally
     Image.Free;
   end;
+}
 end;
 
 {----------------TDib.CreateDIB}
@@ -2441,8 +2406,7 @@ begin
   begin
     if ImageSize < $FF00 then
       Freemem(Image, ImageSize)
-    else
-    begin
+    else begin
       GlobalUnlock(FHandle);
       GlobalFree(FHandle);
     end;
@@ -2505,13 +2469,11 @@ begin
     RealizePalette(DC);
   end;
   bmInfo := PBitmapInfo(Info);
-  Rslt := GetDIBits(DC, Bitmap, 0, Info^.biHeight, Image, bmInfo^, DIB_RGB_COLORS);
+//!!!  Rslt := GetDIBits(DC, Bitmap, 0, Info^.biHeight, Image, bmInfo^, DIB_RGB_COLORS);
   if OldPal <> 0 then
     SelectPalette(DC, OldPal, False);
-  if Rslt = 0 then
-  begin
-    OutofMemoryError;
-  end;
+//  if Rslt = 0 then
+//    OutofMemoryError;
 end;
 
 procedure TDib.DrawDIB(DC: HDC; X: Integer; Y: integer; W, H: integer; ROP: DWord);
@@ -3434,7 +3396,9 @@ begin
       Image := Allocate(ImageSize);
       OldPal := SelectPalette(DC, ThePalette, False);
       try
-//!!!        GetDIB(BMHandle, ThePalette, Info^, Image.Ptr^);
+{$IFNDEF LCL}
+        GetDIB(BMHandle, ThePalette, Info^, Image.Ptr^);
+{$ENDIF}
         RealizePalette(DC);
         with Info^.bmiHeader do
           StretchDIBits(DC, X, Y, W, H,
@@ -3722,8 +3686,7 @@ begin
 end;
 
 procedure StretchPrintGpImageDirect(Handle: THandle; Image: TGpImage;
-              DestX, DestY, DestW, DestH: integer;
-              ScaleX, ScaleY: single);
+              DestX, DestY, DestW, DestH: integer; ScaleX, ScaleY: single);
 {Prints the entire image at the point specified with the height and width specified}
 var
   g: TGpGraphics;
@@ -4186,7 +4149,7 @@ initialization
 
 {$I htmlun2.lrs}
 
-DefBitMap := TBitmap.Create;
+  DefBitMap := TBitmap.Create;
   ErrorBitMap := TBitmap.Create;
   ErrorBitMapMask := TBitmap.Create;
   DefBitMap.LoadFromLazarusResource('ErrBitmap');

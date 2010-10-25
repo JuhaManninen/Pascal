@@ -86,7 +86,7 @@ end;
 
 procedure TPrnStatusForm.CancelButtonClick(Sender: TObject);
 begin
-Canceled := True;
+  Canceled := True;
 end;
 
 

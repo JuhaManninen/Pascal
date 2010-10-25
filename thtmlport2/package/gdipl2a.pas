@@ -249,7 +249,6 @@ const
 begin
   GdipDrawImageRectRectI(fGraphics, Image.fHandle, dx, dy, dw, dh,
                          sx, sy, sw, sh, UnitPixel, 0, Nil, 0);
-
 end;
 
 procedure TGpGraphics.Clear (Color: Cardinal);
@@ -368,7 +367,7 @@ begin
   GdipBitmapGetPixel(fHandle, X, Y, Result);
 end;
 
-procedure TGpBitmap.SetPixel(X, Y: integer; Color: DWord);   
+procedure TGpBitmap.SetPixel(X, Y: integer; Color: DWord);
 begin
   GdipBitmapSetPixel(fHandle, X, Y, Color);
 end;
@@ -381,7 +380,7 @@ var
   GDIPlusCount: integer;  
 {$endif}
 
-procedure CheckInitGDIPlus;   
+procedure CheckInitGDIPlus;
 begin
 {$ifndef NoGDIPlus}
   if GDIPlusCount = 0 then

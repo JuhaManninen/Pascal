@@ -187,7 +187,7 @@ type
     FPrintMarginRight,
     FPrintMarginTop,
     FPrintMarginBottom: double;
-    FCharset: TFontCharset;   {see htmlun2.pas for Delphi 2 TFontCharSet definition}
+    FCharset: TFontCharset;
     FOnPrintHeader, FOnPrintFooter: TPagePrinted;
     FOnPrintHTMLHeader, FOnPrintHTMLFooter: ThtmlPagePrinted;
     FPage: integer;
@@ -217,7 +217,8 @@ type
     FOnObjectTag: TObjectTagEvent; 
 
     function CreateHeaderFooter: ThtmlViewer;
-    procedure WMSize(var Message: TLMSize); message LM_SIZE;
+//    procedure WMSize(var Message: TLMSize); message LM_SIZE;
+    procedure WMSizeHandler(Sender: TObject);
     procedure ScrollTo(Y: integer);
     procedure Scroll(Sender: TObject; ScrollCode: TScrollCode;
            var ScrollPos: Integer);
@@ -349,12 +350,12 @@ type
     TablePartRec: TTablePartRec;
     Visited: TStringList;     {visited URLs}
 
-    procedure AddVisitedLink(const S: string);  
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure AddVisitedLink(const S: string);
     procedure CheckVisitedLinks;
     procedure UrlAction;
     procedure TriggerUrlAction;
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
     function HTMLExpandFilename(const Filename: string): string; virtual;
     procedure LoadFromFile(const FileName: string);
     procedure LoadTextFromString(const S: string);
@@ -399,7 +400,7 @@ type
     procedure htProgressEnd;
     procedure htProgressInit;
     function FullDisplaySize(FormatWidth: integer): TSize;
-    function MakeBitmap(YTop, FormatWidth, AWidth, AHeight: integer): TBitmap;
+//    function MakeBitmap(YTop, FormatWidth, AWidth, AHeight: integer): TBitmap;
 {
     function MakeMetaFile(YTop, FormatWidth, AWidth, AHeight: integer): TMetaFile;
     function MakePagedMetaFiles(AWidth, AHeight: integer): TList;
@@ -584,6 +585,8 @@ type
     destructor Destroy; override;
   end;
 
+{ THTMLViewer }
+
 constructor THTMLViewer.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -601,6 +604,7 @@ begin
   FCharset := DEFAULT_CHARSET;
   FMarginHeight := 5;
   FMarginWidth := 10;
+  OnResize:=@WMSizeHandler;
 
   BorderPanel := TPanel.Create(Self);
   BorderPanel.BevelInner := bvNone;
@@ -1245,15 +1249,14 @@ begin
   if not DontDraw then
   begin
     ARect := Rect(0, 1, PaintPanel.Width, PaintPanel.Height);
-    FSectionList.Draw(PaintPanel.Canvas2, ARect, MaxHScroll,
-                      -HScrollBar.Position, 0, 0, 0);
+    FSectionList.Draw(PaintPanel.Canvas2, ARect, MaxHScroll, -HScrollBar.Position, 0, 0, 0);
   end;
 end;
 
-procedure ThtmlViewer.WMSize(var Message: TLMSize);
+//procedure ThtmlViewer.WMSize(var Message: TLMSize);
+procedure ThtmlViewer.WMSizeHandler(Sender: TObject);
 begin
-//  inherited;
-//  if InCreate then
+  if InCreate then
     Exit;
   if not FProcessing then
     Layout
@@ -1830,8 +1833,7 @@ begin
   with FSectionList do
   begin
     InText := False;
-    CaretPos := FindCursor(PaintPanel.Canvas, X,
-           Y+YOff, XR, YR, CaretHt, InText);
+    CaretPos := FindCursor(PaintPanel.Canvas, X, Y+YOff, XR, YR, CaretHt, InText);
     CursorToXy(PaintPanel.Canvas, CaretPos, X1, Y1);
     if InText then   {else cursor is past end of row}
     begin
@@ -2645,8 +2647,7 @@ begin
           begin
             if Mask = Nil then
               BitBlt(DC, X, Y, BW, BH, Bitmap.Canvas.Handle, 0, 0, SRCCOPY)
-            else
-            begin
+            else begin
               BitBlt(dc, X, Y, BW, BH, Bitmap.Canvas.Handle, 0, 0, SrcInvert);
               BitBlt(dc, X, Y, BW, BH, Mask.Canvas.Handle, 0, 0, SrcAnd);
               BitBlt(dc, X, Y, BW, BH, Bitmap.Canvas.Handle, 0, 0, SrcPaint);
@@ -3067,7 +3068,7 @@ begin
   end;
 end;
 }
-
+{
 function ThtmlViewer.MakeBitmap(YTop, FormatWidth, AWidth, AHeight: integer): TBitmap;
 var
   CopyList: TSectionList;
@@ -3103,7 +3104,7 @@ begin
     CopyList.Free;
   end;
 end;
-
+}
 function ThtmlViewer.CreateHeaderFooter: ThtmlViewer;
 begin
   Result := ThtmlViewer.Create(Nil);
@@ -5016,27 +5017,29 @@ begin
   Canvas.Brush.Color := Color;
   ARect := Canvas.ClipRect;
   Canvas2 := TCanvas.Create;   {paint on a memory DC}
-  try
+  try  //!!!
     MemDC := CreateCompatibleDC(Canvas.Handle);
     ABitmap := 0;
     try
       with ARect do
       begin
         ABitmap := CreateCompatibleBitmap(Canvas.Handle, Right-Left, Bottom-Top);
-        if (ABitmap = 0) and (Right-Left + Bottom-Top <> 0) then
+        if (ABitmap = 0) and ((Right-Left) + (Bottom-Top) <> 0) then
                raise EOutOfResources.Create('Out of Resources');
         try
           SelectObject(MemDC, ABitmap);
           SetWindowOrgEx(memDC, Left, Top, Nil);
           Canvas2.Handle := MemDC;
           DoBackground(Canvas2);
-          if Assigned(FOnPaint) then FOnPaint(Self);
+          if Assigned(FOnPaint) then
+            FOnPaint(Self);
           OldPal := SelectPalette(Canvas.Handle, ThePalette, False);
           RealizePalette(Canvas.Handle);
           BitBlt(Canvas.Handle, Left, Top, Right-Left, Bottom-Top,
-                                MemDC, Left, Top, SrcCopy);
+                                MemDC, Left, Top, SRCCOPY);
         finally
-          if OldPal <> 0 then SelectPalette(MemDC, OldPal, False);
+          if OldPal <> 0 then
+            SelectPalette(MemDC, OldPal, False);
           Canvas2.Handle := 0;
         end;
       end;
@@ -5128,7 +5131,7 @@ end;
 procedure TPaintPanel.WMLButtonDblClk(var Message: TLMMouse);
 begin
   if Message.Keys and MK_LButton <> 0 then
-    ThtmlViewer(FViewer).HTMLMouseDblClk(Message);
+    FViewer.HTMLMouseDblClk(Message);
 end;
 
 {$IFNDEF LCL}

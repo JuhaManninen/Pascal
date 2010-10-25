@@ -260,7 +260,11 @@ begin
       ShellExecute(Handle, nil, 'MPlayer.exe', '/play /close',
                    nil, SW_SHOWNORMAL);
 {$ELSE}  //No equivalent to MPlayer?
+ {$IFDEF LCLCarbon}
+      OpenDocument(S + '.app"'); // Shell('Open "' + S + '.app"');
+ {$ELSE}
       OpenDocument(S);
+ {$ENDIF}
 {$ENDIF}
     end;
     {else ignore other extensions}
@@ -777,16 +781,16 @@ var
   PC2: array[0..255] of char;
 begin
 //  WinExec(StrPCopy(PC, ParamStr(0)+' "'+NewWindowFile+'"'), sw_Show);
- {$IFDEF MSWINDOWS}
+{$IFDEF MSWINDOWS}
   ShellExecute(Handle, nil, StrPCopy(PC, ParamStr(0)), 
                StrPCopy(PC2, NewWindowFile), nil, SW_SHOWNORMAL); 
+{$ELSE}
+ {$IFDEF LCLCarbon}
+  OpenDocument(NewWindowFile);
  {$ELSE}
-  {$IFDEF LCLCarbon}
-  Shell('Open "' + ParamStr(0) + '.app"');
-  {$ELSE}
   OpenDocument(NewWindowFile); // Shell('"' + ParamStr(0) + '" "' + NewWindowFile + '"');
-  {$ENDIF}
  {$ENDIF}
+{$ENDIF}
 end;
 
 procedure TForm1.PrinterSetupClick(Sender: TObject);
@@ -804,7 +808,9 @@ var
   pf: TPreviewForm;
   Viewer: ThtmlViewer;
   Abort: boolean;
+{$ENDIF}
 begin
+{$IFNDEF LCL}
   Viewer := FrameViewer.ActiveViewer;
   if Assigned(Viewer) then
   begin
@@ -816,8 +822,6 @@ begin
       pf.Free;
     end;
   end;
-{$ELSE}
-begin
 {$ENDIF}
 end;
 

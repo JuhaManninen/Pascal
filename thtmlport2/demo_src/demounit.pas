@@ -123,7 +123,7 @@ type
     HintWindow: THintWindow;
     HintVisible: boolean;   
 
-    procedure wmDropFiles(var AMessage: TMessage); message wm_DropFiles;
+    procedure wmDropFiles(var AMessage: TLMessage); message LM_DROPFILES;
     procedure CloseAll;
   public
 
@@ -288,7 +288,11 @@ begin
       ShellExecute(Handle, nil, StrPCopy(PC, S), StrPCopy(PC2, Params),
                    nil, SW_SHOWNORMAL);
 {$ELSE}
-      Shell('Open ' + S);
+ {$IFDEF LCLCarbon}
+      OpenDocument(S + '.app"'); // Shell('Open "' + S + '.app"');
+ {$ELSE}
+      OpenDocument(S);
+ {$ENDIF}
 {$ENDIF}
     end
     else if (Ext = '.MID') or (Ext = '.AVI')  then
@@ -305,7 +309,6 @@ begin
     Edit1.Text := URL;
     Exit;
   end;
-
   I := Pos('MAILTO:', UpperCase(URL));
   J := Pos('HTTP:', UpperCase(URL));
   if (I > 0) or (J > 0) then
@@ -313,7 +316,11 @@ begin
 {$IFDEF MSWINDOWS}
     ShellExecute(0, nil, pchar(URL), nil, nil, SW_SHOWNORMAL);
 {$ELSE}
-    Shell('Open ' + URL);
+ {$IFDEF LCLCarbon}
+     OpenDocument(URL + '.app"'); // Shell('Open "' + URL + '.app"');
+ {$ELSE}
+     OpenDocument(URL);
+ {$ENDIF}
 {$ENDIF}
     Handled := True;
     Exit;
@@ -564,7 +571,7 @@ begin
   end;
 end;
 
-procedure TForm1.wmDropFiles(var AMessage: TMessage);
+procedure TForm1.wmDropFiles(var AMessage: TLMessage);
 var
   S: string[200];
   Ext: string;
@@ -786,7 +793,11 @@ begin
   ShellExecute(Handle, nil, StrPCopy(PC, ParamStr(0)), 
                StrPCopy(PC2, NewWindowFile), nil, SW_SHOWNORMAL); 
 {$ELSE}
-  Shell('Open ' + ParamStr(0));
+ {$IFDEF LCLCarbon}
+  OpenDocument(NewWindowFile);
+ {$ELSE}
+  OpenDocument(NewWindowFile); // Shell('"' + ParamStr(0) + '" "' + NewWindowFile + '"');
+ {$ENDIF}
 {$ENDIF}
 end;
 

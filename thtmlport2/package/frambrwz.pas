@@ -848,9 +848,7 @@ begin
         Viewer.Position := ViewerPosition
       else
         Viewer.Position := APosition;    {its History Position}
-      Viewer.FormData := ViewerFormData;   
-      ViewerFormData.Free;
-      ViewerFormData := Nil;      
+      Viewer.FormData := ViewerFormData; //   FreeAndNil(ViewerFormData);
     except
       DoError;
     end;
@@ -1232,9 +1230,7 @@ begin
       begin
         if (Source <> Strings[Value]) then
         frLoadFromBrzFile(Strings[Value], '', '', '', '', False, True, False);
-        Viewer.FormData := PosFormData;
-//!!!        PosFormData.Free;
-//!!!        PosFormData := Nil;
+        Viewer.FormData := PosFormData; //!!! FreeAndNil(PosFormData);
         Viewer.Position := Pos;
       end;
     end;

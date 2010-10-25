@@ -6,14 +6,18 @@
       <Flags>
         <LRSInOutputDirectory Value="False"/>
       </Flags>
+      <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <ActiveWindowIndexAtStart Value="0"/>
+      <ResourceType Value="res"/>
     </General>
     <VersionInfo>
       <Language Value=""/>
       <CharSet Value=""/>
       <StringTable ProductVersion=""/>
     </VersionInfo>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
       <IgnoreBinaries Value="False"/>
@@ -34,472 +38,12 @@
         <PackageName Value="htmlcomp"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="37">
+    <Units Count="1">
       <Unit0>
         <Filename Value="htmldemo.dpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="0"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="36" Y="24"/>
-        <UsageCount Value="36"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
-      <Unit1>
-        <Filename Value="../package/styleun.pas"/>
-        <UnitName Value="StyleUn"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="542"/>
-        <CursorPos X="55" Y="567"/>
-        <UsageCount Value="15"/>
-        <Bookmarks Count="2">
-          <Item0 X="1" Y="1601" ID="2"/>
-          <Item1 X="1" Y="574" ID="1"/>
-        </Bookmarks>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit1>
-      <Unit2>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/winapih.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="206"/>
-        <CursorPos X="10" Y="215"/>
-        <UsageCount Value="11"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/font.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1046"/>
-        <CursorPos X="8" Y="1055"/>
-        <UsageCount Value="10"/>
-        <Bookmarks Count="1">
-          <Item0 X="1" Y="1160" ID="8"/>
-        </Bookmarks>
-      </Unit3>
-      <Unit4>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/graphics.pp"/>
-        <UnitName Value="Graphics"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="514"/>
-        <CursorPos X="54" Y="544"/>
-        <UsageCount Value="10"/>
-      </Unit4>
-      <Unit5>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/lcltype.pp"/>
-        <UnitName Value="LCLType"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="72"/>
-        <CursorPos X="3" Y="81"/>
-        <UsageCount Value="10"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/widgetset/wsreferences.pp"/>
-        <UnitName Value="WSReferences"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="70"/>
-        <CursorPos X="40" Y="100"/>
-        <UsageCount Value="10"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/winapi.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="855"/>
-        <CursorPos X="1" Y="864"/>
-        <UsageCount Value="10"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/qt/qtwinapi.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="4683"/>
-        <CursorPos X="78" Y="4691"/>
-        <UsageCount Value="10"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="demounit.pas"/>
-        <ComponentName Value="Form1"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="demounit"/>
-        <EditorIndex Value="1"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="150"/>
-        <CursorPos X="50" Y="160"/>
-        <UsageCount Value="17"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/lclintf.pas"/>
-        <UnitName Value="LCLIntf"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="10" Y="10"/>
-        <UsageCount Value="10"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="../../../freepascal/fpc/rtl/inc/systemh.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="232"/>
-        <CursorPos X="12" Y="239"/>
-        <UsageCount Value="9"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="../package/htmlsubs.pas"/>
-        <UnitName Value="Htmlsubs"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="9420"/>
-        <CursorPos X="1" Y="9429"/>
-        <UsageCount Value="9"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="../../../lazarus_gitsvn/trunk/examples/dockmanager/package/zoneheader.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="320"/>
-        <CursorPos X="40" Y="339"/>
-        <UsageCount Value="9"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="../../../lazarus_gitsvn/trunk/examples/fontenum/mainunit.pas"/>
-        <UnitName Value="mainunit"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="498"/>
-        <CursorPos X="10" Y="507"/>
-        <UsageCount Value="9"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/interfaces/gtk2/interfaces.pas"/>
-        <UnitName Value="Interfaces"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="31" Y="30"/>
-        <UsageCount Value="9"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="../package/htmlcons.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="162"/>
-        <CursorPos X="46" Y="175"/>
-        <UsageCount Value="9"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit16>
-      <Unit17>
-        <Filename Value="submit.pas"/>
-        <UnitName Value="Submit"/>
-        <EditorIndex Value="5"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="1" Y="38"/>
-        <UsageCount Value="16"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit17>
-      <Unit18>
-        <Filename Value="fontdlg.pas"/>
-        <UnitName Value="Fontdlg"/>
-        <EditorIndex Value="4"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="195"/>
-        <CursorPos X="1" Y="195"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit18>
-      <Unit19>
-        <Filename Value="htmlabt.pas"/>
-        <UnitName Value="HTMLAbt"/>
-        <EditorIndex Value="7"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="1" Y="49"/>
-        <UsageCount Value="16"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit19>
-      <Unit20>
-        <Filename Value="imgform.pas"/>
-        <UnitName Value="ImgForm"/>
-        <EditorIndex Value="10"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="1" Y="28"/>
-        <UsageCount Value="16"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit20>
-      <Unit21>
-        <Filename Value="demounit.lrs"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="1" Y="1"/>
-        <UsageCount Value="9"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit21>
-      <Unit22>
-        <Filename Value="demounit.lfm"/>
-        <EditorIndex Value="11"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="32" Y="3"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="LFM"/>
-      </Unit22>
-      <Unit23>
-        <Filename Value="demounit.dfm"/>
-        <EditorIndex Value="12"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="84"/>
-        <CursorPos X="25" Y="132"/>
-        <UsageCount Value="13"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="LFM"/>
-      </Unit23>
-      <Unit24>
-        <Filename Value="../../../freepascal/fpc/packages/fcl-image/src/fpcanvas.pp"/>
-        <UnitName Value="FPCanvas"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="25"/>
-        <CursorPos X="14" Y="71"/>
-        <UsageCount Value="10"/>
-      </Unit24>
-      <Unit25>
-        <Filename Value="../package/htmlun2.pas"/>
-        <UnitName Value="HTMLUn2"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="4216"/>
-        <CursorPos X="3" Y="4273"/>
-        <UsageCount Value="13"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit25>
-      <Unit26>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/graphtype.pp"/>
-        <UnitName Value="GraphType"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="16"/>
-        <CursorPos X="3" Y="39"/>
-        <UsageCount Value="9"/>
-      </Unit26>
-      <Unit27>
-        <Filename Value="../../../freepascal/fpc/rtl/objpas/classes/classesh.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="612"/>
-        <CursorPos X="14" Y="635"/>
-        <UsageCount Value="9"/>
-      </Unit27>
-      <Unit28>
-        <Filename Value="../package/htmlcompreg.pas"/>
-        <UnitName Value="HtmlCompReg"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="1"/>
-        <CursorPos X="55" Y="20"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit28>
-      <Unit29>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/forms.pp"/>
-        <UnitName Value="Forms"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="675"/>
-        <CursorPos X="17" Y="698"/>
-        <UsageCount Value="9"/>
-      </Unit29>
-      <Unit30>
-        <Filename Value="../../../lazarus_gitsvn/trunk/lcl/include/control.inc"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="3120"/>
-        <CursorPos X="17" Y="3126"/>
-        <UsageCount Value="10"/>
-      </Unit30>
-      <Unit31>
-        <Filename Value="../package/htmlsbs1.pas"/>
-        <UnitName Value="Htmlsbs1"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="376"/>
-        <CursorPos X="3" Y="436"/>
-        <UsageCount Value="12"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit31>
-      <Unit32>
-        <Filename Value="fdemunit.pas"/>
-        <UnitName Value="FDemUnit"/>
-        <EditorIndex Value="3"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="910"/>
-        <CursorPos X="1" Y="958"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit32>
-      <Unit33>
-        <Filename Value="printstatusform.pas"/>
-        <UnitName Value="PrintStatusForm"/>
-        <EditorIndex Value="8"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="14"/>
-        <CursorPos X="1" Y="44"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit33>
-      <Unit34>
-        <Filename Value="previewform.pas"/>
-        <UnitName Value="PreviewForm"/>
-        <EditorIndex Value="9"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="495"/>
-        <CursorPos X="1" Y="495"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit34>
-      <Unit35>
-        <Filename Value="gopage.pas"/>
-        <UnitName Value="Gopage"/>
-        <EditorIndex Value="6"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="8"/>
-        <CursorPos X="21" Y="47"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit35>
-      <Unit36>
-        <Filename Value="../package/gdipl2a.pas"/>
-        <UnitName Value="GDIPL2A"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <WindowIndex Value="0"/>
-        <TopLine Value="396"/>
-        <CursorPos X="3" Y="396"/>
-        <UsageCount Value="12"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
-      </Unit36>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
-      <Position1>
-        <Filename Value="previewform.pas"/>
-        <Caret Line="541" Column="3" TopLine="496"/>
-      </Position1>
-      <Position2>
-        <Filename Value="previewform.pas"/>
-        <Caret Line="465" Column="1" TopLine="417"/>
-      </Position2>
-      <Position3>
-        <Filename Value="imgform.pas"/>
-        <Caret Line="19" Column="1" TopLine="1"/>
-      </Position3>
-      <Position4>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="158" Column="3" TopLine="118"/>
-      </Position4>
-      <Position5>
-        <Filename Value="fdemunit.pas"/>
-        <Caret Line="690" Column="8" TopLine="666"/>
-      </Position5>
-      <Position6>
-        <Filename Value="fontdlg.pas"/>
-        <Caret Line="96" Column="4" TopLine="73"/>
-      </Position6>
-      <Position7>
-        <Filename Value="fontdlg.pas"/>
-        <Caret Line="74" Column="1" TopLine="44"/>
-      </Position7>
-      <Position8>
-        <Filename Value="imgform.pas"/>
-        <Caret Line="33" Column="1" TopLine="1"/>
-      </Position8>
-      <Position9>
-        <Filename Value="previewform.pas"/>
-        <Caret Line="130" Column="6" TopLine="102"/>
-      </Position9>
-      <Position10>
-        <Filename Value="fontdlg.pas"/>
-        <Caret Line="243" Column="5" TopLine="195"/>
-      </Position10>
-      <Position11>
-        <Filename Value="submit.pas"/>
-        <Caret Line="37" Column="3" TopLine="1"/>
-      </Position11>
-      <Position12>
-        <Filename Value="gopage.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
-      </Position12>
-      <Position13>
-        <Filename Value="htmlabt.pas"/>
-        <Caret Line="10" Column="1" TopLine="1"/>
-      </Position13>
-      <Position14>
-        <Filename Value="htmlabt.pas"/>
-        <Caret Line="49" Column="1" TopLine="1"/>
-      </Position14>
-      <Position15>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="166" Column="1" TopLine="144"/>
-      </Position15>
-      <Position16>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="171" Column="1" TopLine="144"/>
-      </Position16>
-      <Position17>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="175" Column="1" TopLine="144"/>
-      </Position17>
-      <Position18>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="179" Column="1" TopLine="144"/>
-      </Position18>
-      <Position19>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="180" Column="1" TopLine="144"/>
-      </Position19>
-      <Position20>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="181" Column="1" TopLine="144"/>
-      </Position20>
-      <Position21>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="183" Column="1" TopLine="144"/>
-      </Position21>
-      <Position22>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="185" Column="1" TopLine="144"/>
-      </Position22>
-      <Position23>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="186" Column="1" TopLine="145"/>
-      </Position23>
-      <Position24>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="187" Column="1" TopLine="146"/>
-      </Position24>
-      <Position25>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="189" Column="1" TopLine="148"/>
-      </Position25>
-      <Position26>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="190" Column="1" TopLine="149"/>
-      </Position26>
-      <Position27>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="191" Column="1" TopLine="150"/>
-      </Position27>
-      <Position28>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="183" Column="1" TopLine="150"/>
-      </Position28>
-      <Position29>
-        <Filename Value="demounit.pas"/>
-        <Caret Line="185" Column="1" TopLine="150"/>
-      </Position29>
-      <Position30>
-        <Filename Value="../package/gdipl2a.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
-      </Position30>
-    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="9"/>
@@ -519,9 +63,11 @@
     <CodeGeneration>
       <Checks>
         <IOChecks Value="True"/>
+        <RangeChecks Value="True"/>
         <OverflowChecks Value="True"/>
         <StackChecks Value="True"/>
       </Checks>
+      <VerifyObjMethodCallValidity Value="True"/>
     </CodeGeneration>
     <Linking>
       <Debugging>
@@ -538,17 +84,12 @@
       <CompilerMessages>
         <UseMsgFile Value="True"/>
       </CompilerMessages>
-      <CustomOptions Value="-dDebugIt"/>
+      <CustomOptions Value="-dDebugIt
+"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>
   <Debugging>
-    <BreakPoints Count="1">
-      <Item1>
-        <Source Value="demounit.pas"/>
-        <Line Value="166"/>
-      </Item1>
-    </BreakPoints>
     <Exceptions Count="2">
       <Item1>
         <Name Value="ECodetoolError"/>

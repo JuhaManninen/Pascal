@@ -230,7 +230,7 @@ Var
   IBuff, IBuffEnd: PChar;
   SIBuff: string;     
   IncludeEvent: TIncludeType;
-  CallingObject: TObject;
+  CallingObject: TObject; // TFrameViewerBase; or ThtmlViewer;
   SaveLoadStyle: LoadStyleType;
   SoundEvent: TSoundType;
   MetaEvent: TMetaType;
@@ -328,7 +328,7 @@ begin
   if (PtrInt(Buff) and $FFF = 0)    {about every 4000 chars}
         and not LinkSearch and Assigned(MasterList) and (DocS <> '') then
     ThtmlViewer(CallingObject).htProgress(
-        ((Buff-PChar(DocS)) *MasterList.ProgressStart) div (BuffEnd-PChar(DocS)));
+        ((Buff-PChar(DocS))*MasterList.ProgressStart) div (BuffEnd-PChar(DocS)));
 end;
 
 {----------------GetchBasic; }
@@ -2979,10 +2979,11 @@ var
   Loop: integer;
   T, T1: TAttribute;
 begin
-  if Assigned(SoundEvent) and Attributes.Find(SrcSy, T) then
-  begin
-    if Attributes.Find(LoopSy, T1) then Loop := T1.Value
-      else Loop := 1;
+  if Assigned(SoundEvent) and Attributes.Find(SrcSy, T) then begin
+    if Attributes.Find(LoopSy, T1) then
+      Loop := T1.Value
+    else
+      Loop := 1;
     SoundEvent(CallingObject, T.Name, Loop, False);
   end;
   Next;
@@ -3262,7 +3263,7 @@ begin
   begin
     Stream := TMemoryStream.Create;
     try
-      Viewer := (CallingObject as ThtmlViewer);
+      Viewer := CallingObject as ThtmlViewer;
       Request := Viewer.OnHtStreamRequest;
       if Assigned(Request) then
       begin
@@ -3347,8 +3348,8 @@ begin
             Section.Free;   {Will start with a new section}
           end;
           PushNewProp('body', Attributes.TheClass, Attributes.TheID, '', Attributes.TheTitle, Attributes.TheStyle);
-          AMarginHeight := (CallingObject as ThtmlViewer).MarginHeight;
-          AMarginWidth := (CallingObject as ThtmlViewer).MarginWidth;
+          AMarginHeight := ThtmlViewer(CallingObject).MarginHeight;
+          AMarginWidth := ThtmlViewer(CallingObject).MarginWidth;
           for I := 0 to Attributes.Count-1 do
             with TAttribute(Attributes[I]) do
               case Which of
@@ -3825,11 +3826,14 @@ var
     repeat
       case Sy of
         FrameSetSy:
-          begin
+        begin
           Result := True;
           break;
-          end;
-        ScriptSy: begin DoScript(Nil); Next; end;  {to skip the script stuff}
+        end;
+        ScriptSy:
+        begin
+          DoScript(Nil); Next;
+        end;  {to skip the script stuff}
 
         BodySy, HeadingSy, HRSy, TableSy, ImageSy, OLSy, ULSy, MenuSy, DirSy,
         PSy, PreSy, FormSy, AddressSy, BlockQuoteSy, DLSy:
@@ -3856,7 +3860,6 @@ begin
   InScript := False;
   NoBreak := False;
   InComment := False;
-
   try
     if ALoadStyle = lsFile then
     begin
@@ -3924,8 +3927,7 @@ var
       Buffer.Add('?', SaveIndex)     {is there an error symbol to use here?}
     else if (I >= 127) and (I <= 159) and not ForceUnicode then
       Buffer.Add(Char(I), SaveIndex)      {127 to 159 not valid Unicode}
-    else
-    begin
+    else begin
       // Unicode character. Flush any pending ANSI string data before storing it.
       if Buffer.Size > 0 then
       begin
@@ -3973,8 +3975,7 @@ begin
             Buffer.Add(X, SaveIndex+1);
           end;
         end
-        else
-        begin
+        else begin
           // Decimal digits given.
           if Ch in ['0'..'9'] then
           begin
