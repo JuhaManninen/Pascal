@@ -1123,14 +1123,11 @@ var
   i			: integer;
 begin
   ASSERT(ColorBits <= 8, 'ColorBits must be 8 or less');
-
   FTree := nil;
   FLeafCount := 0;
-
   // Initialize all nodes even though only ColorBits+1 of them are needed
   for i := Low(FReducibleNodes) to High(FReducibleNodes) do
     FReducibleNodes[i] := nil;
-
   FMaxColors := MaxColors;
   FColorBits := ColorBits;
 end;
@@ -1218,7 +1215,6 @@ begin
   for i := High(TReducibleNodes) downto Low(TReducibleNodes) do
     if (Node.Child[i] <> nil) then
       DeleteTree(Node.Child[i]);
-
   Node.Free;
   Node := nil;
 end;
@@ -1268,16 +1264,13 @@ begin
   i := Colorbits - 1;
   while (i > 0) and (ReducibleNodes[i] = nil) do
     dec(i);
-
   // Reduce the node most recently added to the list at level i.
   Node := ReducibleNodes[i];
   ReducibleNodes[i] := Node.Next;
-
   RedSum   := 0;
   GreenSum := 0;
   BlueSum  := 0;
   Children := 0;
-
   for i := Low(ReducibleNodes) to High(ReducibleNodes) do
     if (Node.Child[i] <> nil) then
     begin
@@ -1289,7 +1282,6 @@ begin
       Node.Child[i] := nil;
       inc(Children);
     end;
-
   Node.IsLeaf := TRUE;
   Node.RedSum := RedSum;
   Node.GreenSum := GreenSum;
@@ -1539,7 +1531,8 @@ begin
     begin
       if ColorBits >= 8 then
         ColorReduction := rmMyPalette
-      else ColorReduction := rmWindows20;
+      else
+        ColorReduction := rmWindows20;
       DitherMode := dmFloydSteinberg;
       // Convert image to 8 bits/pixel or less
       FBitmap := ReduceColors(TBitmap(Source), ColorReduction, DitherMode);

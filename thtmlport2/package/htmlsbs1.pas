@@ -334,7 +334,7 @@ var
   FO: TFontObj;
   lb: Integer;
 begin
-  FO := TFontObj(Fonts.Items[Fonts.Count-1]);    {keep font the same for inserted space}
+  FO := Fonts[Fonts.Count-1];    {keep font the same for inserted space}
   if FO.ThePos = Length(BuffS) then
     Inc(FO.ThePos);
   BuffS := BuffS+' ';

@@ -379,6 +379,18 @@ type
     procedure InitializeDimensions(X, Y, Wid, Ht: integer); virtual; abstract;
   end;
 
+  { TFrameBaseList }
+
+  TFrameBaseList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TFrameBase;
+    procedure SetItems(AIndex: integer; const AValue: TFrameBase);
+  public
+    property Items[AIndex: integer]: TFrameBase read GetItems write SetItems; default;
+  end;
+
+  { TfvFrame }
+
   TfvFrame = class(TFrameBase) {TfvFrame holds a ThtmlViewer or TSubFrameSet}
   protected
     NoScroll: boolean;
@@ -476,7 +488,7 @@ type
   public
     First: boolean;     {First time thru}
     Rows: boolean;          {set if row frameset, else column frameset}
-    FrameList: TObjectList;   {list of TFrames and TSubFrameSets in this TSubFrameSet}
+    FrameList: TFrameBaseList;   {list of TFrames and TSubFrameSets in this TSubFrameSet}
     Dim,    {col width or row height as read.  Blanks may have been added}
     DimF,   {col width or row height in pixels as calculated and displayed}
     Lines   {pixel pos of lines, Lines[1]=0, Lines[DimCount]=width|height}
@@ -715,6 +727,18 @@ begin
 end;
 
 procedure TfvPositionObjList.SetItems(AIndex: integer; const AValue: TfvPositionObj);
+begin
+  inherited Items[AIndex] := AValue;
+end;
+
+{ TFrameBaseList }
+
+function TFrameBaseList.GetItems(AIndex: integer): TFrameBase;
+begin
+  Result := inherited Items[AIndex] as TFrameBase;
+end;
+
+procedure TFrameBaseList.SetItems(AIndex: integer; const AValue: TFrameBase);
 begin
   inherited Items[AIndex] := AValue;
 end;
@@ -1012,7 +1036,6 @@ end;
 {----------------TfvFrame.LoadFiles}
 procedure TfvFrame.LoadFiles(PEV: PEventRec);
 var
-  Item: TFrameBase;
   I: integer;
   Upper, Lower, Image, Tex: boolean;
   Msg: string;
@@ -1026,8 +1049,7 @@ begin
     EV.LStyle := lsFile;
     if Image or Tex then
       EV.NewName := MasterSet.FrameViewer.HTMLExpandFilename(Source)
-    else
-    begin
+    else begin
       if Assigned(PEV) then
       begin
         Event := True;
@@ -1055,10 +1077,7 @@ begin
         with FrameSet do
         begin
           for I := 0 to FrameList.Count-1 do
-          Begin
-            Item := TFrameBase(FrameList.Items[I]);
-            Item.LoadFiles(Nil);
-          end;
+            FrameList[I].LoadFiles(Nil);
           CheckNoresize(Lower, Upper);
           if FRefreshDelay > 0 then
             SetRefreshTimer;
@@ -1103,7 +1122,6 @@ end;
 {----------------TfvFrame.ReloadFiles}
 procedure TfvFrame.ReloadFiles(APosition: integer);
 var
-  Item: TFrameBase;
   I: integer;
   Upper, Lower: boolean;
   EV: EventRec;
@@ -1120,15 +1138,9 @@ begin
   if (Source <> '') then
     if Assigned(FrameSet) then
     begin
-      with FrameSet do
-      begin
-        for I := 0 to FrameList.Count-1 do
-        Begin
-          Item := TFrameBase(FrameList.Items[I]);
-          Item.ReloadFiles(APosition);
-        end;
-        CheckNoresize(Lower, Upper);
-      end;
+      for I := 0 to FrameSet.FrameList.Count-1 do
+        FrameSet.FrameList[I].ReloadFiles(APosition);
+      FrameSet.CheckNoResize(Lower, Upper);
     end
     else if Assigned(Viewer) then
     begin
@@ -1167,21 +1179,14 @@ end;
 {----------------TfvFrame.UnloadFiles}
 procedure TfvFrame.UnloadFiles;
 var
-  Item: TFrameBase;
   I: integer;
 begin
   if Assigned(RefreshTimer) then
     RefreshTimer.Enabled := False;
   if Assigned(FrameSet) then
   begin
-    with FrameSet do
-    begin
-      for I := 0 to FrameList.Count-1 do
-      Begin
-        Item := TFrameBase(FrameList.Items[I]);
-        Item.UnloadFiles;
-      end;
-    end;
+    for I := 0 to FrameSet.FrameList.Count-1 do
+      FrameSet.FrameList[I].UnloadFiles;
   end
   else if Assigned(Viewer) then
   begin
@@ -1208,7 +1213,6 @@ var
   OldFrameSet: TSubFrameSet;
   EV: EventRec;
   Upper, Lower, FrameFile: boolean;
-  Item: TFrameBase;
   I: integer;
 begin
   if Assigned(RefreshTimer) then
@@ -1256,21 +1260,12 @@ begin
         end;
         MasterSet.FrameViewer.AddVisitedLink(EV.NewName+Dest);
       end
-      else
-      begin
-        with FrameSet do
-        begin
-          for I := 0 to FrameList.Count-1 do
-          Begin
-            Item := TFrameBase(FrameList.Items[I]);
-            if (Item is TfvFrame) then
-              with TfvFrame(Item) do
-                if CompareText(Source, OrigSource) <> 0 then
-                begin
-                  frLoadFromFile(OrigSource, '', True, False);
-                end;
-            end;
-          end;
+      else begin
+        for I := 0 to FrameSet.FrameList.Count-1 do
+          if (FrameSet.FrameList[I] is TfvFrame) then
+            with TfvFrame(FrameSet.FrameList[I]) do
+              if CompareText(Source, OrigSource) <> 0 then
+                frLoadFromFile(OrigSource, '', True, False);
         Exit;
       end
     else if Assigned(Viewer) and not FrameFile then   {not Same Name}
@@ -1338,10 +1333,7 @@ begin
         with FrameSet do
         begin
           for I := 0 to FrameList.Count-1 do
-          Begin
-            Item := TFrameBase(FrameList.Items[I]);
-            Item.LoadFiles(Nil);
-          end;
+            FrameList[I].LoadFiles(Nil);
           CheckNoresize(Lower, Upper);
           if FRefreshDelay > 0 then
             SetRefreshTimer;
@@ -1568,7 +1560,7 @@ begin
   if Self <> Master then
     BorderSize := Master.BorderSize;
   First := True;
-  FrameList := TObjectList.Create;
+  FrameList := TFrameBaseList.Create;
   OnResize := @CalcSizes;
   OnMouseDown := @FVMouseDown;
   OnMouseMove := @FVMouseMove;
@@ -1583,7 +1575,7 @@ var
   I, J: integer;
 begin
   for J := 0 to FrameList.Count-1 do
-    if (TFrameBase(FrameList[J]) is TfvFrame) then
+    if FrameList[J] is TfvFrame then
     begin
       with TfvFrame(FrameList[J]) do
         if Assigned(MasterSet) and (WinName <> '')
@@ -1591,7 +1583,7 @@ begin
                 and MasterSet.FrameNames.Find(WinName, I) then
                   MasterSet.FrameNames.Delete(I);
     end
-    else if (TFrameBase(FrameList[J]) is TSubFrameSet) then
+    else if FrameList[J] is TSubFrameSet then
       TSubFrameSet(FrameList[J]).ClearFrameNames;
 end;
 
@@ -1602,7 +1594,7 @@ var
   Frame: TfvFrame;
 begin
   for J := 0 to FrameList.Count-1 do
-    if (TFrameBase(FrameList[J]) is TfvFrame) then
+    if FrameList[J] is TfvFrame then
     begin
       Frame := TfvFrame(FrameList[J]);
       with Frame do
@@ -1611,7 +1603,7 @@ begin
           MasterSet.FrameNames.AddObject(Uppercase(WinName), Frame);
         end;
     end
-    else if (TFrameBase(FrameList[J]) is TSubFrameSet) then
+    else if (FrameList[J] is TSubFrameSet) then
       TSubFrameSet(FrameList[J]).AddFrameNames;
 end;
 
@@ -1733,26 +1725,18 @@ end;
 procedure TSubFrameSet.LoadFiles(PEV: PEventRec);
 var
   I: integer;
-  Item: TFrameBase;
 begin
   for I := 0 to FrameList.Count-1 do
-  begin
-    Item := TFrameBase(FrameList.Items[I]);
-    Item.LoadFiles(Nil);
-  end;
+    FrameList[I].LoadFiles(Nil);
 end;
 
 {----------------TSubFrameSet.ReloadFiles}
 procedure TSubFrameSet.ReloadFiles(APosition: integer);
 var
   I: integer;
-  Item: TFrameBase;
 begin
   for I := 0 to FrameList.Count-1 do
-  begin
-    Item := TFrameBase(FrameList.Items[I]);
-    Item.ReloadFiles(APosition);
-  end;
+    FrameList[I].ReloadFiles(APosition);
   if (FRefreshDelay > 0) and Assigned(RefreshTimer) then
     SetRefreshTimer;
   Unloaded := False;
@@ -1762,15 +1746,11 @@ end;
 procedure TSubFrameSet.UnloadFiles;
 var
   I: integer;
-  Item: TFrameBase;
 begin
   if Assigned(RefreshTimer) then
     RefreshTimer.Enabled := False;
   for I := 0 to FrameList.Count-1 do
-  begin
-    Item := TFrameBase(FrameList.Items[I]);
-    Item.UnloadFiles;
-  end;
+    FrameList[I].UnloadFiles;
   if Assigned(MasterSet.FrameViewer.FOnSoundRequest) then
     MasterSet.FrameViewer.FOnSoundRequest(MasterSet, '', 0, True);
   Unloaded := True;
@@ -1790,8 +1770,9 @@ begin
       Inc(DimCount);
     end;
   end
-  else while DimCount > FrameList.Count do  {or add Frames if more Dims than Count}
-    AddFrame(Nil, '');
+  else
+    while DimCount > FrameList.Count do  {or add Frames if more Dims than Count}
+      AddFrame(Nil, '');
   if ReadHTML.Base <> '' then
     FBase := ReadHTML.Base
   else
@@ -1855,9 +1836,9 @@ begin
   for I := 0 to FrameList.Count-1 do  {intialize the dimensions of contained items}
   begin
     if Rows then
-      TFrameBase(FrameList.Items[I]).InitializeDimensions(X, Y+Sum, Wid, DimF[I+1])
+      FrameList[I].InitializeDimensions(X, Y+Sum, Wid, DimF[I+1])
     else
-      TFrameBase(FrameList.Items[I]).InitializeDimensions(X+Sum, Y, DimF[I+1], Ht);
+      FrameList[I].InitializeDimensions(X+Sum, Y, DimF[I+1], Ht);
     Sum := Sum+DimF[I+1];
   end;
 end;
@@ -1882,9 +1863,9 @@ begin
     begin
       Step := MulDiv(DimF[I+1], ThisTotal, DimFTot);
       if Rows then
-        TFrameBase(FrameList.Items[I]).SetBounds(ARect.Left, ARect.Top+Sum, ARect.Right-ARect.Left, Step)
+        FrameList[I].SetBounds(ARect.Left, ARect.Top+Sum, ARect.Right-ARect.Left, Step)
       else
-        TFrameBase(FrameList.Items[I]).SetBounds(ARect.Left+Sum, ARect.Top, Step, ARect.Bottom-Arect.Top);
+        FrameList[I].SetBounds(ARect.Left+Sum, ARect.Top, Step, ARect.Bottom-Arect.Top);
       Sum := Sum+Step;
       Lines[I+1] := Sum;
     end;
@@ -2047,31 +2028,31 @@ var
   Lw, Up: boolean;
   I: integer;
 begin
-  Result := False; Lower := False;  Upper := False;
+  Result := False;
+  Lower := False;
+  Upper := False;
   for I := 0 to FrameList.Count-1 do
-    with TFrameBase(FrameList[I]) do
-      if CheckNoResize(Lw, Up) then
-      begin
-        Result := True;  {sides are fixed}
-        Fixed[I] := True;  {these edges are fixed}
-        Fixed[I+1] := True;
-        If Lw and (I = 0) then Lower := True;
-        If Up and (I = FrameList.Count-1) then Upper := True;
-      end;
+    if FrameList[I].CheckNoResize(Lw, Up) then
+    begin
+      Result := True;  {sides are fixed}
+      Fixed[I] := True;  {these edges are fixed}
+      Fixed[I+1] := True;
+      If Lw and (I = 0) then
+        Lower := True;
+      If Up and (I = FrameList.Count-1) then
+        Upper := True;
+    end;
 end;
 
 {----------------TSubFrameSet.Clear}
 procedure TSubFrameSet.Clear;
 var
   I: integer;
-  X: TFrameBase;
 begin
   for I := FrameList.Count-1 downto 0 do
   begin
-    X := TFrameBase(FrameList.Items[I]);
-    RemoveControl(X);
+    RemoveControl(FrameList[I]);
     FrameList.Delete(I);
-//!!!    X.Free;
   end;
   DimCount := 0;
   First := True;
@@ -2111,7 +2092,7 @@ var
   I: integer;
 begin
   for I := 0 to FrameList.Count-1 do
-    TFrameBase(FrameList[I]).UpdateFrameList;
+    FrameList[I].UpdateFrameList;
 end;
 
 {----------------TSubFrameSet.HandleMeta}
@@ -2371,7 +2352,6 @@ end;
 procedure TFrameSet.LoadFromFile(const FName, Dest: string);
 var
   I: integer;
-  Item: TFrameBase;
   Frame: TfvFrame;
   Lower, Upper: boolean;
   EV: EventRec;
@@ -2398,10 +2378,7 @@ begin
     FrameParseString(MasterSet.FrameViewer, Self, EV.LStyle, EV.NewName, EV.AString,
                      @HandleMeta);
     for I := 0 to FrameList.Count-1 do
-    Begin
-      Item := TFrameBase(FrameList.Items[I]);
-      Item.LoadFiles(Nil);
-    end;
+      FrameList[I].LoadFiles(Nil);
     CalcSizes(Self);
     CheckNoresize(Lower, Upper);
     if FRefreshDelay > 0 then

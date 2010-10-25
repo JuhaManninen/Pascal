@@ -513,7 +513,8 @@ begin
         MasterSet.Viewers.Remove(Viewer);
       if Assigned(MasterSet.Frames) then
         MasterSet.Frames.Remove(Self);
-      if Viewer = MasterSet.FActive then MasterSet.FActive := Nil;
+      if Viewer = MasterSet.FActive then
+        MasterSet.FActive := Nil;
     end;
   end;
   if Assigned(Viewer) then
@@ -727,7 +728,6 @@ end;
 {----------------TbrFrame.LoadBrzFiles}
 procedure TbrFrame.LoadBrzFiles;
 var
-  Item: TbrFrameBase;
   I: integer;
   Upper, Lower: boolean;
   Msg: string[255];
@@ -740,7 +740,8 @@ begin
     begin
       NewURL := '';
       if Assigned(MasterSet.FrameViewer.FOnGetPostRequestEx) then
-        MasterSet.FrameViewer.FOnGetPostRequestEX(Self, True, Source, '', '', '', False, NewURL, TheStreamType, TheStream)
+        MasterSet.FrameViewer.FOnGetPostRequestEX(Self, True, Source, '', '', '',
+                                          False, NewURL, TheStreamType, TheStream)
       else
         MasterSet.FrameViewer.FOnGetPostRequest(Self, True, Source, '', False, NewURL, TheStreamType, TheStream);
       if NewURL <> '' then
@@ -750,8 +751,8 @@ begin
     Inc(MasterSet.NestLevel);
     try
       TheString := StreamToString(TheStream);
-      if (TheStreamType = HTMLType) and IsFrameString(LsString, '', TheString,
-            MasterSet.FrameViewer) then
+      if (TheStreamType = HTMLType) and
+          IsFrameString(LsString, '', TheString, MasterSet.FrameViewer) then
       begin
         FrameSet := TbrSubFrameSet.CreateIt(Self, MasterSet);
         FrameSet.Align := alClient;
@@ -766,10 +767,7 @@ begin
         with FrameSet do
         begin
           for I := 0 to FrameList.Count-1 do
-          Begin
-            Item := FrameList.Items[I];
-            Item.LoadBrzFiles;
-          end;
+            FrameList[I].LoadBrzFiles;
           CheckNoresize(Lower, Upper);
           if FRefreshDelay > 0 then
             SetRefreshTimer;
@@ -785,18 +783,13 @@ begin
     except
       if not Assigned(Viewer) then
         CreateViewer;
-      if Assigned(FrameSet) then
-      begin
-        FrameSet.Free;
-        FrameSet := Nil;
-      end;
+      FreeAndNil(FrameSet);
       Msg := '<p><img src="qw%&.bmp" alt="Error"> Can''t load '+Source;
       Viewer.LoadFromBuffer(@Msg[1], Length(Msg), '');  {load an error message}
     end;
     Dec(MasterSet.NestLevel);
   end
-  else
-  begin  {so blank area will perform like the TFrameBrowser}
+  else begin  {so blank area will perform like the TFrameBrowser}
     OnMouseDown := MasterSet.FrameViewer.OnMouseDown;
     OnMouseMove := MasterSet.FrameViewer.OnMouseMove;
     OnMouseUp := MasterSet.FrameViewer.OnMouseUp;
@@ -806,7 +799,6 @@ end;
 {----------------TbrFrame.ReloadFiles}
 procedure TbrFrame.ReloadFiles(APosition: LongInt);
 var
-  Item: TbrFrameBase;
   I: integer;
   Upper, Lower: boolean;
   Dummy: string;
@@ -823,15 +815,9 @@ begin
  if Source <> '' then
   if Assigned(FrameSet) then
   begin
-    with FrameSet do
-    begin
-      for I := 0 to FrameList.Count-1 do
-      Begin
-        Item := FrameList.Items[I];
-        Item.ReloadFiles(APosition);
-      end;
-      CheckNoresize(Lower, Upper);
-    end;
+    for I := 0 to FrameSet.FrameList.Count-1 do
+      FrameSet.FrameList[I].ReloadFiles(APosition);
+    FrameSet.CheckNoresize(Lower, Upper);
   end
   else if Assigned(Viewer) then
   begin
@@ -859,21 +845,14 @@ end;
 {----------------TbrFrame.UnloadFiles}
 procedure TbrFrame.UnloadFiles;
 var
-  Item: TbrFrameBase;
   I: integer;
 begin
   if Assigned(RefreshTimer) then
     RefreshTimer.Enabled := False;
   if Assigned(FrameSet) then
   begin
-    with FrameSet do
-    begin
-      for I := 0 to FrameList.Count-1 do
-      Begin
-        Item := FrameList.Items[I];
-        Item.UnloadFiles;
-      end;
-    end;
+    for I := 0 to FrameSet.FrameList.Count-1 do
+      FrameSet.FrameList[I].UnloadFiles;
   end
   else if Assigned(Viewer) then
   begin
@@ -901,7 +880,6 @@ var
   OldFrameSet: TbrSubFrameSet;
   TheString: string;   
   Upper, Lower, FrameFile: boolean;
-  Item: TbrFrameBase;
   I: integer;
 begin
   if Assigned(RefreshTimer) then
@@ -951,20 +929,14 @@ begin
         Viewer.PositionTo(Dest);
         MasterSet.FrameViewer.AddVisitedLink(URL+Dest);
         if Bump and (Viewer.Position <> OldPos) then
-          {Viewer to Viewer}
-          frBumpHistory(HS, Viewer.Position, OldPos, Nil);
+          frBumpHistory(HS, Viewer.Position, OldPos, Nil); {Viewer to Viewer}
       end
-      else
-      begin
-        with FrameSet do
-          for I := 0 to FrameList.Count-1 do
-          Begin
-            Item := FrameList.Items[I];
-            if (Item is TbrFrame) then
-              with TbrFrame(Item) do
-                if CompareText(Source, OrigSource) <> 0 then
-                  frLoadFromBrzFile(OrigSource, '', '', '', '', True, True, False);
-          end;
+      else begin
+        for I := 0 to FrameSet.FrameList.Count-1 do
+          if (FrameSet.FrameList[I] is TbrFrame) then
+            with TbrFrame(FrameSet.FrameList[I]) do
+              if CompareText(Source, OrigSource) <> 0 then
+                frLoadFromBrzFile(OrigSource, '', '', '', '', True, True, False);
         Exit;
       end
     else if Assigned(Viewer) and not FrameFile then  {not samename or samename and reload}
@@ -1026,17 +998,11 @@ begin
                          @FrameSet.HandleMeta);
         MasterSet.FrameViewer.AddVisitedLink(URL);
         Self.BevelOuter := bvNone;
-        with FrameSet do
-        begin
-          for I := 0 to FrameList.Count-1 do
-          Begin
-            Item := FrameList.Items[I];
-            Item.LoadBrzFiles;
-          end;
-          CheckNoresize(Lower, Upper);
-          if FRefreshDelay > 0 then
-            SetRefreshTimer;
-        end;
+        for I := 0 to FrameSet.FrameList.Count-1 do
+          FrameSet.FrameList[I].LoadBrzFiles;
+        FrameSet.CheckNoresize(Lower, Upper);
+        if FrameSet.FRefreshDelay > 0 then
+          FrameSet.SetRefreshTimer;
         if Assigned(OldViewer) then
           frBumpHistory(HS, 0, OldViewer.Position, OldViewer.FormData)
         else frBumpHistory(S, 0, 0, Nil);
@@ -1051,11 +1017,10 @@ begin
         frBumpHistory(HS, Viewer.Position, 0, Nil);
       end;
       if Assigned(FrameSet) then
-        with FrameSet do
         begin
-          with ClientRect do
-            InitializeDimensions(Left, Top, Right-Left, Bottom-Top);
-          CalcSizes(Nil);
+          with FrameSet.ClientRect do
+            FrameSet.InitializeDimensions(Left, Top, Right-Left, Bottom-Top);
+          FrameSet.CalcSizes(Nil);
         end;
       if Assigned(Viewer) then
       begin
@@ -1219,8 +1184,7 @@ begin
           MasterSet.Viewers.Remove(Viewer);
         if MasterSet.FActive = Viewer then
           MasterSet.FActive := Nil;
-        Viewer.Free;
-        Viewer := Nil;
+        FreeAndNil(Viewer);
       end;
     end
     else begin
@@ -1466,7 +1430,7 @@ begin
   if Assigned(RefreshTimer) then
     RefreshTimer.Enabled := False;
   for I := 0 to FrameList.Count-1 do
-    FrameList.Items[I].UnloadFiles;
+    FrameList[I].UnloadFiles;
   if Assigned(MasterSet.FrameViewer.FOnSoundRequest) then
     MasterSet.FrameViewer.FOnSoundRequest(MasterSet, '', 0, True);
   Unloaded := True;
@@ -1486,11 +1450,13 @@ begin
       Inc(DimCount);
     end;
   end
-  else while DimCount > FrameList.Count do  {or add Frames if more Dims than Count}
-    AddFrame(Nil, '');
+  else
+    while DimCount > FrameList.Count do  {or add Frames if more Dims than Count}
+      AddFrame(Nil, '');
   if ReadHTML.Base <> '' then
     FBase := ReadHTML.Base
-  else FBase := MasterSet.FrameViewer.FBaseEx;
+  else
+    FBase := MasterSet.FrameViewer.FBaseEx;
   FBaseTarget := ReadHTML.BaseTarget;
 end;
 
@@ -1577,9 +1543,9 @@ begin
     begin
       Step := MulDiv(DimF[I+1], ThisTotal, DimFTot);
       if Rows then
-        FrameList.Items[I].SetBounds(ARect.Left, ARect.Top+Sum, ARect.Right-ARect.Left, Step)
+        FrameList[I].SetBounds(ARect.Left, ARect.Top+Sum, ARect.Right-ARect.Left, Step)
       else
-        FrameList.Items[I].SetBounds(ARect.Left+Sum, ARect.Top, Step, ARect.Bottom-Arect.Top);
+        FrameList[I].SetBounds(ARect.Left+Sum, ARect.Top, Step, ARect.Bottom-Arect.Top);
       Sum := Sum+Step;
       Lines[I+1] := Sum;
     end;
@@ -1990,8 +1956,7 @@ begin
     if FRefreshDelay > 0 then
       SetRefreshTimer;
   end
-  else
-  begin   {it's a non frame file}
+  else begin   {it's a non frame file}
     Frame := AddFrame(Nil, '');
     Frame.Source := URL;
     Frame.TheStream := Stream;

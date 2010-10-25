@@ -474,7 +474,7 @@ begin
     fColorTableList := TList.Create;
   for i := 0 to (fColorTableList.Count - 1) do
   begin
-    ct := fColorTableList.Items[i];
+    ct := fColorTableList[i];
     if (ct <> nil) then
       dispose(ct);
   end;
@@ -1063,7 +1063,7 @@ begin
   // init data block
   fillchar(fZipData^, sizeof(TGifZip), 0);
   fZipData^.rID := pID;
-  fZipData^.rCT := fColorTableList.Items[pID^.rLocalColorTable];
+  fZipData^.rCT := fColorTableList[pID^.rLocalColorTable];
 
   // reset data stream
   fDataStream.Position := 0;
@@ -1082,7 +1082,7 @@ end;
 
 procedure TGif.LZWReset;
 var
-    i:    integer;
+  i:    integer;
 begin
   with fZipData^ do
   begin
@@ -1091,7 +1091,6 @@ begin
       rPrefix[i] := 0;
       rSuffix[i] := 0;
     end;
-
     rCurSize   := rID^.rLZWSize + 1;
     rClearCode := (1 shl rID^.rLZWSize);
     rEndCode   := rClearCode + 1;
@@ -1393,7 +1392,7 @@ function TGif.GetImageDescriptor(image: integer): PGifImageDescriptor;
 begin
   if ((image < 0) or (image >= fImageDescriptorList.Count)) then
     GIF_Error(15);
-  GetImageDescriptor := fImageDescriptorList.Items[image];
+  GetImageDescriptor := fImageDescriptorList[image];
 end;
 
 
@@ -1423,7 +1422,7 @@ end;
 function TGif.GetColorTable(table: integer): PGifColorTable;
 begin
   if ((table < 0) or (table >= fColorTableList.Count)) then GIF_Error(15);
-  GetColorTable := fColorTableList.Items[table];
+  GetColorTable := fColorTableList[table];
 end;
 
 function TGif.GetImageDelay(Image: integer): integer;
@@ -1461,7 +1460,7 @@ var
     p:      PChar;
 begin
   if ((image < 0) or (image >= fImageDescriptorList.Count)) then GIF_Error(15);
-  id := fImageDescriptorList.Items[image];
+  id := fImageDescriptorList[image];
   if ((x < 0) or (x >= id^.rWidth))  then GIF_Error(15);
   if ((y < 0) or (y >= id^.rHeight)) then GIF_Error(15);
 
@@ -1546,7 +1545,7 @@ var
   ct: PGifColorTable;
 begin
   id := GetImageDescriptor(image);
-  ct := fColorTableList.Items[id^.rLocalColorTable];
+  ct := fColorTableList[id^.rLocalColorTable];
   GetImageDepth := ct^.rSize;
 end;
 
@@ -1565,13 +1564,12 @@ begin
   begin
     for i := 0 to (list.Count - 1) do
     begin
-      db := list.Items[i];
+      db := list[i];
       if (db <> nil) then
         dispose(db);
     end;
-    list.Free;
+    FreeAndNil(list);
   end;
-  list := nil;
 end;
 
 { ---------------------------------------------------------------------------- }
@@ -1585,7 +1583,7 @@ begin
   begin
     for i := 0 to (list.Count - 1) do
     begin
-      ex := list.Items[i];
+      ex := list[i];
       if (ex <> nil) then
       begin
         if      (ex^.rLabel = kGifLabelComment)     then FreeDataBlockList(ex^.rComment.rDataBlockList)
@@ -1594,9 +1592,8 @@ begin
         dispose(ex);
       end;
     end;
-    list.Free;
+    FreeAndNil(list);
   end;
-  list := nil;
 end;
 
 
@@ -1625,7 +1622,7 @@ var
 begin
   for i := 0 to (fImageDescriptorList.Count - 1) do
   begin
-    id := fImageDescriptorList.Items[i];
+    id := fImageDescriptorList[i];
     if ((id <> nil) and (id^.rBitmap = nil)) then      // don't do it again
       with id^ do
       begin
@@ -1663,7 +1660,7 @@ begin
             biClrImportant := 0;
           end;
 
-          ct := fColorTableList.Items[rLocalColorTable];
+          ct := fColorTableList[rLocalColorTable];
           TrIndex := GetTransparentIndex(i);
           if (TrIndex >= 0) and (TrIndex < ct^.rSize) then
             {change transparent color to something that won't likely match any other color}
@@ -1787,11 +1784,11 @@ begin
 
     for i := 0 to (fImageDescriptorList.Count - 1) do  {for all the frames}
     begin
-      id := fImageDescriptorList.Items[i];
+      id := fImageDescriptorList[i];
       if (id <> nil) then
         with id^ do
         begin
-          ct := fColorTableList.Items[rLocalColorTable];
+          ct := fColorTableList[rLocalColorTable];
           TrIndex := GetTransparentIndex(i);
 
           N := 0;   {pixel index in rPixelList, the frame source pixels}
@@ -1912,16 +1909,14 @@ var
   gx: PGifExtensionGraphic;
 begin
   gx := nil;
-  id := fImageDescriptorList.Items[image];
+  id := fImageDescriptorList[image];
   if (id^.rExtensionList <> nil) then
   begin
     for n := 0 to (id^.rExtensionList.Count - 1) do
     begin
-      ex := id^.rExtensionList.Items[n];
+      ex := id^.rExtensionList[n];
       if ((ex^.rLabel = kGifLabelGraphic) and (gx = nil)) then
-      begin
         gx := @(ex^.rGraphic);
-      end;
     end;
   end;
   FindGraphicExtension := gx;

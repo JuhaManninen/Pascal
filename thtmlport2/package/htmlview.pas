@@ -1722,7 +1722,7 @@ begin
         FLinkText := GetTextByIndices(UrlTarget.Start, UrlTarget.Last);
         ThisID := UrlTarget.ID;
         for I := 0 to LinkList.Count-1 do
-          with LinkList.Items[I] do
+          with LinkList[I] do
             if (ThisID = UrlTarget.ID) and Assigned(TabControl) then
             begin
               ParentForm := GetParentForm(TabControl);
@@ -1755,11 +1755,11 @@ begin
   Lines := Mouse.WheelScrollLines;
   if Lines > 0 then
     if WheelDelta > 0 then
-       VScrollBarPosition := VScrollBarPosition - (Lines * 16)
+      VScrollBarPosition := VScrollBarPosition - (Lines * 16)
     else
-       VScrollBarPosition := VScrollBarPosition + (Lines * 16)
+      VScrollBarPosition := VScrollBarPosition + (Lines * 16)
   else
-       VScrollBarPosition := VScrollBarPosition - WheelDelta div 2;
+    VScrollBarPosition := VScrollBarPosition - WheelDelta div 2;
 end;
 
 function ThtmlViewer.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer;   
@@ -3059,7 +3059,7 @@ begin
       end;
     except
       for I := 0 to Result.Count-1 do
-        TMetaFile(Result.Items[I]).Free;
+        TMetaFile(Result[I]).Free;
       FreeAndNil(Result);
       Raise;
     end;
@@ -4799,7 +4799,7 @@ var
   I: integer;
 begin
   for I := 0 to FormControlList.count-1 do
-    with FormControlList.Items[I] do
+    with FormControlList[I] do
       if Assigned(TheControl) then
         TheControl.Hide;
   BorderPanel.BorderStyle := bsNone;

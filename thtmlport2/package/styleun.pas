@@ -453,8 +453,7 @@ begin
       CalcLinkFontInfo(Styles, I)
     else
     begin  {an <a href> tag has been removed}
-      FIArray.Free;
-      FIArray := Nil;
+      FreeAndNil(FIArray);
       Inlink := False;
     end;
 end;

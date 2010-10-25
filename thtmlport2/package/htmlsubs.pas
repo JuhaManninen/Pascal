@@ -63,9 +63,8 @@ unit Htmlsubs;
 interface
 
 uses
-  LclIntf, LMessages, Types, LclType, HtmlMisc,
-  SysUtils, Classes, Graphics, Controls, contnrs,
-  Forms, Dialogs, StdCtrls, ExtCtrls, HTMLGif2, HTMLUn2,
+  LclIntf, LMessages, Types, LclType, SysUtils, Classes, Graphics, Controls, contnrs,
+  Forms, Dialogs, StdCtrls, ExtCtrls, HtmlMisc, HTMLGif2, HTMLUn2, JmIntList,
   {$ifdef UseTNT}    
   TntStdCtrls,
   {$endif}
@@ -345,11 +344,6 @@ type
     procedure ReplaceImage(NewImage: TStream);   
   end;
 
-  { TImageObjList }
-{
-  TImageObjList = class(TObjectList)  {a list of TImageObj's and TPanelObj's}
-  end;
-}
   IndentManager = class(IndentManagerBasic)
     procedure Update(Y: integer; Img: TFloatingObj);
     procedure UpdateBlock(Y: integer; IW: integer; IH: integer; AJustify: AlignmentType);
@@ -562,9 +556,30 @@ type
     procedure SaveContents; override;
   end;
 
-  { LineRec }
+  { TBorderObj }
 
-  LineRec = class(TObject)  {holds info on a line of text}
+  TBorderObj = class   {record for inline borders}
+  private
+    BStart, BEnd: integer;
+    OpenStart, OpenEnd: boolean;
+    BRect: TRect;
+    MargArray: TMarginArray;
+    procedure DrawTheBorder(Canvas: TCanvas; XOffset, YOffSet: integer; Printing: boolean);
+  end;
+
+  { TBorderObjList }
+
+  TBorderObjList = class(TObjectList)
+  private
+    function GetItems(AIndex: integer): TBorderObj;
+    procedure SetItems(AIndex: integer; const AValue: TBorderObj);
+  public
+    property Items[AIndex: integer]: TBorderObj read GetItems write SetItems; default;
+  end;
+
+  { TLineObj }
+
+  TLineObj = class(TObject)  {holds info on a line of text}
   private
     Start: PWideChar;
     SpaceBefore, SpaceAfter,
@@ -576,7 +591,7 @@ type
     DrawXX, DrawWidth: integer;
     DrawY: integer;
     Spaces, Extra:  integer;
-    BorderList: TObjectList;   {List of inline borders (BorderRec's) in this Line}
+    BorderList: TBorderObjList;   {List of inline borders (BorderRec's) in this Line}
     FirstDraw: boolean;  {set if border processing needs to be done when first drawn}
     FirstX: integer;     {x value at FirstDraw}
     Shy: boolean;   
@@ -590,10 +605,37 @@ type
 
   TLineObjList = class(TObjectList)
   private
-    function GetItems(AIndex: integer): LineRec;
-    procedure SetItems(AIndex: integer; const AValue: LineRec);
+    function GetItems(AIndex: integer): TLineObj;
+    procedure SetItems(AIndex: integer; const AValue: TLineObj);
   public
-    property Items[AIndex: integer]: LineRec read GetItems write SetItems; default;
+    property Items[AIndex: integer]: TLineObj read GetItems write SetItems; default;
+  end;
+
+  { TInlineObj }
+
+  TInlineObj = class
+  private
+    StartB, EndB, IDB, StartBDoc, EndBDoc: integer;
+    MargArray: TMarginArray;
+  end;
+
+  { TInlineList }
+
+  TInlineList = class(TObjectList)  {a list of TInlineObj's}
+  private
+    NeedsConverting: boolean;
+    Owner: TSectionList;
+    procedure AdjustValues;
+    function GetStartB(I: integer): integer;
+    function GetEndB(I: integer): integer;
+    function GetItems(AIndex: integer): TInlineObj;
+    procedure SetItems(AIndex: integer; const AValue: TInlineObj);
+  public
+    constructor Create(AnOwner: TSectionList);
+    procedure Clear;
+    property StartB[I: integer]: integer read GetStartB;
+    property EndB[I: integer]: integer read GetEndB;
+    property Items[AIndex: integer]: TInlineObj read GetItems write SetItems; default;
   end;
 
   { TSectionBase }
@@ -881,7 +923,15 @@ type
     colVAlign: AlignmentType;
   end;
 
-  IntArray = array of Integer;
+  { TColObjList }
+
+  TColObjList = class(TObjectList) //  {a list of TColObjs}
+  private
+    function GetItems(AIndex: integer): TColObj;
+    procedure SetItems(AIndex: integer; const AValue: TColObj);
+  public
+    property Items[AIndex: integer]: TColObj read GetItems write SetItems; default;
+  end;
 
   { TTablePartRec }
 
@@ -927,7 +977,7 @@ type
     DrawY: integer;
     BkGnd: boolean;
     BkColor: TColor;
-    ColInfo: TObjectList;
+    ColInfo: TColObjList;
     Widths,                   {holds column widths}    
     MaxWidths, MinWidths, Heights,
     Percents: IntArray;       {percent widths of columns}
@@ -975,9 +1025,19 @@ type
   XArray = array {[0..30000]} of integer;  // LCL port: Prevent range-check error with $R+
 //  PXArray = ^XArray;
 
-  IndexObj = class
+  TIndexObj = class
     Pos: integer;
     Index: integer;
+  end;
+
+  { TIndexObjList }
+
+  TIndexObjList = class(TObjectList) //  {a list of TIndexObj}
+  private
+    function GetItems(AIndex: integer): TIndexObj;
+    procedure SetItems(AIndex: integer; const AValue: TIndexObj);
+  public
+    property Items[AIndex: integer]: TIndexObj read GetItems write SetItems; default;
   end;
 
   { TSection }
@@ -987,9 +1047,9 @@ type
   private
     SectionNumber: integer;   
     ThisCycle: integer;
-//    function GetIndexObj(I: integer): IndexObj;
-//    property PosIndex[I: integer]: IndexObj read GetIndexObj;
-    procedure CheckForInlines(LR: Linerec);
+//    function GetIndexObj(I: integer): TIndexObj;
+//    property PosIndex[I: integer]: TIndexObj read GetIndexObj;
+    procedure CheckForInlines(LR: TLineObj);
   public
     BuffS: WideString; {holds the text for the section}
     Buff: PWideChar; {same as above}
@@ -999,7 +1059,7 @@ type
     Fonts : TFontList;       {List of FontObj's in this section}
     Images: TFloatingObjList; {list of TImageObj's, the images in section}
     FormControls: TFormControlObjList;   {list of TFormControls in section}
-    SIndexList: TObjectList;   {list of Source index changes}
+    SIndexList: TIndexObjList;   {list of Source index changes}
     Lines : TLineObjList;      {List of LineRecs,  info on all the lines in section}
     Justify: JustifyType;    {Left, Centered, Right}
     ClearAttr: ClearAttrType;
@@ -1219,7 +1279,7 @@ type
     TabOrderList: TStringList;
     FirstPageItem: boolean;
     StopTab: boolean;
-    InlineList: TObjectList;  {actually TInlineList, a list of InlineRec's}
+    InlineList: TInlineList;  {actually TInlineList, a list of TInlineObj's}
     TableNestLevel: integer;
     InLogic2: boolean;
     LinkDrawnEvent: TLinkDrawnEvent;
@@ -1347,35 +1407,6 @@ type
   TFormCheckBox = class(TCheckBox)  
   private
     procedure WMGetDlgCode(var Message: TLMessage); message LM_GETDLGCODE;
-  end;
-
-  BorderRec = class   {record for inline borders} 
-  private
-    BStart, BEnd: integer;
-    OpenStart, OpenEnd: boolean;
-    BRect: TRect;
-    MargArray: TMarginArray;
-    procedure DrawTheBorder(Canvas: TCanvas; XOffset, YOffSet: integer; Printing: boolean);  
-  end;
-
-  InlineRec = class
-  private
-    StartB, EndB, IDB, StartBDoc, EndBDoc: integer;  
-    MargArray: TMarginArray;
-  end;
-
-  TInlineList = class(TObjectList)  {a list of InlineRec's}
-  private
-    NeedsConverting: boolean;
-    Owner: TSectionList;
-    procedure AdjustValues;
-    function GetStartB(I: integer): integer;
-    function GetEndB(I: integer): integer;
-  public
-    constructor Create(AnOwner: TSectionList);
-    procedure Clear;
-    property StartB[I: integer]: integer read GetStartB;
-    property EndB[I: integer]: integer read GetEndB;
   end;
 
 procedure IndentManager.Update(Y: integer; Img: TFloatingObj);
@@ -6662,7 +6693,7 @@ begin
   for I := 0 to htmlFormList.Count-1 do
     htmlFormList.Items[I].SetSizes(Canvas);
   SetTextJustification(Canvas.Handle, 0, 0);
-  TInlineList(InlineList).NeedsConverting := True;
+  InlineList.NeedsConverting := True;
 
   {set up the tab order for form controls according to the TabIndex attributes}
   if Assigned(TabOrderList) and (TabOrderList.Count > 0) then
@@ -6881,11 +6912,11 @@ begin
           Image := TBitmap.Create;
           TBitmap(Image).Assign(Tmp.MaskedBitmap);
           if Tmp.IsTransparent then
-            begin
+          begin
             AMask := TBitmap.Create;
             AMask.Assign(Tmp.Mask);
             Transparent := TGif;
-            end;
+          end;
           Tmp.Free;
         end;
       end
@@ -6894,8 +6925,10 @@ begin
       end;
     if Assigned(Image) then  {put in Cache}
       try
-        if Assigned(AMask) then Tr := Transparent
-          else Tr := NotTransp;
+        if Assigned(AMask) then
+          Tr := Transparent
+        else
+          Tr := NotTransp;
         Pair := TBitmapItem.Create(Image, AMask, Tr);
         try
           BitmapList.AddObject(UName, Pair);  {put new bitmap in list}
@@ -7063,8 +7096,10 @@ begin
       Result := LoadImageFromFile(BMName, AMask, Transparent);
     if Assigned(Result) then  {put in Image List for use later also}
       try
-        if Assigned(AMask) then Tr := Transparent
-          else Tr := NotTransp;
+        if Assigned(AMask) then
+          Tr := Transparent
+        else
+          Tr := NotTransp;
         Pair := TBitmapItem.Create(Result, AMask, Tr);
         try
           BitmapList.AddObject(UName, Pair);  {put new bitmap in list}
@@ -7203,16 +7238,14 @@ procedure TSectionList.ProcessInlines(SIndex: integer; Prop: TProperties; Start:
 {called when an inline property is found to specify a border}
 var
   I, EmSize, ExSize: integer;
-  IR: InlineRec;
+  IR: TInlineObj;
   MargArrayO: TVMarginArray;
   Dummy: BorderStyleType;
   Dummy1: integer;
 begin
-//  with InlineList do
-//  begin
   if Start then
   begin    {this is for border start}
-    IR := InlineRec.Create;
+    IR := TInlineObj.Create;
     InlineList.Add(IR);
     with IR do
     begin
@@ -7228,15 +7261,11 @@ begin
   end
   else  {this call has end information}
     for I := InlineList.Count-1 downto 0 do   {the record we want is probably the last one}
-    begin
-      IR := InlineRec(InlineList.Items[I]);
-      if Prop.ID = IR.IDB then     {check the ID to make sure}
+      if Prop.ID = InlineList[I].IDB then     {check the ID to make sure}
       begin
-        IR.EndBDoc := SIndex; {the source position of the border end}
+        InlineList[I].EndBDoc := SIndex; {the source position of the border end}
         Break;
       end;
-    end;
-//  end;
 end;
 
 {----------------TInlineList.Create}
@@ -7259,7 +7288,7 @@ var
   I: integer;
 begin
   for I := 0 to Count-1 do
-    with InlineRec(Items[I]) do
+    with TInlineObj(Items[I]) do
     begin
       StartB := Owner.FindDocPos(StartBDoc, False);
       EndB := Owner.FindDocPos(EndBDoc, False);
@@ -7274,7 +7303,7 @@ begin
   if NeedsConverting then
     AdjustValues;
   if (I < Count) and (I >= 0) then
-    Result := InlineRec(Items[I]).StartB
+    Result := TInlineObj(Items[I]).StartB
   else
     Result := 99999999;
 end;
@@ -7284,9 +7313,19 @@ begin
   if NeedsConverting then
     AdjustValues;
   if (I < Count) and (I >= 0) then
-    Result := InlineRec(Items[I]).EndB
+    Result := TInlineObj(Items[I]).EndB
   else
     Result := 99999999;
+end;
+
+function TInlineList.GetItems(AIndex: integer): TInlineObj;
+begin
+  Result := inherited Items[AIndex] as TInlineObj;
+end;
+
+procedure TInlineList.SetItems(AIndex: integer; const AValue: TInlineObj);
+begin
+  inherited Items[AIndex] := AValue;
 end;
 
 {----------------TCellObj.Create}
@@ -8163,7 +8202,7 @@ begin
     colAlign := Align;
   end;
   if not Assigned(colInfo) then
-    colInfo := TObjectList.Create;
+    colInfo := TColObjList.Create;
   ColInfo.Add(Col);
 end;
 
@@ -8279,20 +8318,14 @@ Begin
         Row := Rows[Rw];
         for Cl := 0 to IntMin(Row.Count-1, NumCols-1) do
         begin
-          with Row[Cl] do
-          begin
-            if Cl < colInfo.Count then
-              with TColObj(colInfo[Cl]) do
-              begin
-                if colWidth > 0 then
-                begin
-                  WidthAttr := colWidth;
-                  AsPercent := colAsPercent;
-                end;
-              end;
-            if not AsPercent then
-              AnyAbsolute := True;
-          end;
+          if Cl < colInfo.Count then
+            if colInfo[Cl].colWidth > 0 then
+            begin
+              Row[Cl].WidthAttr := colInfo[Cl].colWidth;
+              Row[Cl].AsPercent := colInfo[Cl].colAsPercent;
+            end;
+          if not Row[Cl].AsPercent then
+            AnyAbsolute := True;
         end;
       end;
       UseAbsolute := AnyAbsolute;
@@ -9827,9 +9860,9 @@ begin
   Tok.Free;
 end;
 {
-function TSection.GetIndexObj(I: integer): IndexObj;
+function TSection.GetIndexObj(I: integer): TIndexObj;
 begin
-  Result := SIndexList[I] as IndexObj;
+  Result := SIndexList[I] as TIndexObj;
 end;
 }
 procedure TSection.AddOpBrk;
@@ -9999,7 +10032,7 @@ procedure TSection.Finish;
 {complete some things after all information added}
 var
   Last, Ind, I: integer;
-  IO: IndexObj;
+  IO: TIndexObj;
 begin
   Buff := PWideChar(BuffS);
   Len := Length(BuffS);
@@ -10007,11 +10040,11 @@ begin
     Brk := Brk+'y';
     if Length(XP) > 0 then begin  {XP = Nil when printing}
       Last := 0;   {to prevent warning msg}
-      SIndexList := TObjectList.Create;
+      SIndexList := TIndexObjList.Create;
       for I := 0 to Len-1 do begin
         Ind := 0;
         if (I = 0) or (XP[I-1] <> Last+1) then begin
-          IO := IndexObj.Create;
+          IO := TIndexObj.Create;
           IO.Pos := I;
           if I > 0 then
             Ind := XP[I-1];
@@ -10682,7 +10715,7 @@ var
   PStart, P, Last: PWideChar;
   Max, N, NN, Width, I, Indx, ImgHt: integer;
   Finished: boolean;
-  LR : LineRec;
+  LR : TLineObj;
   NxImages: TFloatingObjList;
   Tmp, Tmp1: integer;
   Obj: TFloatingObj;
@@ -10938,7 +10971,7 @@ begin         {TSection.DrawLogic}
   begin
     Max := Last - PStart + 1;
     if Max <= 0 then Break;
-    LR := LineRec.Create(ParentSectionList);     {a new line}
+    LR := TLineObj.Create(ParentSectionList);     {a new line}
     if Lines.Count = 0 then
     begin  {may need to move down past floating image}
       Tmp := GetClearSpace(ClearAttr);
@@ -10950,7 +10983,7 @@ begin         {TSection.DrawLogic}
         LR.Start := PStart;
         Inc(Y, Tmp);
         Lines.Add(LR);
-        LR := LineRec.Create(ParentSectionList);
+        LR := TLineObj.Create(ParentSectionList);
       end;
     end;
 
@@ -11085,56 +11118,49 @@ begin         {TSection.DrawLogic}
 end;
 
 {----------------TSection.CheckForInlines}
-procedure TSection.CheckForInlines(LR: Linerec);
+procedure TSection.CheckForInlines(LR: TLineObj);
 {called before each line is drawn the first time to check if there are any
  inline borders in the line}
 var
   I: integer;
-  BR: BorderRec;
+  BR: TBorderObj;
   StartBI, EndBI, LineStart: integer;
 begin
-  with LR do
+  LR.FirstDraw := False;  {this will turn it off if there is no inline border action in this line}
+  for I := 0 to ParentSectionList.InlineList.Count-1 do    {look thru the inlinelist}
   begin
-    FirstDraw := False;  {this will turn it off if there is no inline border action in this line}
-    with TInlineList(ParentSectionList.InlineList) do
-      for I := 0 to Count-1 do    {look thru the inlinelist}
+    StartBI := ParentSectionList.InlineList.StartB[I];
+    EndBI := ParentSectionList.InlineList.EndB[I];
+    LineStart := StartCurs + LR.Start - Buff;  {offset from Section start to Line start}
+    if (EndBI > LineStart) and (StartBI < LineStart + LR.Ln) then
+    begin        {it's in this line}
+      if not Assigned(LR.BorderList) then
       begin
-        StartBI := StartB[I];
-        EndBI := EndB[I];
-        LineStart := StartCurs + Start-Buff;  {offset from Section start to Line start}
-        if (EndBI > LineStart) and (StartBI < LineStart +Ln) then
-        begin        {it's in this line}
-          if not Assigned(BorderList) then
-          begin
-            BorderList := TObjectList.Create;
-            FirstDraw := True;   {there will be more processing needed}
-          end;
-          BR := BorderRec.Create;
-          BorderList.Add(BR);
-          with BR do
-          begin
-            BR.MargArray := InlineRec(ParentSectionList.InlineList.Items[I]).MargArray;  {get border data}
-            if StartBI < LineStart then
-            begin
-              OpenStart := True;  {continuation of border on line above, end is open}
-              BStart := Start-Buff;  {start of this line}
-            end
-            else begin
-              OpenStart := False;
-              BStart := StartBI - StartCurs;  {start is in this line}
-            end;
-            if EndBI > LineStart + Ln  then
-            begin
-              OpenEnd := True;   {will continue on next line, end is open}
-              BEnd := Start-Buff +Ln;
-            end
-            else begin
-              OpenEnd := False;
-              BEnd := EndBI - StartCurs;   {end is in this line}
-            end;
-          end;
-        end;
+        LR.BorderList := TBorderObjList.Create;
+        LR.FirstDraw := True;   {there will be more processing needed}
       end;
+      BR := TBorderObj.Create;
+      LR.BorderList.Add(BR);
+      BR.MargArray := ParentSectionList.InlineList[I].MargArray; {get border data}
+      if StartBI < LineStart then
+      begin
+        BR.OpenStart := True;  {continuation of border on line above, end is open}
+        BR.BStart := LR.Start - Buff;  {start of this line}
+      end
+      else begin
+        BR.OpenStart := False;
+        BR.BStart := StartBI - StartCurs;  {start is in this line}
+      end;
+      if EndBI > LineStart + LR.Ln  then
+      begin
+        BR.OpenEnd := True;   {will continue on next line, end is open}
+        BR.BEnd := LR.Start - Buff + LR.Ln;
+      end
+      else begin
+        BR.OpenEnd := False;
+        BR.BEnd := EndBI - StartCurs;   {end is in this line}
+      end;
+    end;
   end;
 end;
 
@@ -11159,8 +11185,8 @@ var
     CP1: TPoint;
     CPx, CPy, CP1x: integer;      
     SaveColor: TColor;
-    BR: BorderRec;
-    LR:LineRec;      
+    BR: TBorderObj;
+    LR:TLineObj;
     Start: PWideChar;
     Cnt, Descent: integer;
     St: WideString;   
@@ -11225,8 +11251,8 @@ var
       if LR.FirstDraw and Assigned(LR.BorderList) then
         for K := 0 to LR.BorderList.Count-1 do  {may be several inline borders}
         begin
-          BR := BorderRec(LR.BorderList.Items[K]);
-          if (Start-Buff = BR.BStart) then
+          BR := LR.BorderList.Items[K];
+          if Start-Buff = BR.BStart then
           begin   {this is it's start}
             BR.bRect.Top := Y-FO.GetHeight(Desc)-Descent+Desc+1;
             BR.bRect.Left := CPx;
@@ -11261,12 +11287,9 @@ var
             if LR.FirstDraw and Assigned(LR.BorderList) then
               for K := LR.BorderList.Count-1 downto 0 do
               begin
-                BR := BorderRec(LR.BorderList.Items[K]);
+                BR := LR.BorderList.Items[K];
                 if (Start-Buff = BR.BStart) and (BR.BEnd = BR.BStart+1) then
-                begin
-                  LR.BorderList.Delete(K);
-                  BR.Free;
-                end;
+                  LR.BorderList.Delete(K); //  BR.Free;
               end;
           end
           else begin
@@ -11279,7 +11302,7 @@ var
             if LR.FirstDraw and Assigned(LR.BorderList) then
               for K := 0 to LR.BorderList.Count-1 do
               begin
-                BR := BorderRec(LR.BorderList.Items[K]);
+                BR := LR.BorderList.Items[K];
                 if (Start-Buff >= BR.BStart) and (Start-Buff <= BR.BEnd) then
                 begin  {there is a border here, find the image dimensions}
                   with TImageObj(Obj) do
@@ -11340,12 +11363,9 @@ var
               if LR.FirstDraw and Assigned(LR.BorderList) then
                 for K := LR.BorderList.Count-1 downto 0 do
                 begin
-                  BR := BorderRec(LR.BorderList.Items[K]);
+                  BR := LR.BorderList.Items[K];
                   if (Start-Buff = BR.BStart) and (BR.BEnd = BR.BStart+1) then
-                  begin
-                    LR.BorderList.Delete(K);
-                    BR.Free;
-                  end;
+                    LR.BorderList.Delete(K); //  BR.Free;
                 end;
             end
             else begin
@@ -11360,7 +11380,7 @@ var
               if LR.FirstDraw and Assigned(LR.BorderList) then
                 for K := 0 to LR.BorderList.Count-1 do
                 begin
-                  BR := BorderRec(LR.BorderList.Items[K]);
+                  BR := LR.BorderList.Items[K];
                   if (Start-Buff >= BR.BStart) and (Start-Buff <= BR.BEnd) then
                   begin
                     if (Start-Buff = BR.BStart) then
@@ -11423,7 +11443,7 @@ var
             if LR.FirstDraw and Assigned(LR.BorderList) then
               for K := 0 to LR.BorderList.Count-1 do
               begin
-                BR := BorderRec(LR.BorderList.Items[K]);
+                BR := LR.BorderList.Items[K];
                 if (Start-Buff >= BR.BStart) and (Start-Buff <= BR.BEnd) then
                 begin
                   if (Start-Buff = BR.BStart) then
@@ -11623,7 +11643,7 @@ var
     if LR.FirstDraw and Assigned(LR.BorderList) then
       for K := 0 to LR.BorderList.Count-1 do
       begin
-        BR := BorderRec(LR.BorderList.Items[K]);
+        BR := LR.BorderList.Items[K];
         if BR.OpenEnd or (BR.BRect.Right = 0) then
           BR.BRect.Right := CPx;
       end;
@@ -11632,7 +11652,7 @@ var
   procedure DoDraw(I: integer);
   {draw the Ith line in this section}
   var
-    BR: BorderRec;
+    BR: TBorderObj;
     K: integer;
     XOffset: integer;   
   begin
@@ -11653,7 +11673,7 @@ var
       if Assigned(BorderList) then  {draw any borders found in this line}
         for K := 0 to BorderList.Count-1 do
         begin
-          BR := BorderRec(BorderList.Items[K]);
+          BR := BorderList.Items[K];
           BR.DrawTheBorder(Canvas, XOffset, YOffSet, ParentSectionList.Printing);
         end;
       DrawTheText(I);  {draw the text, etc., in this line}
@@ -11679,7 +11699,7 @@ begin       {TSection.Draw}
     for I := 0 to Lines.Count-1 do
       with ParentSectionList do
         if Printing then
-          with LineRec(Lines[I]) do
+          with TLineObj(Lines[I]) do
           begin
             if (Y + LineImgHt <= PageBottom) then
             begin
@@ -11698,7 +11718,7 @@ begin       {TSection.Draw}
             end;
           end
         else
-          with LineRec(Lines[I]) do
+          with TLineObj(Lines[I]) do
             if ((Y-YOffset+LineImgHt+40 >= ARect.Top) and (Y-YOffset-40 < ARect.Bottom)) then
               DoDraw(I)
             else  {do not completely draw extremely long paragraphs}
@@ -11715,7 +11735,7 @@ begin
   MySelB := ParentSectionList.SelB - StartCurs;
   MySelE := ParentSectionList.SelE - StartCurs;
   for I := 0 to Lines.Count-1 do
-    with LineRec(Lines.Items[I]) do
+    with TLineObj(Lines.Items[I]) do
     begin
       Strt := Start-Buff;
       if (MySelE <= Strt) or (MySelB > Strt + Ln) then Continue;
@@ -11747,7 +11767,7 @@ function TSection.GetURL(Canvas: TCanvas; X: integer; Y: integer;
 var
   I, L, Index, Width, IX, IY, Posn: integer;
   FO : TFontObj;
-  LR: LineRec;
+  LR: TLineObj;
   IMap, UMap: boolean;
   MapItem: TMapItem;
   ImageObj: TImageObj;
@@ -11814,7 +11834,7 @@ begin
     begin
       while I < Count do
       begin
-        LR := LineRec(Lines[I]);
+        LR := TLineObj(Lines[I]);
         if (Y > LR.DrawY) and (Y <= LR.DrawY+LR.LineHt) then
           Break;
         Inc(I);
@@ -11856,7 +11876,7 @@ function TSection.FindCursor(Canvas: TCanvas; X: integer; Y: integer;
  for a caret along with its height, CaretHt. Coordinates are relative to this section}
 var
   I, H, L, Width, TotalHt, L1, W, Delta, OHang: integer;
-  LR: LineRec;
+  LR: TLineObj;
 
 begin
   Result := -1;
@@ -11866,7 +11886,7 @@ begin
   begin
     while I < Count do
     begin
-      LR := LineRec(Lines[I]);
+      LR := TLineObj(Lines[I]);
       with LR do
         TotalHt := LineHt+SpaceBefore+SpaceAfter;
       if H+TotalHt > Y then Break;
@@ -11991,14 +12011,14 @@ end;
 function TSection.FindSourcePos(DocPos: integer): integer;
 var
   I: integer;
-  IO: IndexObj;
+  IO: TIndexObj;
 begin
   Result := -1;
   if (Len = 0) or (DocPos >= StartCurs + Len) then Exit;
 
   for I := SIndexList.Count-1 downto 0 do
   begin
-    IO := SIndexList[I] as IndexObj; // PosIndex[I];
+    IO := SIndexList[I];
     if IO.Pos <= DocPos-StartCurs then
     begin
       Result := IO.Index + DocPos-StartCurs - IO.Pos;
@@ -12013,18 +12033,17 @@ function TSection.FindDocPos(SourcePos: integer; Prev: boolean): integer;
  previous}
 var
   I: integer;
-  IO, IOPrev: IndexObj;
+  IO, IOPrev: TIndexObj;
 begin
   Result := -1;
   if Len = 0 then Exit;
 
   if not Prev then
   begin
-    I:= SIndexList.Count-1;
-    IO := SIndexList[I] as IndexObj;
+    IO := SIndexList[SIndexList.Count-1];
     if SourcePos > IO.Index + (Len-1) - IO.Pos then Exit; {beyond this section}
 
-    IOPrev := SIndexList[0] as IndexObj; //PosIndex[0];
+    IOPrev := SIndexList[0] as TIndexObj; //PosIndex[0];
     if SourcePos <= IOPrev.Index then
     begin  {in this section but before the start of Document text}
       Result := StartCurs;
@@ -12033,26 +12052,25 @@ begin
 
     for I := 1 to SIndexList.Count-1 do
     begin
-      IO := SIndexList[I] as IndexObj;
+      IO := SIndexList[I];
       if (SourcePos >= IOPrev.Index) and (SourcePos < IO.Index) then
       begin   {between IOprev and IO}
         if SourcePos-IOPrev.Index+IOPrev.Pos < IO.Pos then
           Result := StartCurs+IOPrev.Pos+(SourcePos-IOPrev.Index)
-        else Result := StartCurs+IO.Pos;
+        else
+          Result := StartCurs+IO.Pos;
         Exit;
       end;
       IOPrev := IO;
     end;
-    {after the last IndexObj in list}
+    {after the last TIndexObj in list}
     Result := StartCurs+IOPrev.Pos+(SourcePos-IOPrev.Index);
   end
-  else     {prev  -- we're iterating from the end of TSectionList}
-  begin
-    IOPrev := SIndexList[0] as IndexObj;
+  else begin     {prev  -- we're iterating from the end of TSectionList}
+    IOPrev := SIndexList[0];
     if SourcePos < IOPrev.Index then Exit;   {before this section}
 
-    I:= SIndexList.Count-1;
-    IO := SIndexList[I] as IndexObj;
+    IO := SIndexList[SIndexList.Count-1];
     if SourcePos > IO.Index + (Len-1) - IO.Pos then
     begin   {SourcePos is after the end of this section}
       Result := StartCurs + (Len-1);
@@ -12061,7 +12079,7 @@ begin
 
     for I := 1 to SIndexList.Count-1 do
     begin
-      IO := SIndexList[I] as IndexObj;
+      IO := SIndexList[I];
       if (SourcePos >= IOPrev.Index) and (SourcePos < IO.Index) then
       begin {between IOprev and IO}
         if SourcePos-IOPrev.Index+IOPrev.Pos < IO.Pos then
@@ -12071,8 +12089,8 @@ begin
       end;
       IOPrev := IO;
     end;
-    {after the last IndexObj in list}
-    Result := StartCurs+IOPrev.Pos+(SourcePos-IOPrev.Index);
+    {after the last TIndexObj in list}
+    Result := StartCurs + IOPrev.Pos + SourcePos - IOPrev.Index;
   end;
 end;
 
@@ -12081,7 +12099,7 @@ function TSection.CursorToXY(Canvas: TCanvas; Cursor: integer;
                              var X: integer; var Y: integer): boolean;
 var
   I, Curs: integer;
-  LR: LineRec;
+  LR: TLineObj;
 begin
   Result := False;
   if (Len = 0) or (Cursor > StartCurs + Len) then Exit;
@@ -12094,7 +12112,7 @@ begin
   begin
     while I < Count do
     begin
-      LR := LineRec(Lines[I]);
+      LR := TLineObj(Lines[I]);
       with LR do
       begin
         if Curs < Ln then Break;
@@ -12643,20 +12661,20 @@ begin
   Message.Result := DLGC_WantArrows;  {this to eat the arrow keys}
 end;
 
-{----------------LineRec.Create}
-constructor LineRec.Create(SL: TSectionList);
+{----------------TLineObj.Create}
+constructor TLineObj.Create(SL: TSectionList);
 begin
   inherited Create;
   if SL.InlineList.Count > 0 then
     FirstDraw := True;
 end;
 
-procedure LineRec.Clear;
+procedure TLineObj.Clear;
 begin
-  FreeAndNil(BorderList);
+  BorderList.Clear; // FreeAndNil(BorderList);
 end;
 
-destructor LineRec.Destroy;
+destructor TLineObj.Destroy;
 begin
   BorderList.Free;
   inherited;
@@ -12664,18 +12682,19 @@ end;
 
 { TLineObjList }
 
-function TLineObjList.GetItems(AIndex: integer): LineRec;
+function TLineObjList.GetItems(AIndex: integer): TLineObj;
 begin
-  Result := inherited Items[AIndex] as LineRec;
+  Result := inherited Items[AIndex] as TLineObj;
 end;
 
-procedure TLineObjList.SetItems(AIndex: integer; const AValue: LineRec);
+procedure TLineObjList.SetItems(AIndex: integer; const AValue: TLineObj);
 begin
   inherited Items[AIndex] := AValue;
 end;
 
-{----------------BorderRec.DrawTheBorder}
-procedure BorderRec.DrawTheBorder(Canvas: TCanvas; XOffset, YOffSet: integer; Printing: boolean); 
+{ TBorderObj }
+
+procedure TBorderObj.DrawTheBorder(Canvas: TCanvas; XOffset, YOffSet: integer; Printing: boolean);
 var
   IRect, ORect: TRect;
 begin
@@ -12707,6 +12726,42 @@ begin
      MargArray[BackgroundColor], Printing)
 end;
 
+{ TBorderObjList }
+
+function TBorderObjList.GetItems(AIndex: integer): TBorderObj;
+begin
+  Result := inherited Items[AIndex] as TBorderObj;
+end;
+
+procedure TBorderObjList.SetItems(AIndex: integer; const AValue: TBorderObj);
+begin
+  inherited Items[AIndex] := AValue;
+end;
+
+
+{ TColObjList }
+
+function TColObjList.GetItems(AIndex: integer): TColObj;
+begin
+  Result := inherited Items[AIndex] as TColObj;
+end;
+
+procedure TColObjList.SetItems(AIndex: integer; const AValue: TColObj);
+begin
+  inherited Items[AIndex] := AValue;
+end;
+
+{ TIndexObjList }
+
+function TIndexObjList.GetItems(AIndex: integer): TIndexObj;
+begin
+  Result := inherited Items[AIndex] as TIndexObj;
+end;
+
+procedure TIndexObjList.SetItems(AIndex: integer; const AValue: TIndexObj);
+begin
+  inherited Items[AIndex] := AValue;
+end;
 
 end.
 

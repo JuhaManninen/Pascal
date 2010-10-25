@@ -1169,7 +1169,8 @@ begin
       if Sy in [BlockQuoteEndSy, AddressEndSy] then
         Next;
     end;
-    else Next;
+    else
+      Next;
   end;
 end;
 
@@ -1369,9 +1370,9 @@ var
           CM.AddCell(Table.Rows.Count, CellObj);
       end
     else
-    {$ifdef DebugIt}
+{$ifdef DebugIt}
     ShowMessage('Table cell error, ReadHTML.pas, DoTable')
-    {$endif}
+{$endif}
     ;
     SectionList := Nil;
     end;
@@ -1692,8 +1693,10 @@ begin
         Inc(ErrorCnt);
       Next;
     end;
-    if Sy = MapEndSy then MasterList.MapList.Add(Item)
-      else Item.Free;
+    if Sy = MapEndSy then
+      MasterList.MapList.Add(Item)
+    else
+      Item.Free;
   except
     Item.Free;
     Raise;
@@ -2040,10 +2043,10 @@ var
     begin
       CurrentForm := Nil;
       if Assigned(Section) then
-        begin
+      begin
         Section.AddTokenObj(S);
         SectionList.Add(Section, TagIndex);
-        end;
+      end;
       S.Clear;
       Section := Nil;
       PopAProp('form');
