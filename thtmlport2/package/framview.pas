@@ -223,8 +223,7 @@ type
     function GetViewersByName: TStrings; virtual; abstract;
 
     property CurViewer[I: integer]: ThtmlViewer read GetCurViewer;
-    property OnBitmapRequest: TGetBitmapEvent read FOnBitmapRequest
-             write SetOnBitmapRequest;
+    property OnBitmapRequest: TGetBitmapEvent read FOnBitmapRequest write SetOnBitmapRequest;
     property ServerRoot: string read FServerRoot write SetServerRoot;
   public
     constructor Create(AOwner: TComponent); override;
@@ -258,14 +257,12 @@ type
 
   published
     property OnHotSpotTargetCovered: THotSpotTargetEvent read FOnHotSpotTargetCovered
-             write FOnHotSpotTargetCovered;
+                                                        write FOnHotSpotTargetCovered;
     property OnHotSpotTargetClick: THotSpotTargetClickEvent read FOnHotSpotTargetClick
-             write FOnHotSpotTargetClick;
+                                                           write FOnHotSpotTargetClick;
     property ViewImages: boolean read FViewImages write SetViewImages default True;
-    property ImageCacheCount: integer read FImageCacheCount
-             write SetImageCacheCount default 5;
-    property OnHistoryChange: TNotifyEvent read FOnHistoryChange
-             write FOnHistoryChange;
+    property ImageCacheCount: integer read FImageCacheCount write SetImageCacheCount default 5;
+    property OnHistoryChange: TNotifyEvent read FOnHistoryChange write FOnHistoryChange;
     property NoSelect: boolean read FNoSelect write SetNoSelect;
 
     property OnBlankWindowRequest: TWindowRequestEvent read FOnBlankWindowRequest
@@ -309,14 +306,10 @@ type
     property DefFontName: TFontName read GetFontName write SetFontName;
     property DefPreFontName: TFontName read GetPreFontName write SetPreFontName;
     property DefFontSize: integer read FFontSize write SetFontSize default 12;
-    property DefFontColor: TColor read FFontColor write SetFontColor
-             default clBtnText;
-    property DefHotSpotColor: TColor read FHotSpotColor write SetHotSpotColor
-             default clBlue;
-    property DefVisitedLinkColor: TColor read FVisitedColor write SetVisitedColor
-             default clPurple;       
-    property DefOverLinkColor: TColor read FOverColor write SetActiveColor
-             default clBlue;        
+    property DefFontColor: TColor read FFontColor write SetFontColor default clBtnText;
+    property DefHotSpotColor: TColor read FHotSpotColor write SetHotSpotColor default clBlue;
+    property DefVisitedLinkColor: TColor read FVisitedColor write SetVisitedColor default clPurple;
+    property DefOverLinkColor: TColor read FOverColor write SetActiveColor default clBlue;
     property VisitedMaxCount: integer read FVisitedMaxCount write SetVisitedMaxCount default 50; 
     property HistoryMaxCount: integer read FHistoryMaxCount write SetHistoryMaxCount;
     property CharSet: TFontCharset read FCharSet write SetCharset;
@@ -618,8 +611,7 @@ type
     procedure LoadImageFile(const FName: string);
     procedure Reload;
     procedure Clear;
-    procedure HotSpotClick(Sender: TObject; const AnURL: string;
-              var Handled: boolean);
+    procedure HotSpotClick(Sender: TObject; const AnURL: string; var Handled: boolean);
     function HTMLExpandFilename(const Filename: string): string; virtual;
     procedure ClearHistory; override;
     function ViewerFromTarget(const ATarget: string): ThtmlViewer;
@@ -634,10 +626,8 @@ type
     property HistoryIndex: integer read FHistoryIndex write SetHistoryIndex;
 
   published
-    property OnImageRequest: TGetImageEvent read FOnImageRequest
-             write SetOnImageRequest;
-    property OnFormSubmit: TFormSubmitEvent read FOnFormSubmit
-             write SetOnFormSubmit;
+    property OnImageRequest: TGetImageEvent read FOnImageRequest write SetOnImageRequest;
+    property OnFormSubmit: TFormSubmitEvent read FOnFormSubmit write SetOnFormSubmit;
     property FwdButtonEnabled: boolean read GetFwdButtonEnabled;
     property BackButtonEnabled: boolean read GetBackButtonEnabled;
     property fvOptions: TFrameViewerOptions read FOptions write SetOptions
@@ -1237,7 +1227,8 @@ begin
       except
         Raise(EfvLoadError.Create('Can''t load: '+EV.NewName));
       end
-    else FrameFile := not Assigned(Viewer);
+    else
+      FrameFile := not Assigned(Viewer);
     if SameName then
       if Assigned(Viewer) then
       begin
@@ -1302,21 +1293,22 @@ begin
         Raise;
       end;
       if (MasterSet.Viewers.Count = 1) and Bump then
-        {a single viewer situation, bump the history here}
-        with MasterSet do
-        begin
-          FCurrentFile := Viewer.CurrentFile;
-          FTitle := Viewer.DocumentTitle;
-          FBase := Viewer.Base;
-          FBaseTarget := Viewer.BaseTarget;
-          FrameViewer.BumpHistory1(OldName, OldTitle, OldPos, HTMLType);
-        end;
-      end
+      begin   {a single viewer situation, bump the history here}
+        MasterSet.FCurrentFile := Viewer.CurrentFile;
+        MasterSet.FTitle := Viewer.DocumentTitle;
+        MasterSet.FBase := Viewer.Base;
+        MasterSet.FBaseTarget := Viewer.BaseTarget;
+        MasterSet.FrameViewer.BumpHistory1(OldName, OldTitle, OldPos, HTMLType);
+      end;
+    end
     else begin {Viewer is not assigned or it is a Frame File} {not Same Name here either}
       {keep the old viewer or frameset around (free later) to minimize blink}
-      OldViewer := Viewer;  Viewer := Nil;
-      OldFrameSet := FrameSet;  FrameSet := Nil;
-      if OldFrameSet <> Nil then OldFrameSet.ClearFrameNames;
+      OldViewer := Viewer;
+      Viewer := Nil;
+      OldFrameSet := FrameSet;
+      FrameSet := Nil;
+      if OldFrameSet <> Nil then
+        OldFrameSet.ClearFrameNames;
       if not Img and not Tex and FrameFile then
       begin   {it's a frame file}
         FrameSet := TSubFrameSet.CreateIt(Self, MasterSet);
@@ -1329,17 +1321,15 @@ begin
                          EV.AString, @FrameSet.HandleMeta);
         MasterSet.FrameViewer.AddVisitedLink(EV.NewName);
         Self.BevelOuter := bvNone;
-        with FrameSet do
-        begin
-          for I := 0 to FrameList.Count-1 do
-            FrameList[I].LoadFiles(Nil);
-          CheckNoresize(Lower, Upper);
-          if FRefreshDelay > 0 then
-            SetRefreshTimer;
-        end;
+        for I := 0 to FrameSet.FrameList.Count-1 do
+          FrameSet.FrameList[I].LoadFiles(Nil);
+        FrameSet.CheckNoResize(Lower, Upper);
+        if FrameSet.FRefreshDelay > 0 then
+          FrameSet.SetRefreshTimer;
         if Assigned(OldViewer) then
           frBumpHistory(HS, 0, OldViewer.Position, OldViewer.FormData)
-        else frBumpHistory(EV.NewName, 0, 0, Nil);
+        else
+          frBumpHistory(EV.NewName, 0, 0, Nil);
       end
       else begin   {not a frame file but needs a viewer}
         CreateViewer;
@@ -1362,12 +1352,11 @@ begin
         frBumpHistory(HS, Viewer.Position, 0, Nil);
       end;
       if Assigned(FrameSet) then
-        with FrameSet do
-        begin
-          with ClientRect do
-            InitializeDimensions(Left, Top, Right-Left, Bottom-Top);
-          CalcSizes(Nil);
-        end;
+      begin
+        with FrameSet.ClientRect do
+          FrameSet.InitializeDimensions(Left, Top, Right-Left, Bottom-Top);
+        FrameSet.CalcSizes(Nil);
+      end;
       if Assigned(Viewer) then
       begin
         if MasterSet.BorderSize = 0 then
@@ -1416,31 +1405,27 @@ procedure TfvFrame.frBumpHistory(const NewName: string;
 var
   PO: TfvPositionObj;
 begin
-  with frHistory do
+  if (frHistory.Count > 0) then
   begin
-    if (Count > 0) then
-    begin
-      frPositionHistory[frHistoryIndex].Pos := OldPos;
-      if frHistory[frHistoryIndex] <> NewName then
-        frPositionHistory[frHistoryIndex].PosFormData := OldFormData
-      else
-        OldFormData.Free;
-    end
+    frPositionHistory[frHistoryIndex].Pos := OldPos;
+    if frHistory[frHistoryIndex] <> NewName then
+      frPositionHistory[frHistoryIndex].PosFormData := OldFormData
     else
       OldFormData.Free;
-    MasterSet.ClearForwards;   {clear the history list forwards}
-    frHistoryIndex := 0;
-    InsertObject(0, NewName, FrameSet);  {FrameSet may be Nil here}
-    PO := TfvPositionObj.Create;
-    PO.Pos := NewPos;
-    PO.Seq := Sequence;
-    Inc(Sequence);
-    frPositionHistory.Insert(0, PO);
-    MasterSet.UpdateFrameList;
-    with MasterSet.FrameViewer do
-      if Assigned(FOnHistoryChange) then
-        FOnHistoryChange(MasterSet.FrameViewer);
-  end;
+  end
+  else
+    OldFormData.Free;
+  MasterSet.ClearForwards;   {clear the history list forwards}
+  frHistoryIndex := 0;
+  frHistory.InsertObject(0, NewName, FrameSet);  {FrameSet may be Nil here}
+  PO := TfvPositionObj.Create;
+  PO.Pos := NewPos;
+  PO.Seq := Sequence;
+  Inc(Sequence);
+  frPositionHistory.Insert(0, PO);
+  MasterSet.UpdateFrameList;
+  if Assigned(MasterSet.FrameViewer.FOnHistoryChange) then
+    MasterSet.FrameViewer.FOnHistoryChange(MasterSet.FrameViewer);
 end;
 
 {----------------TfvFrame.frBumpHistory1}
@@ -1449,20 +1434,16 @@ procedure TfvFrame.frBumpHistory1(const NewName: string; Pos: integer);
 var
   PO: TfvPositionObj;
 begin
-  with frHistory do
-  begin
-    frHistoryIndex := 0;
-    InsertObject(0, NewName, FrameSet);  {FrameSet may be Nil here}
-    PO := TfvPositionObj.Create;
-    PO.Pos := Pos;
-    PO.Seq := Sequence;
-    Inc(Sequence);
-    frPositionHistory.Insert(0, PO);
-    MasterSet.UpdateFrameList;
-    with MasterSet.FrameViewer do
-      if Assigned(FOnHistoryChange) then
-        FOnHistoryChange(MasterSet.FrameViewer);
-  end;
+  frHistoryIndex := 0;
+  frHistory.InsertObject(0, NewName, FrameSet);  {FrameSet may be Nil here}
+  PO := TfvPositionObj.Create;
+  PO.Pos := Pos;
+  PO.Seq := Sequence;
+  Inc(Sequence);
+  frPositionHistory.Insert(0, PO);
+  MasterSet.UpdateFrameList;
+  if Assigned(MasterSet.FrameViewer.FOnHistoryChange) then
+    MasterSet.FrameViewer.FOnHistoryChange(MasterSet.FrameViewer);
 end;
 
 {----------------TfvFrame.frSetHistoryIndex}
@@ -1922,19 +1903,16 @@ begin
   end
   else begin
     ACursor := (Sender as TFrameBase).Cursor;
-    if (ACursor = crVSplit) or(ACursor = crHSplit) then
+    if (ACursor = crVSplit) or (ACursor = crHSplit) then
     begin
       MasterSet.HotSet := Self;
-      with RP do
-      begin   {restrict cursor to lines on both sides}
-        if Rows then
-          R := Rect(0, Lines[LineIndex-1]+1, ClientWidth, Lines[LineIndex+1]-1)
-        else
-          R := Rect(Lines[LineIndex-1]+1, 0, Lines[LineIndex+1]-1, ClientHeight);
-        P1 := ClientToScreen(P1);
-        P2 := ClientToScreen(P2);
-        ClipCursor(@R);
-      end;
+      if Rows then    {restrict cursor to lines on both sides}
+        RP.R := Rect(0, Lines[LineIndex-1]+1, ClientWidth, Lines[LineIndex+1]-1)
+      else
+        RP.R := Rect(Lines[LineIndex-1]+1, 0, Lines[LineIndex+1]-1, ClientHeight);
+      RP.P1 := ClientToScreen(RP.P1);
+      RP.P2 := ClientToScreen(RP.P2);
+      ClipCursor(@RP.R);
       DrawRect(GetRect);
     end;
   end;
@@ -1948,11 +1926,14 @@ var
 begin
   if not Assigned(MasterSet.HotSet) then
   begin  {here we change the cursor as mouse moves over lines,button up or down}
-    if Rows then Line := Y else Line := X;
+    if Rows then
+      Line := Y
+    else
+      Line := X;
     Gap := 9999;
     for I := 1 to DimCount-1 do
     begin
-      ThisGap := Line-Lines[I];
+      ThisGap := Line - Lines[I];
       if Abs(ThisGap) < Abs(Gap) then
       begin
         Gap := Line - Lines[I];
@@ -1966,17 +1947,17 @@ begin
     begin
       if Rows then
         ACursor := crVSplit
-      else ACursor := crHSplit;
+      else
+        ACursor := crHSplit;
       (Sender as TFrameBase).Cursor := ACursor;
     end
-    else (Sender as TFrameBase).Cursor := MasterSet.FrameViewer.Cursor;
+    else
+      (Sender as TFrameBase).Cursor := MasterSet.FrameViewer.Cursor;
   end
-  else
-    with TSubFrameSet(MasterSet.HotSet) do
-    begin
-      DrawRect(OldRect);
-      DrawRect(GetRect);
-    end;
+  else begin
+    DrawRect(TSubFrameSet(MasterSet.HotSet).OldRect);
+    DrawRect(TSubFrameSet(MasterSet.HotSet).GetRect);
+  end;
 end;
 
 {----------------TSubFrameSet.FVMouseMove}
@@ -2846,8 +2827,7 @@ begin
 end;
 
 {----------------TFrameViewer.HotSpotClick}
-procedure TFrameViewer.HotSpotClick(Sender: TObject; const AnURL: string;
-          var Handled: boolean);
+procedure TFrameViewer.HotSpotClick(Sender: TObject; const AnURL: string; var Handled: boolean);
 var
   I: integer;
   Viewer: ThtmlViewer;

@@ -264,9 +264,9 @@ begin
       end;
     end;
     if Count = 0 then
-        Result := Last
+      Result := Last
     else
-        Result := 0;
+      Result := 0;
   end
   else
     Result := 0;
@@ -274,12 +274,10 @@ end;
 
 { Syntax of an URL: protocol://[user[:password]@]server[:port]/path         }
 {Thanx to François PIETTE}
-procedure ParseURL(
-    const url : String;
-    var Proto, User, Pass, Host, Port, Path : String);
+procedure ParseURL(const url : String; var Proto, User, Pass, Host, Port, Path : String);
 var
-    p, q : Integer;
-    s    : String;
+  p, q : Integer;
+  s    : String;
 begin
   proto := '';
   User  := '';

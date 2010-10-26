@@ -825,10 +825,10 @@ begin
     try     
       if Assigned(MasterSet.FrameViewer.FOnGetPostRequestEx) then   
         MasterSet.FrameViewer.FOnGetPostRequestEx(Self, True, Source, '', '', '',False,
-                                     Dummy, TheStreamType, TheStream)
+                                                  Dummy, TheStreamType, TheStream)
       else
         MasterSet.FrameViewer.FOnGetPostRequest(Self, True, Source, '', False,
-                                     Dummy, TheStreamType, TheStream);
+                                                Dummy, TheStreamType, TheStream);
       Viewer.LoadStream(Source, TheStream, TheStreamType);
       if APosition < 0 then
         Viewer.Position := ViewerPosition
@@ -1654,17 +1654,17 @@ begin
     begin
       if Rows then
         ACursor := crVSplit
-      else ACursor := crHSplit;
+      else
+        ACursor := crHSplit;
       (Sender as TbrFrameBase).Cursor := ACursor;
     end
-    else (Sender as TbrFrameBase).Cursor := MasterSet.FrameViewer.Cursor;
+    else
+      (Sender as TbrFrameBase).Cursor := MasterSet.FrameViewer.Cursor;
   end
-  else
-    with TbrSubFrameSet(MasterSet.HotSet) do
-    begin
-      DrawRect(OldRect);
-      DrawRect(GetRect);
-    end;
+  else begin
+    DrawRect(TbrSubFrameSet(MasterSet.HotSet).OldRect);
+    DrawRect(TbrSubFrameSet(MasterSet.HotSet).GetRect);
+  end;
 end;
 
 {----------------TbrSubFrameSet.FVMouseMove}

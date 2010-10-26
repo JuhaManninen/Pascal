@@ -50,8 +50,8 @@ type
     constructor Create(Handle: HDC); overload;
     constructor Create(Image: TGpImage); overload;
     destructor Destroy; override;
-    procedure DrawImage (Image: TGPImage; X, Y: Integer); overload;
-    procedure DrawImage (Image: TGPImage; X, Y, Width, Height: Integer); overload;
+    procedure DrawImage(Image: TGPImage; X, Y: Integer); overload;
+    procedure DrawImage(Image: TGPImage; X, Y, Width, Height: Integer); overload;
     procedure DrawImage(Image: TGpImage; x, y, srcx, srcy, srcwidth, srcheight: integer); overload;
     procedure DrawImage(Image: TGpImage; dx, dy, dw, dh, sx, sy, sw, sh: integer); overload;
     procedure Clear(Color: Cardinal);
@@ -235,7 +235,7 @@ begin
 end;
 
 procedure TGPGraphics.DrawImage(Image: TGpImage; x, y,
-            srcx, srcy, srcwidth, srcheight: integer);
+                                srcx, srcy, srcwidth, srcheight: integer);
 const
   UnitPixel = 2;
 begin
