@@ -2451,7 +2451,8 @@ begin
         FOnBlankWindowRequest(Self, FTarget, FullUrl + Dest);
         AHandled := True;
       end
-      else AHandled := FTarget <> '';   {true if can't find target window}
+      else
+        AHandled := FTarget <> '';   {true if can't find target window}
       Exit;
     end;
 
@@ -2498,8 +2499,7 @@ begin
     S := ConvDosToHTML(S);    {convert DOS names}
     if IsFullURL(S) or (Src = '') then
       FullUrl := S
-    else
-    begin
+    else begin
       if Viewer.Base <> '' then
         FullUrl := Combine(UrlSubs.GetBase(ConvDosToHTML(Viewer.Base)), S)
       else
@@ -2903,9 +2903,8 @@ var
   I: integer;
 begin
   FOnProgress := Handler;
-  with CurbrFrameSet do
-    for I := 0 to Viewers.Count-1 do
-      Viewers[I].OnProgress := Handler;
+  for I := 0 to CurbrFrameSet.Viewers.Count-1 do
+    CurbrFrameSet.Viewers[I].OnProgress := Handler;
 end;
 
 procedure TFrameBrowser.SetDragDrop(const Value: TDragDropEvent);
@@ -2961,9 +2960,8 @@ var
   I: integer;
 begin
   FOnImageRequest := Value;
-  with CurbrFrameSet do
-    for I := 0 to Viewers.Count-1 do
-      Viewers[I].OnImageRequest := Value;
+  for I := 0 to CurbrFrameSet.Viewers.Count-1 do
+    CurbrFrameSet.Viewers[I].OnImageRequest := Value;
 end;
 
 {----------------TFrameBrowser.DoFormSubmitEvent}
@@ -3012,7 +3010,8 @@ var
           J := Pos(' ', S1);
         end;
       end
-      else S1 := Trim(AResults[I]); {No encoding done}
+      else
+        S1 := Trim(AResults[I]); {No encoding done}
       if I <> 0 then
         Result := Result + '&';
       Result := Result + S1;
@@ -3148,19 +3147,18 @@ begin
     begin
       S := Visited[I];
       for J := 0 to Viewer.LinkList.Count-1 do
-        with TFontObj(Viewer.LinkList[J]) do
-        begin
+        with Viewer.LinkList[J] do
           if Url <> '' then
           begin
             if IsFullURL(Url) then
               S1 := Url
             else if Url[1] = '#' then
               S1 :=  TbrFrame(Viewer.FrameOwner).Source+Url
-            else S1 := Combine(TbrFrame(Viewer.FrameOwner).UrlBase, Url);
+            else
+              S1 := Combine(TbrFrame(Viewer.FrameOwner).UrlBase, Url);
             if CompareText(S, S1) = 0 then
               Visited := True;
           end;
-        end;
     end;
     Viewer.Invalidate;
   end;

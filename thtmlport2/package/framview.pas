@@ -35,7 +35,7 @@ unit FramView;
 interface
 
 uses
-  LclIntf, LMessages, Types, LclType, FPimage, HtmlMisc, SysUtils, Classes, Graphics,
+  LclIntf, Types, LclType, FPimage, HtmlMisc, SysUtils, Classes, Graphics,
   Controls, Forms, Dialogs, StdCtrls, ExtCtrls, Menus, contnrs,
   htmlsubs, htmlview, htmlun2, readHTML, JmIntList;
 
@@ -532,8 +532,7 @@ type
     procedure RefreshTimerTimer(Sender: Tobject); override;
 
   protected
-    procedure FVMouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Integer); override;
+    procedure FVMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); override;
     procedure CheckActive(Sender: TObject);
     function GetActive: ThtmlViewer;
   public
@@ -1469,63 +1468,56 @@ end;
 {----------------TfvFrame.frSetHistoryIndex}
 procedure TfvFrame.frSetHistoryIndex(Value: integer);
 begin
-  with frHistory do
-    if (Value <> frHistoryIndex) and (Value >= 0) and (Value < Count) then
+  if (Value <> frHistoryIndex) and (Value >= 0) and (Value < frHistory.Count) then
+  begin
+    if Assigned(RefreshTimer) then
+      RefreshTimer.Enabled := False;    {cut off any timing underway}
+    if Assigned(Viewer) then   {current is Viewer}
     begin
-      if Assigned(RefreshTimer) then
-        RefreshTimer.Enabled := False;    {cut off any timing underway}
-      if Assigned(Viewer) then   {current is Viewer}
-        with frPositionHistory[frHistoryIndex] do
-        begin
-          Pos := Viewer.Position;   {save the old position}
-          {note that frHistoryIndex can only change by 1}
-          frPositionHistory[frHistoryIndex].PosFormData := Viewer.FormData;
-        end
-      else
-      begin    {Current is FrameSet}
-        FrameSet.UnloadFiles;
-        FrameSet.DestroyHandle;
-        FrameSet.ClearFrameNames;
-        FrameSet.Visible := False;
-        FrameSet := Nil;   {it's not destroyed,though}
-      end;
-      if Objects[Value] is TSubFrameSet then
-      begin
-        FrameSet := TSubFrameSet(Objects[Value]);
-        FrameSet.Visible := True;
-        FrameSet.ReloadFiles(-1);
-        FrameSet.AddFrameNames;
-        if Assigned(Viewer) then
-          begin
-          if Assigned(MasterSet.Viewers) then
-            MasterSet.Viewers.Remove(Viewer);
-          if MasterSet.FActive = Viewer then
-            MasterSet.FActive := Nil;
-          FreeAndNil(Viewer);
-          end;
-      end
-      else begin
-        if not Assigned(Viewer) then
-          CreateViewer;
-        with frPositionHistory[Value] do
-        begin
-          if (Source <> Strings[Value]) then
-          begin
-            frLoadFromFile(Strings[Value], '', False, False);
-            Viewer.FormData := PosFormData;
-            FreeAndNil(PosFormData);
-          end;
-          Viewer.Position := Pos;
-        end;
-      end;
-      Source := Strings[Value];
-      frHistoryIndex := Value;
-      MasterSet.UpdateFrameList;
-      with MasterSet.FrameViewer do
-        if Assigned(FOnHistoryChange) then
-          FOnHistoryChange(MasterSet.FrameViewer);
-      MasterSet.FrameViewer.CheckVisitedLinks;
+      frPositionHistory[frHistoryIndex].Pos := Viewer.Position;   {save the old position}
+      {note that frHistoryIndex can only change by 1}
+      frPositionHistory[frHistoryIndex].PosFormData := Viewer.FormData;
+    end
+    else begin    {Current is FrameSet}
+      FrameSet.UnloadFiles;
+      FrameSet.DestroyHandle;
+      FrameSet.ClearFrameNames;
+      FrameSet.Visible := False;
+      FrameSet := Nil;   {it's not destroyed,though}
     end;
+    if frHistory.Objects[Value] is TSubFrameSet then
+    begin
+      FrameSet := TSubFrameSet(frHistory.Objects[Value]);
+      FrameSet.Visible := True;
+      FrameSet.ReloadFiles(-1);
+      FrameSet.AddFrameNames;
+      if Assigned(Viewer) then
+      begin
+        if Assigned(MasterSet.Viewers) then
+          MasterSet.Viewers.Remove(Viewer);
+        if MasterSet.FActive = Viewer then
+          MasterSet.FActive := Nil;
+        FreeAndNil(Viewer);
+      end;
+    end
+    else begin
+      if not Assigned(Viewer) then
+        CreateViewer;
+      if (Source <> frHistory.Strings[Value]) then
+      begin
+        frLoadFromFile(frHistory.Strings[Value], '', False, False);
+        Viewer.FormData := frPositionHistory[Value].PosFormData;
+        FreeAndNil(frPositionHistory[Value].PosFormData);
+      end;
+      Viewer.Position := frPositionHistory[Value].Pos;
+    end;
+    Source := frHistory.Strings[Value];
+    frHistoryIndex := Value;
+    MasterSet.UpdateFrameList;
+    if Assigned(MasterSet.FrameViewer.FOnHistoryChange) then
+      MasterSet.FrameViewer.FOnHistoryChange(MasterSet.FrameViewer);
+    MasterSet.FrameViewer.CheckVisitedLinks;
+  end;
 end;
 
 {----------------TfvFrame.UpdateFrameList}
@@ -1573,15 +1565,16 @@ end;
 procedure TSubFrameSet.ClearFrameNames;
 var
   I, J: integer;
+  Frame: TfvFrame;
 begin
   for J := 0 to FrameList.Count-1 do
     if FrameList[J] is TfvFrame then
     begin
-      with TfvFrame(FrameList[J]) do
-        if Assigned(MasterSet) and (WinName <> '')
-              and Assigned(MasterSet.FrameNames)
-                and MasterSet.FrameNames.Find(WinName, I) then
-                  MasterSet.FrameNames.Delete(I);
+      Frame := TfvFrame(FrameList[J]);
+      if Assigned(Frame.MasterSet) and (Frame.WinName <> '')
+      and Assigned(Frame.MasterSet.FrameNames)
+      and Frame.MasterSet.FrameNames.Find(Frame.WinName, I) then
+        Frame.MasterSet.FrameNames.Delete(I);
     end
     else if FrameList[J] is TSubFrameSet then
       TSubFrameSet(FrameList[J]).ClearFrameNames;
@@ -1597,11 +1590,9 @@ begin
     if FrameList[J] is TfvFrame then
     begin
       Frame := TfvFrame(FrameList[J]);
-      with Frame do
-        if Assigned(MasterSet) and (WinName <> '') and Assigned(MasterSet.FrameNames) then
-        begin
-          MasterSet.FrameNames.AddObject(Uppercase(WinName), Frame);
-        end;
+      if Assigned(Frame.MasterSet) and (Frame.WinName <> '')
+      and Assigned(Frame.MasterSet.FrameNames) then
+        Frame.MasterSet.FrameNames.AddObject(Uppercase(Frame.WinName), Frame);
     end
     else if (FrameList[J] is TSubFrameSet) then
       TSubFrameSet(FrameList[J]).AddFrameNames;
@@ -1617,8 +1608,7 @@ end;
 
 {----------------TSubFrameSet.AddFrame}
 function TSubFrameSet.AddFrame(Attr: TAttributeList; const FName: string): TfvFrame;
-{called by the parser when <Frame> is encountered within the <Frameset>
- definition}
+{called by the parser when <Frame> is encountered within the <Frameset> definition}
 begin
   Result := TfvFrame.CreateIt(Self, Attr, MasterSet, ExtractFilePath(FName));
   FrameList.Add(Result);
@@ -1643,9 +1633,9 @@ var
 
     procedure GetCh;
     begin
-      if I > Length(S) then Ch := EOL
-      else
-        begin
+      if I > Length(S) then
+        Ch := EOL
+      else begin
         Ch := S[I];
         Inc(I);
       end;
@@ -1655,7 +1645,8 @@ var
     if Name = '' then
       S := T.Name
     else Exit;
-    I := 1;   DimCount := 0;
+    I := 1;
+    DimCount := 0;
     repeat
       Inc(DimCount);
       Numb := '';
@@ -1669,7 +1660,8 @@ var
           GetCh;
         end;
         N := IntMax(1, StrToInt(Numb));   {no zeros}
-        while not (Ch in ['*', '%', ',', EOL]) do GetCh;
+        while not (Ch in ['*', '%', ',', EOL]) do
+          GetCh;
         if ch = '*' then
         begin
           Dim[DimCount] := -IntMin(99, N);{store '*' relatives as negative, -1..-99}
@@ -1811,8 +1803,7 @@ begin
       Inc(DimFTot, DimF[I]);
     end;
   end
-  else    {some remainder left for % and relative}
-  begin
+  else begin  {some remainder left for % and relative}
     PixDesired := MulDiv(Total, PctTot, 100);
     if PixDesired > Remainder then
       PixActual := Remainder
@@ -1857,8 +1848,10 @@ begin
     ARect := ClientRect;
     InflateRect(ARect, -OuterBorder, -OuterBorder);
     Sum := 0;
-    if Rows then ThisTotal := ARect.Bottom - ARect.Top
-    else ThisTotal := ARect.Right-ARect.Left;
+    if Rows then
+      ThisTotal := ARect.Bottom - ARect.Top
+    else
+      ThisTotal := ARect.Right - ARect.Left;
     for I := 0 to FrameList.Count-1 do
     begin
       Step := MulDiv(DimF[I+1], ThisTotal, DimFTot);
@@ -1866,7 +1859,7 @@ begin
         FrameList[I].SetBounds(ARect.Left, ARect.Top+Sum, ARect.Right-ARect.Left, Step)
       else
         FrameList[I].SetBounds(ARect.Left+Sum, ARect.Top, Step, ARect.Bottom-Arect.Top);
-      Sum := Sum+Step;
+      Sum := Sum + Step;
       Lines[I+1] := Sum;
     end;
   end;
@@ -1917,7 +1910,7 @@ var
       case boolean of
         True: (P1, P2: TPoint);
         False:(R: TRect);
-        end;
+      end;
 begin
   if Button <> mbLeft then Exit;
   if NearBoundary(X, Y) then
@@ -1953,7 +1946,7 @@ var
   ACursor: TCursor;
   Gap, ThisGap, Line, I: integer;
 begin
-  if  not Assigned(MasterSet.HotSet) then
+  if not Assigned(MasterSet.HotSet) then
   begin  {here we change the cursor as mouse moves over lines,button up or down}
     if Rows then Line := Y else Line := X;
     Gap := 9999;
@@ -2075,12 +2068,11 @@ begin
   EndFrameSet;
   Frame.LoadFiles(Nil);
   if Assigned(Frame.FrameSet) then
-    with Frame.FrameSet do
-    begin
-      with ClientRect do
-        InitializeDimensions(Left, Top, Right-Left, Bottom-Top);
-      CalcSizes(Nil);
-    end
+  begin
+    with Frame.FrameSet.ClientRect do
+      Frame.FrameSet.InitializeDimensions(Left, Top, Right-Left, Bottom-Top);
+    Frame.FrameSet.CalcSizes(Nil);
+  end
   else if Assigned(Frame.Viewer) then
     Frame.Viewer.PositionTo(Dest);
   MasterSet.FrameViewer.AddVisitedLink(FName+Dest);
@@ -2123,7 +2115,8 @@ begin
       FRefreshURL := Copy(Content, I+4, Length(Content)-I-3)
     else if Owner is TfvFrame then
       FRefreshURL := TfvFrame(Owner).Source
-    else FRefreshURL := '';
+    else
+      FRefreshURL := '';
     FRefreshDelay := DelTime;
   end;
 end;
@@ -2227,63 +2220,61 @@ var
   Buffer: PChar;     
   BuffSize: integer;
 begin
-  with PEV^ do
+  Result := False;
+  PEV^.LStyle := lsFile;
+  PEV^.AString := '';
+  Buffer := Nil;
+  BuffSize := 0;
+  AName := '';
+  Stream := Nil;
+  if Assigned(FrameViewer.FOnStringsRequest) then
   begin
-    Result := False;  LStyle := lsFile;
-    Buffer := Nil; BuffSize := 0;
-    AName := '';
-    AString := '';
-    Stream := Nil;
-    with FrameViewer do
-      if Assigned(FOnStringsRequest) then
-      begin
-        FOnStringsRequest(Self, Src, Strings);
-        Result := Assigned(Strings);
-        if Result then
-        begin
-          LStyle := lsString;
-          AString := Strings.Text;
-        end;
-      end
-      else if Assigned(FOnStreamRequest) then
-      begin
-        FOnStreamRequest(Self, Src, Stream);
-        Result := Assigned(Stream);
-        if Result then
-        begin
-          LStyle := lsString;
-          BStream := TMemoryStream.Create;
-          try
-            BStream.LoadFromStream(Stream);
-            SetLength(AString, BStream.Size);
-            Move(BStream.Memory^, AString[1], BStream.Size);
-          finally
-            BStream.Free;
-          end;
-        end;
-      end
-      else if Assigned(FOnBufferRequest) then
-      begin
-        FOnBufferRequest(Self, Src, Buffer, BuffSize);
-        Result := (BuffSize > 0) and Assigned(Buffer);
-        if Result then
-        begin
-          LStyle := lsString;
-          SetLength(AString, BuffSize);
-          Move(Buffer^, AString[1], BuffSize);
-        end;
-      end
-      else if Assigned(FOnFileRequest) then
-      begin
-        FOnFileRequest(Self, Src, AName);
-        Result := AName <> '';
-        if Result then
-        begin
-          LStyle := lsFile;
-          NewName := AName;
-          AString := FileToString(NewName);
-        end;
+    FrameViewer.FOnStringsRequest(Self, Src, Strings);
+    Result := Assigned(Strings);
+    if Result then
+    begin
+      PEV^.LStyle := lsString;
+      PEV^.AString := Strings.Text;
+    end;
+  end
+  else if Assigned(FrameViewer.FOnStreamRequest) then
+  begin
+    FrameViewer.FOnStreamRequest(Self, Src, Stream);
+    Result := Assigned(Stream);
+    if Result then
+    begin
+      PEV^.LStyle := lsString;
+      BStream := TMemoryStream.Create;
+      try
+        BStream.LoadFromStream(Stream);
+        SetLength(PEV^.AString, BStream.Size);
+        Move(BStream.Memory^, PEV^.AString[1], BStream.Size);
+      finally
+        BStream.Free;
       end;
+    end;
+  end
+  else if Assigned(FrameViewer.FOnBufferRequest) then
+  begin
+    FrameViewer.FOnBufferRequest(Self, Src, Buffer, BuffSize);
+    Result := (BuffSize > 0) and Assigned(Buffer);
+    if Result then
+    begin
+      PEV^.LStyle := lsString;
+      SetLength(PEV^.AString, BuffSize);
+      Move(Buffer^, PEV^.AString[1], BuffSize);
+    end;
+  end
+  else if Assigned(FrameViewer.FOnFileRequest) then
+  begin
+    FrameViewer.FOnFileRequest(Self, Src, AName);
+    Result := AName <> '';
+    if Result then
+    begin
+      PEV^.LStyle := lsFile;
+      PEV^.NewName := AName;
+      PEV^.AString := FileToString(PEV^.NewName);
+    end;
   end;
 end;
 
@@ -2585,7 +2576,7 @@ var
   OldFrameSet: TFrameSet;
   OldFile, S, Dest: string;
   OldPos: integer;
-  Tmp: TObject;
+//  Tmp: TObject;
   SameName: boolean;
 {$ifdef Windows}
   Dummy: integer;

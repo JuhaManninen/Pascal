@@ -950,7 +950,8 @@ begin
   if I > L then
     Result := ''
   else begin
-    while S[L] <= ' ' do Dec(L);
+    while S[L] <= ' ' do
+      Dec(L);
     Result := Copy(S, I, L - I + 1);
   end;
 end;
@@ -970,17 +971,14 @@ end;
 function Allocate(Size: integer): AllocRec;
 begin
   Result := AllocRec.Create;
-  with Result do
-  begin
-    ASize := Size;
-    if Size < $FF00 then
-      GetMem(Ptr, Size)
-    else begin
-      AHandle := GlobalAlloc(HeapAllocFlags, Size);
-      if AHandle = 0 then
-        ABort;
-      Ptr := GlobalLock(AHandle);
-    end;
+  Result.ASize := Size;
+  if Size < $FF00 then
+    GetMem(Result.Ptr, Size)
+  else begin
+    Result.AHandle := GlobalAlloc(HeapAllocFlags, Size);
+    if Result.AHandle = 0 then
+      ABort;
+    Result.Ptr := GlobalLock(Result.AHandle);
   end;
 end;
 
@@ -1034,48 +1032,47 @@ var
   OldBrushColor: TColor;
   MonoBlack: boolean;
 begin
-  with Canvas do
-  begin
-    MonoBlack := PrintMonoBlack and (GetDeviceCaps(Handle, BITSPIXEL) = 1) and
-            (GetDeviceCaps(Handle, PLANES) = 1);
-    Dec(X2);  Dec(Y2);
-    OldWid := Pen.Width;
-    OldStyle := Pen.Style;
-    OldBrushStyle := Brush.Style;   {save style first}
-    OldBrushColor := Brush.Color;
-    if not MonoBlack and Disabled then
-      Brush.Color := clBtnFace
-    else
-      Brush.Color := color;
-    Brush.Style := bsSolid;
-    FillRect(Rect(X1, Y1, X2, Y2));
-    Brush.Color := OldBrushColor;
-    Brush.Style := OldBrushStyle;    {style after color as color changes style}
+  MonoBlack := PrintMonoBlack and (GetDeviceCaps(Canvas.Handle, BITSPIXEL) = 1) and
+          (GetDeviceCaps(Canvas.Handle, PLANES) = 1);
+  Dec(X2);  Dec(Y2);
+  OldWid := Canvas.Pen.Width;
+  OldStyle := Canvas.Pen.Style;
+  OldBrushStyle := Canvas.Brush.Style;   {save style first}
+  OldBrushColor := Canvas.Brush.Color;
+  if not MonoBlack and Disabled then
+    Canvas.Brush.Color := clBtnFace
+  else
+    Canvas.Brush.Color := color;
+  Canvas.Brush.Style := bsSolid;
+  Canvas.FillRect(Rect(X1, Y1, X2, Y2));
+  Canvas.Brush.Color := OldBrushColor;
+  Canvas.Brush.Style := OldBrushStyle;    {style after color as color changes style}
 
-    Pen.Style := psInsideFrame;
-    if MonoBlack then
-    begin
-      Pen.Width := 1;
-      Pen.Color := clBlack;
-    end
-    else begin
-      Pen.Width := 2;
-      if Raised then Pen.Color := clSilver
-        else Pen.Color := clBtnShadow;
-    end;
-    MoveTo(X1, Y2);
-    LineTo(X1, Y1);
-    LineTo(X2, Y1);
-    if not MonoBlack then
-      if Raised then
-        Pen.Color := clBtnShadow
-      else
-        Pen.Color := clSilver;
-    LineTo(X2, Y2);
-    LineTo(X1, Y2);
-    Pen.Style := OldStyle;
-    Pen.Width := OldWid;
+  Canvas.Pen.Style := psInsideFrame;
+  if MonoBlack then
+  begin
+    Canvas.Pen.Width := 1;
+    Canvas.Pen.Color := clBlack;
+  end
+  else begin
+    Canvas.Pen.Width := 2;
+    if Raised then
+      Canvas.Pen.Color := clSilver
+    else
+      Canvas.Pen.Color := clBtnShadow;
   end;
+  Canvas.MoveTo(X1, Y2);
+  Canvas.LineTo(X1, Y1);
+  Canvas.LineTo(X2, Y1);
+  if not MonoBlack then
+    if Raised then
+      Canvas.Pen.Color := clBtnShadow
+    else
+      Canvas.Pen.Color := clSilver;
+  Canvas.LineTo(X2, Y2);
+  Canvas.LineTo(X1, Y2);
+  Canvas.Pen.Style := OldStyle;
+  Canvas.Pen.Width := OldWid;
 end;
 
 procedure RaisedRect(SectionList: TObjectList; Canvas: TCanvas; X1: integer;
@@ -1113,22 +1110,19 @@ procedure RaisedRectColor1(Canvas: TCanvas; X1: integer;
 begin
   Y1 := IntMax(Y1, TopLim);
   Y2 := IntMin(Y2, BotLim);
-  with Canvas do
-  begin
-    if Raised then
-      Pen.Color := Light
-    else
-      Pen.Color := Dark;
-    MoveTo(X1, Y2);
-    LineTo(X1, Y1);
-    LineTo(X2, Y1);
-    if not Raised then
-      Pen.Color := Light
-    else
-      Pen.Color := Dark;
-    LineTo(X2, Y2);
-    LineTo(X1, Y2);
-  end;
+  if Raised then
+    Canvas.Pen.Color := Light
+  else
+    Canvas.Pen.Color := Dark;
+  Canvas.MoveTo(X1, Y2);
+  Canvas.LineTo(X1, Y1);
+  Canvas.LineTo(X2, Y1);
+  if not Raised then
+    Canvas.Pen.Color := Light
+  else
+    Canvas.Pen.Color := Dark;
+  Canvas.LineTo(X2, Y2);
+  Canvas.LineTo(X1, Y2);
 end;
 
 procedure RaisedRectColor(SectionList: TObjectList; Canvas: TCanvas; X1: integer;
@@ -1140,8 +1134,7 @@ var
 begin
   if W = 1 then  {this looks better in Print Preview}
     RaisedRectColor1(Canvas, X1, Y1, X2, Y2, Light, Dark, Raised)
-  else
-  begin
+  else begin
     if Raised then
       Colors := htColors(Light, Light, Dark, Dark)
     else
@@ -1241,8 +1234,7 @@ var
 begin
   I := IndexOf(S);
   if I >= 0 then
-    with Objects[I] as TBitmapItem do
-      Inc(UsageCount);
+    Inc((Objects[I] as TBitmapItem).UsageCount);
 end;
 
 procedure TStringBitmapList.SetCacheCount(N: integer);
@@ -2544,23 +2536,17 @@ begin
   IR := IndentRec.Create;
   if Justify = Left then
   begin
-    with IR do
-    begin
-      X := -LfEdge + IW;
-      YT := Y;
-      YB := Y + IH;
-      L.Add(IR);
-    end;
+    IR.X := -LfEdge + IW;
+    IR.YT := Y;
+    IR.YB := Y + IH;
+    L.Add(IR);
   end
   else if Justify = Right then
   begin
-    with IR do
-    begin
-      X := RightSide(Y) - IW;
-      YT := Y;
-      YB := Y + IH;
-      R.Add(IR);
-    end;
+    IR.X := RightSide(Y) - IW;
+    IR.YT := Y;
+    IR.YB := Y + IH;
+    R.Add(IR);
   end;
 end;
 
@@ -2570,23 +2556,23 @@ const
 function IndentManagerBasic.LeftIndent(Y: integer): integer;
 var
   I: integer;
+  IR: IndentRec;
 begin
   Result := -99999;
   for I := 0 to L.Count-1 do
-    with IndentRec(L.Items[I]) do
-    begin
-      if (Y >= YT) and (Y < YB) and (Result < X) then
-        if not Assigned(ID) or (ID = CurrentID) then
-          Result := X;
-    end;
+  begin
+    IR := IndentRec(L[I]);
+    if (Y >= IR.YT) and (Y < IR.YB) and (Result < IR.X) then
+      if not Assigned(IR.ID) or (IR.ID = CurrentID) then
+        Result := IR.X;
+  end;
   if Result = -99999 then
     Result := 0;
   Inc(Result, LfEdge);
 end;
 
 function IndentManagerBasic.RightSide(Y: integer): integer;
-{returns the current right side dimension as measured from the left, a positive
- number}
+{returns the current right side dimension as measured from the left, a positive number}
 var
   I: integer;
   IR: IndentRec;
@@ -2594,11 +2580,10 @@ begin
   Result := 99999;
   for I := 0 to R.Count-1 do
   begin
-    IR := IndentRec(R.Items[I]);
-    with IR do
-      if (Y >= YT) and (Y < YB) and (Result > X) then
-        if not Assigned(ID) or (ID = CurrentID) then
-          Result := X;
+    IR := IndentRec(R[I]);
+    if (Y >= IR.YT) and (Y < IR.YB) and (Result > IR.X) then
+      if not Assigned(IR.ID) or (IR.ID = CurrentID) then
+        Result := IR.X;
   end;
   if Result = 99999 then
     Result := RtEdge
@@ -2610,33 +2595,43 @@ function IndentManagerBasic.ImageBottom: integer;
 {finds the bottom of the last floating image}
 var
   I: integer;
+  IR: IndentRec;
 begin
   Result := 0;
   for I := 0 to L.Count-1 do
-    with IndentRec(L.Items[I]) do
-      if not Assigned(ID) and (YB > Result) then
-        Result := YB;
+  begin
+    IR := IndentRec(L[I]);
+    if not Assigned(IR.ID) and (IR.YB > Result) then
+      Result := IR.YB;
+  end;
   for I := 0 to R.Count-1 do
-    with IndentRec(R.Items[I]) do
-      if not Assigned(ID) and (YB > Result) then
-        Result := YB;
+  begin
+    IR := IndentRec(R[I]);
+    if not Assigned(IR.ID) and (IR.YB > Result) then
+      Result := IR.YB;
+  end;
 end;
 
 procedure IndentManagerBasic.GetClearY(var CL, CR: integer);
 {returns the left and right Y values which will clear image margins}
 var
   I: integer;
+  IR: IndentRec;
 begin
   CL := -1;
   for I := 0 to L.Count-1 do
-    with IndentRec(L.Items[I]) do
-      if not Assigned(ID)and (YB > CL) then
-        CL := YB;
+  begin
+    IR := IndentRec(L[I]);
+    if not Assigned(IR.ID) and (IR.YB > CL) then
+      CL := IR.YB;
+  end;
   CR := -1;
   for I := 0 to R.Count-1 do
-    with IndentRec(R.Items[I]) do
-      if not Assigned(ID)and (YB > CR) then
-        CR := YB;
+  begin
+    IR := IndentRec(R[I]);
+    if not Assigned(IR.ID)and (IR.YB > CR) then
+      CR := IR.YB;
+  end;
   Inc(CL);
   Inc(CR);
 end;
@@ -2645,17 +2640,22 @@ function IndentManagerBasic.GetNextWiderY(Y: integer): integer;
 {returns the next Y value which offers a wider space or Y if none}
 var
   I, CL, CR: integer;
+  IR: IndentRec;
 begin
   CL := Y;
   for I := 0 to L.Count-1 do
-    with IndentRec(L.Items[I]) do
-      if not Assigned(ID)and (YB > Y) and ((YB < CL) or (CL = Y)) then
-        CL := YB;
+  begin
+    IR := IndentRec(L[I]);
+    if not Assigned(IR.ID)and (IR.YB > Y) and ((IR.YB < CL) or (CL = Y)) then
+      CL := IR.YB;
+  end;
   CR := Y;
   for I := 0 to R.Count-1 do
-    with IndentRec(R.Items[I]) do
-      if not Assigned(ID)and (YB > Y) and ((YB < CR) or (CR = Y)) then
-        CR := YB;
+  begin
+    IR := IndentRec(R[I]);
+    if not Assigned(IR.ID)and (IR.YB > Y) and ((IR.YB < CR) or (CR = Y)) then
+      CR := IR.YB;
+  end;
   if CL = Y then
     Result := CR
   else if CR = Y then
@@ -2669,13 +2669,10 @@ var
   IR: IndentRec;
 begin
   IR := IndentRec.Create;
-  with IR do
-  begin
-    YT := Y;
-    YB := BigY;
-    X := XLeft;
-    ID := CurrentID;
-  end;
+  IR.YT := Y;
+  IR.YB := BigY;
+  IR.X := XLeft;
+  IR.ID := CurrentID;
   Result := L.Add(IR);
 end;
 
@@ -2684,13 +2681,10 @@ var
   IR: IndentRec;
 begin
   IR := IndentRec.Create;
-  with IR do
-  begin
-    YT := Y;
-    YB := BigY;
-    X := XRight;
-    ID := CurrentID;
-  end;
+  IR.YT := Y;
+  IR.YB := BigY;
+  IR.X := XRight;
+  IR.ID := CurrentID;
   Result := R.Add(IR);
 end;
 
@@ -2713,7 +2707,7 @@ var
   LP: ^TLogPalette;
   NumEntries: integer;
 begin
-Result := 0;
+  Result := 0;
   if ColorBits > 8 then
     Exit;
   GetMem(LP, Sizeof(TLogPalette) + 256*Sizeof(TPaletteEntry));
@@ -3083,8 +3077,7 @@ var
 begin
   if CodePage = CP_UTF8 then  {UTF-8 encoded string.}
     Result := UTF8Encode(W)
-  else
-  begin
+  else begin
     Len := Length(W);
     SetLength(Result, 3*Len);
     NewLen := WideCharToMultiByte(CodePage, 0, PWideChar(W), Len, PChar(Result), 3*Len, Nil, Nil);
@@ -3105,8 +3098,7 @@ begin
       Result := P1 - P
     else
       Result := 0;
-  end
-  else
+  end else
     case ord(P^) of  {UTF-8}
       0:        Result := 0;
       1..127:   Result := 1;
@@ -3780,35 +3772,30 @@ begin
     Thickness := Abs(P[1].Y - P[2].Y);
   if Thickness = 1 then
   begin
-    with Canvas do
-    begin
-      OldColor := Pen.Color;
-      OldStyle := Pen.Style;
-      OldWidth := Pen.Width;
-      Pen.Color := Color;
-      Pen.Style := psSolid;
-      Pen.Width := 1;
-      if Printing then
-        I := AP
-      else I := AD;
-      P1 := Point(P[I[Side,1]].X, P[I[Side,2]].Y);
-      P2 := Point(P[I[Side,3]].X, P[I[Side,4]].Y);
-      MoveTo(P1.X, P1.Y);
-      LineTo(P2.X, P2.Y);
-      Pen.Width := OldWidth;
-      Pen.Style := OldStyle;
-      Pen.Color := OldColor;
-    end;
+    OldColor := Canvas.Pen.Color;
+    OldStyle := Canvas.Pen.Style;
+    OldWidth := Canvas.Pen.Width;
+    Canvas.Pen.Color := Color;
+    Canvas.Pen.Style := psSolid;
+    Canvas.Pen.Width := 1;
+    if Printing then
+      I := AP
+    else
+      I := AD;
+    P1 := Point(P[I[Side,1]].X, P[I[Side,2]].Y);
+    P2 := Point(P[I[Side,3]].X, P[I[Side,4]].Y);
+    Canvas.MoveTo(P1.X, P1.Y);
+    Canvas.LineTo(P2.X, P2.Y);
+    Canvas.Pen.Width := OldWidth;
+    Canvas.Pen.Style := OldStyle;
+    Canvas.Pen.Color := OldColor;
   end
   else begin
     R := CreatePolygonRgn(P, 4, Alternate);
     try
-      with Canvas do
-      begin
-        Brush.Style := bsSolid;
-        Brush.Color := Color;
-        FillRgn(Handle, R, Brush.Handle);
-      end;
+      Canvas.Brush.Style := bsSolid;
+      Canvas.Brush.Color := Color;
+      FillRgn(Canvas.Handle, R, Canvas.Brush.Handle);
     finally
       DeleteObject(R);
     end;
@@ -4168,6 +4155,4 @@ Finalization
   ThisExit;
 
 end.
-
-
 
