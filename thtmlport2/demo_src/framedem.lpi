@@ -30,13 +30,16 @@
         <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="LCL"/>
+        <PackageName Value="printers4lazide"/>
       </Item1>
       <Item2>
-        <PackageName Value="htmlcomp"/>
+        <PackageName Value="LCL"/>
       </Item2>
+      <Item3>
+        <PackageName Value="htmlcomp"/>
+      </Item3>
     </RequiredPackages>
     <Units Count="6">
       <Unit0>

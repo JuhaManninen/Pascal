@@ -2,7 +2,7 @@ program FrameDem;
 {A program to demonstrate the TFrameViewer component}
 
 uses
-  Interfaces, Forms,
+  Interfaces, Forms, printers4lazide,
   FDemUnit in 'FDEMUNIT.PAS' {Form1},
   Fontdlg in 'FONTDLG.PAS' {FontForm},
   Submit in 'SUBMIT.PAS' {SubmitForm},
